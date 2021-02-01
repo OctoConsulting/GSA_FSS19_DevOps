@@ -1,0 +1,9 @@
+{
+    // The following will hide the js and map files in the editor
+    "files.exclude": {
+        "platform/cdk/src/**/*.js": true,
+        "platform/cdk/src/**/*.d.ts": true,
+        "platform/cdk/lib/**/*.js": true,
+        "platform/cdk/lib/**/*.d.ts": true
+    }
+}
