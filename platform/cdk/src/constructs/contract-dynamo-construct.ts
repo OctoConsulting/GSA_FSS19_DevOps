@@ -4,16 +4,18 @@ import * as dynamodb from '@aws-cdk/aws-dynamodb';
 export class ContractDynamoConstruct extends cdk.Construct {
     private contractTable: dynamodb.Table;
 
+    private props: ContractDynamoConstructParms;
     constructor(parent: cdk.Construct, id: string, props: ContractDynamoConstructParms) {
         super(parent, id);
-        this.createDynamoDbTable(props.envParameters.shortEnv);
+        this.props = props;
+        this.createDynamoDbTable();
     }
 
-    createDynamoDbTable(shortEnv: string) {
+    createDynamoDbTable() {
         /**
          * Create Table
          */
-        this.createMainTable(shortEnv);
+        this.createMainTable();
 
         /**
          * Add Global Seconday Indexes
@@ -26,9 +28,9 @@ export class ContractDynamoConstruct extends cdk.Construct {
         this.setOutputs();
     }
 
-    createMainTable(shortEnv: string) {
-        this.contractTable = new dynamodb.Table(this, 'contract-dynamodb-table', {
-            tableName: `contract-${shortEnv}`,
+    createMainTable() {
+        this.contractTable = new dynamodb.Table(this, 'dynamodb-table', {
+            tableName: `contract-${this.props.envParameters.shortEnv}`,
             partitionKey: { name: 'contractId', type: dynamodb.AttributeType.STRING },
             sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
             pointInTimeRecovery: true,
@@ -49,15 +51,15 @@ export class ContractDynamoConstruct extends cdk.Construct {
     }
 
     setOutputs() {
-        new cdk.CfnOutput(this, 'dynamo-table-name-output', {
+        new cdk.CfnOutput(this, 'table-name-output', {
             value: this.contractTable.tableName,
             description: 'Contract DynamoDB table name',
         });
-        new cdk.CfnOutput(this, 'dynamo-table-arn-output', {
+        new cdk.CfnOutput(this, 'table-arn-output', {
             value: this.contractTable.tableArn,
             description: 'Contract DynamoDB table Arn',
         });
-        new cdk.CfnOutput(this, 'dynamo-table-streams-arn-output', {
+        new cdk.CfnOutput(this, 'table-streams-arn-output', {
             value: this.contractTable.tableStreamArn!,
             description: 'Contract DynamoDB table Arn',
         });

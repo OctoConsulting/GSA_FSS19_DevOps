@@ -1,9 +1,12 @@
 import { EnvParameters } from '../models/env-parms';
 
 export class EnvHelper {
-    getEnvironmentParams(): EnvParameters {
+    getEnvironmentParams(stackContext: any): EnvParameters {
+        const shortEnv = process.env.SHORT_ENV!;
+
         const envParameters: EnvParameters = {
-            shortEnv: process.env.SHORT_ENV!,
+            shortEnv,
+            vpc: stackContext.vpc,
         };
         return envParameters;
     }
