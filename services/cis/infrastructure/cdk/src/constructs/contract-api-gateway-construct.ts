@@ -3,6 +3,8 @@ import { ContractApiGatewayConstructParms } from '../models/contract/contract-ap
 import * as apigw from '@aws-cdk/aws-apigateway';
 import * as acm from '@aws-cdk/aws-certificatemanager';
 import * as iam from '@aws-cdk/aws-iam';
+import * as route53 from '@aws-cdk/aws-route53';
+import * as route53Targets from '@aws-cdk/aws-route53-targets';
 
 export class ContractApiGatewayConstruct extends cdk.Construct {
     private props: ContractApiGatewayConstructParms;
@@ -15,6 +17,8 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
         const contractResource = this.addContractResourceAndMethods();
         this.addGetContractsIntegration(contractResource);
         this.addGetContractDetailsIntegration(contractResource);
+        this.addGetContractEntities(contractResource);
+        this.addRoute53Alias();
     }
 
     addGetContractsIntegration(contractResource: apigw.Resource) {
@@ -67,5 +71,16 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
             })
         );
         return apiRole;
+    }
+
+    addRoute53Alias() {
+        const hostedZone = route53.HostedZone.fromLookup(this, 'hosted-zone-lookup', {
+            domainName: `${this.props.envParameters.domainSuffix}`,
+        });
+        new route53.ARecord(this, 'api-gateway-route53', {
+            recordName: `contract-api-${this.props.envParameters.shortEnv}.${this.props.envParameters.domainSuffix}`,
+            zone: hostedZone,
+            target: route53.RecordTarget.fromAlias(new route53Targets.ApiGateway(this.restApi)),
+        });
     }
 }

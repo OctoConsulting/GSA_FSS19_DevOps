@@ -15,13 +15,13 @@ const env = { account: AWS_ACCOUNT, region: AWS_REGION };
 /**
  * Contract API Statck
  */
-const contractStack = new ContractApiStack(app, 'contract-api-stack', { env, stackName: `contract-api-${SHORT_ENV}` });
+const contractStack = new ContractApiStack(app, 'contract-api', { env, stackName: `contract-api-${SHORT_ENV}` });
 cdk.Tags.of(contractStack).add('Env', SHORT_ENV.toUpperCase());
 cdk.Tags.of(contractStack).add('ApplicationID', 'contract-api');
 
 /**
  * FSS Shared Stack - TODO - Move to seperate cdk project
  */
-const fssSharedStack = new FssSharedStack(app, 'fss-shared-stack', { env, stackName: `fss-shared-${SHORT_ENV}` });
+const fssSharedStack = new FssSharedStack(app, 'fss-shared', { env, stackName: `fss-shared-${SHORT_ENV}` });
 cdk.Tags.of(fssSharedStack).add('Env', SHORT_ENV.toUpperCase());
 cdk.Tags.of(fssSharedStack).add('ApplicationID', 'fss');

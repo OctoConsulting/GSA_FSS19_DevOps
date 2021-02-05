@@ -8,8 +8,9 @@ export class ContractApiStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
-        const stackContext = this.node.tryGetContext(`contact-api-${process.env.SHORT_ENV}`);
+        const stackContext = this.node.tryGetContext(`${id}-${process.env.SHORT_ENV}`);
         const envParameters: EnvParameters = new EnvHelper().getEnvironmentParams(stackContext);
+        console.log('envParameters', envParameters);
 
         new ContractDynamoConstruct(this, 'contract-dynamo', {
             envParameters,
