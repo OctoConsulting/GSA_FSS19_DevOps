@@ -7,6 +7,22 @@
         "@aws-cdk/aws-ecr-assets:dockerIgnoreSupport": true,
         "@aws-cdk/aws-secretsmanager:parseOwnedSecretName": true,
         "@aws-cdk/aws-kms:defaultKeyPolicies": true,
-        "@aws-cdk/aws-s3:grantWriteWithoutAcl": true
+        "@aws-cdk/aws-s3:grantWriteWithoutAcl": true,
+        "contract-api-dev": {
+            "vpc": "vpc-000abcefghij12345",
+            "domainSuffix": "fss.gov.com",
+            "certArn": "arn:aws:acm:us-east-1:111122223333:certificate/abcdefgh-dbe3-4159-ac38-761acdc700ef"
+        },
+        "contract-api-qa": {
+            "vpc": "vpc-000abcefghij12345",
+            "domainSuffix": "fss.gov.com",
+            "certArn": "arn:aws:acm:us-east-1:111122223333:certificate/abcdefgh-dbe3-4159-ac38-761acdc700ef"
+        },
+        "fss-shared-dev": {
+            "vpc": "vpc-000abcefghij12345"
+        },
+        "fss-shared-qa": {
+            "vpc": "vpc-000abcefghij12345"
+        }
     }
 }
