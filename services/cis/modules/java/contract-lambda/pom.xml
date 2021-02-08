@@ -33,6 +33,11 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-lambda-java-events</artifactId>
+			<version>3.7.0</version>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>

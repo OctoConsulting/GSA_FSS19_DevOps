@@ -1,11 +1,10 @@
 export interface LambdaConstructProps {
     functionName: string;
     lambdaEnvParameters?: any;
-    vpcId: string;
+    vpcId?: string;
     assetLocation: string;
     timeout?: number;
     memorySize?: number;
-    withInVpc?: boolean;
     exportResource?: boolean;
     handler?: string;
     type: LambdaConstructProps.LambdaTypeEnum;

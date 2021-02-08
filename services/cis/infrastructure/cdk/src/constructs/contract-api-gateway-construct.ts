@@ -9,11 +9,12 @@ import * as route53Targets from '@aws-cdk/aws-route53-targets';
 export class ContractApiGatewayConstruct extends cdk.Construct {
     private props: ContractApiGatewayConstructParms;
     private restApi: apigw.RestApi;
+    private apiRole: iam.Role;
     constructor(parent: cdk.Construct, id: string, props: ContractApiGatewayConstructParms) {
         super(parent, id);
         this.props = props;
         this.createRestApi();
-        const apiRole = this.createApiRole();
+        this.createApiRole();
         const contractResource = this.addContractResourceAndMethods();
         this.addGetContractsIntegration(contractResource);
         this.addGetContractDetailsIntegration(contractResource);
@@ -21,26 +22,31 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
         this.addRoute53Alias();
     }
 
-    addGetContractsIntegration(contractResource: apigw.Resource) {
-        contractResource.addMethod('GET', new apigw.MockIntegration());
+    private addGetContractsIntegration(contractResource: apigw.Resource) {
+        contractResource.addMethod(
+            'GET',
+            new apigw.LambdaIntegration(this.props.contractLambdaFunctions.getContractsLambda!, {
+                credentialsRole: this.apiRole,
+            })
+        );
     }
 
-    addGetContractDetailsIntegration(contractResource: apigw.Resource) {
+    private addGetContractDetailsIntegration(contractResource: apigw.Resource) {
         contractResource.addResource('{contractid}').addMethod('GET', new apigw.MockIntegration());
     }
 
-    addGetContractEntities(contractResource: apigw.Resource) {
+    private addGetContractEntities(contractResource: apigw.Resource) {
         contractResource
             .addResource('entityid')
             .addResource('{entityid}')
             .addMethod('POST', new apigw.MockIntegration());
     }
 
-    addContractResourceAndMethods() {
+    private addContractResourceAndMethods() {
         return this.restApi.root.addResource('contractinformation').addResource('v1').addResource('contracts');
     }
 
-    createRestApi() {
+    private createRestApi() {
         this.restApi = new apigw.RestApi(this, 'my-rest-api', {
             description: `contract-api-${this.props.envParameters.shortEnv}`,
             restApiName: `contract-api-${this.props.envParameters.shortEnv}`,
@@ -64,22 +70,21 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
         });
     }
 
-    createApiRole(): iam.Role {
-        const apiRole = new iam.Role(this, 'api-role', {
+    private createApiRole() {
+        this.apiRole = new iam.Role(this, 'api-role', {
             roleName: 'apiRole',
             assumedBy: new iam.ServicePrincipal('apigateway.amazonaws.com'),
         });
 
-        apiRole.addToPolicy(
+        this.apiRole.addToPolicy(
             new iam.PolicyStatement({
                 resources: ['*'],
                 actions: ['lambda:InvokeFunction'],
             })
         );
-        return apiRole;
     }
 
-    addRoute53Alias() {
+    private addRoute53Alias() {
         if (!this.props.envParameters.domainSuffix) {
             return;
         }

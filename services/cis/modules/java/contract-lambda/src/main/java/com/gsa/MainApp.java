@@ -14,7 +14,7 @@ public class MainApp {
 	}
 
 	@Bean
-	public Function<String, String> getContract() {
+	public Function<String, String> getContracts() {
 		return contractId -> {
 			return "Sucess";
 		};

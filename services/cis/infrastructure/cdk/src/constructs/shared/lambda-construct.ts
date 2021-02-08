@@ -26,7 +26,7 @@ export class LambdaConstruct extends cdk.Construct {
                 : props.type === LambdaConstructProps.LambdaTypeEnum.JAVA
                 ? 'com.amway.na.MyHandler::handleRequest'
                 : 'index.handler',
-            vpc: props.withInVpc ? myVpc : undefined,
+            vpc: props.vpcId ? myVpc : undefined,
             code: lambda.Code.fromAsset(props.assetLocation),
             timeout: cdk.Duration.seconds(props.timeout ? props.timeout : 30),
             environment: props.lambdaEnvParameters ? props.lambdaEnvParameters : {},
