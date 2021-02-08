@@ -25,6 +25,7 @@ export class ContractLambdasConstruct extends cdk.Construct {
             },
             handler: 'org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest',
             type: LambdaConstructProps.LambdaTypeEnum.JAVA,
+            logRetentionInDays: this.props.logRetentionInDays,
             timeout: 15,
         });
         this.contractLambdaFunctions.getContractsLambda = lambdaFun.lambdaFunction;

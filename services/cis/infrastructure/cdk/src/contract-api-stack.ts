@@ -23,6 +23,7 @@ export class ContractApiStack extends cdk.Stack {
         const contractLambas = new ContractLambdasConstruct(this, 'contract-lambdas', {
             shortEnv: envParameters.shortEnv,
             vpc: envParameters.vpc,
+            logRetentionInDays: envParameters.logRetentionInDays,
         });
 
         const contractLambdaFunctions: ContractLambdaFunctions = contractLambas.getContractLambdaFunctions();

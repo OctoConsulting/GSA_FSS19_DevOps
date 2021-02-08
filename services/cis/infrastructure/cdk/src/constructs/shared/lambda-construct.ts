@@ -5,11 +5,12 @@ import * as ec2 from '@aws-cdk/aws-ec2';
 import { LambdaConstructProps } from '../../models/lambda-construct-props';
 
 export class LambdaConstruct extends cdk.Construct {
+    private props: LambdaConstructProps;
     public lambdaFunction: lambda.Function;
     constructor(parent: cdk.Construct, id: string, props: LambdaConstructProps) {
         super(parent, id);
-
-        const lambdaLogGroup = this.createLogGroup(props.functionName);
+        this.props = props;
+        const lambdaLogGroup = this.createLogGroup();
         const myVpc = ec2.Vpc.fromLookup(this, 'myVpc', {
             vpcId: props.vpcId,
         });
@@ -42,10 +43,10 @@ export class LambdaConstruct extends cdk.Construct {
         }
     }
 
-    createLogGroup(functionName: string) {
-        const lambdaLogGroup = new awsLogs.LogGroup(this, `LambdaLogGroup${functionName}`, {
-            retention: 30,
-            logGroupName: `/aws/lambda/${functionName}`,
+    createLogGroup() {
+        const lambdaLogGroup = new awsLogs.LogGroup(this, `LambdaLogGroup${this.props.functionName}`, {
+            retention: this.props.logRetentionInDays ? this.props.logRetentionInDays : 30,
+            logGroupName: `/aws/lambda/${this.props.functionName}`,
             removalPolicy: cdk.RemovalPolicy.DESTROY,
         });
         return lambdaLogGroup;

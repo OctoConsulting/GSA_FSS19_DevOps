@@ -7,6 +7,7 @@ export interface LambdaConstructProps {
     memorySize?: number;
     exportResource?: boolean;
     handler?: string;
+    logRetentionInDays?: number;
     type: LambdaConstructProps.LambdaTypeEnum;
 }
 
