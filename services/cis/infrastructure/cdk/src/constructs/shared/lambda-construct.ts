@@ -24,7 +24,7 @@ export class LambdaConstruct extends cdk.Construct {
             handler: props.handler
                 ? props.handler
                 : props.type === LambdaConstructProps.LambdaTypeEnum.JAVA
-                ? 'com.amway.na.MyHandler::handleRequest'
+                ? 'com.gsa.MyHandler::handleRequest'
                 : 'index.handler',
             vpc: props.vpcId ? myVpc : undefined,
             code: lambda.Code.fromAsset(props.assetLocation),
