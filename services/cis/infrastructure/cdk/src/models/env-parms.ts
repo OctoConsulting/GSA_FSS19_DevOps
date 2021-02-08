@@ -3,4 +3,5 @@ export interface EnvParameters {
     vpc: string;
     domainSuffix?: string;
     certArn?: string;
+    enableEncryptionAtRest: boolean;
 }

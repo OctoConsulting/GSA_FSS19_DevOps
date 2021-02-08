@@ -8,6 +8,7 @@ export class EnvHelper {
             vpc: stackContext.vpc,
             domainSuffix: stackContext.domainSuffix,
             certArn: stackContext.certArn,
+            enableEncryptionAtRest: stackContext.enableEncryptionAtRest,
         };
         return envParameters;
     }

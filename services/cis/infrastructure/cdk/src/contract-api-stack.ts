@@ -1,4 +1,5 @@
 import * as cdk from '@aws-cdk/core';
+import { env } from 'process';
 import { ContractApiGatewayConstruct } from './constructs/contract-api-gateway-construct';
 import { ContractDynamoConstruct } from './constructs/contract-dynamo-construct';
 import { EnvHelper } from './helper/env-helper';
@@ -13,7 +14,8 @@ export class ContractApiStack extends cdk.Stack {
         console.log('envParameters', envParameters);
 
         new ContractDynamoConstruct(this, 'contract-dynamo', {
-            envParameters,
+            enableEncryptionAtRest: envParameters.enableEncryptionAtRest,
+            shortEnv: envParameters.shortEnv,
         });
 
         new ContractApiGatewayConstruct(this, 'contract-api', {

@@ -50,11 +50,17 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
                 loggingLevel: apigw.MethodLoggingLevel.INFO,
                 dataTraceEnabled: true,
             },
-            domainName: {
-                domainName: `contract-api-${this.props.envParameters.shortEnv}.${this.props.envParameters.domainSuffix}`,
-                certificate: acm.Certificate.fromCertificateArn(this, 'my-cert', this.props.envParameters.certArn!),
-                endpointType: apigw.EndpointType.REGIONAL,
-            },
+            domainName: this.props.envParameters.domainSuffix
+                ? {
+                      domainName: `contract-api-${this.props.envParameters.shortEnv}.${this.props.envParameters.domainSuffix}`,
+                      certificate: acm.Certificate.fromCertificateArn(
+                          this,
+                          'my-cert',
+                          this.props.envParameters.certArn!
+                      ),
+                      endpointType: apigw.EndpointType.REGIONAL,
+                  }
+                : undefined,
         });
     }
 
@@ -74,6 +80,9 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
     }
 
     addRoute53Alias() {
+        if (!this.props.envParameters.domainSuffix) {
+            return;
+        }
         const hostedZone = route53.HostedZone.fromLookup(this, 'hosted-zone-lookup', {
             domainName: `${this.props.envParameters.domainSuffix}`,
         });

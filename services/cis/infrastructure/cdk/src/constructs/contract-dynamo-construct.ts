@@ -30,11 +30,13 @@ export class ContractDynamoConstruct extends cdk.Construct {
 
     createMainTable() {
         this.contractTable = new dynamodb.Table(this, 'dynamodb-table', {
-            tableName: `contract-${this.props.envParameters.shortEnv}`,
+            tableName: `contract-${this.props.shortEnv}`,
             partitionKey: { name: 'contractId', type: dynamodb.AttributeType.STRING },
             sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
             pointInTimeRecovery: true,
-            encryption: dynamodb.TableEncryption.CUSTOMER_MANAGED,
+            encryption: this.props.enableEncryptionAtRest
+                ? dynamodb.TableEncryption.CUSTOMER_MANAGED
+                : dynamodb.TableEncryption.DEFAULT,
             stream: dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,
         });
     }
