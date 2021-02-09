@@ -20,4 +20,18 @@ public class MainApp {
 		};
 	}
 
+	@Bean
+	public Function<String, String> getContractDetailsByEntityId() {
+		return contractId -> {
+			return "Sucess";
+		};
+	}
+
+	@Bean
+	public Function<String, String> getContractDetailsByContractId() {
+		return contractId -> {
+			return "Sucess";
+		};
+	}
+
 }
