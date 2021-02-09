@@ -15,8 +15,8 @@ $env:SHORT_ENV='qa'
 ## Deploy Stacks
 
 ```
-cdk deploy fss-shared-stack
-cdk deploy contract-api-stack
+cdk deploy fss-shared
+cdk deploy contract-api
 ```
 
 ## Useful commands

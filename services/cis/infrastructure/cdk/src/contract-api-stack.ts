@@ -27,7 +27,6 @@ export class ContractApiStack extends cdk.Stack {
         });
 
         const contractLambdaFunctions: ContractLambdaFunctions = contractLambas.getContractLambdaFunctions();
-        console.log('contractLambdaFunctions', contractLambdaFunctions);
 
         new ContractApiGatewayConstruct(this, 'contract-api', {
             envParameters,

@@ -15,7 +15,7 @@
         },
         "contract-api-qa": {
             "vpc": "vpc-0543348a8ffcd0ec9",
-            "logRetentionInDays": 15,
+            "logRetentionInDays": 30,
             "enableEncryptionAtRest": false
         },
         "fss-shared-dev": {

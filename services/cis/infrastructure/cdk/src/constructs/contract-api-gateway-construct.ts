@@ -17,29 +17,39 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
         this.createApiRole();
         const contractResource = this.addContractResourceAndMethods();
         this.addGetContractsIntegration(contractResource);
-        this.addGetContractDetailsIntegration(contractResource);
-        this.addGetContractEntities(contractResource);
+        this.addGetContractDetailsByContractIdIntegration(contractResource);
+        this.addGetContractDetailsByEntityIdIntegration(contractResource);
         this.addRoute53Alias();
     }
 
     private addGetContractsIntegration(contractResource: apigw.Resource) {
         contractResource.addMethod(
-            'GET',
+            'POST',
             new apigw.LambdaIntegration(this.props.contractLambdaFunctions.getContractsLambda!, {
                 credentialsRole: this.apiRole,
             })
         );
     }
 
-    private addGetContractDetailsIntegration(contractResource: apigw.Resource) {
-        contractResource.addResource('{contractid}').addMethod('GET', new apigw.MockIntegration());
+    private addGetContractDetailsByContractIdIntegration(contractResource: apigw.Resource) {
+        contractResource.addResource('{contractid}').addMethod(
+            'GET',
+            new apigw.LambdaIntegration(this.props.contractLambdaFunctions.getContractDetailsByContractIdLambda!, {
+                credentialsRole: this.apiRole,
+            })
+        );
     }
 
-    private addGetContractEntities(contractResource: apigw.Resource) {
+    private addGetContractDetailsByEntityIdIntegration(contractResource: apigw.Resource) {
         contractResource
-            .addResource('entityid')
+            .addResource('entities')
             .addResource('{entityid}')
-            .addMethod('POST', new apigw.MockIntegration());
+            .addMethod(
+                'GET',
+                new apigw.LambdaIntegration(this.props.contractLambdaFunctions.getContractDetailsByEntityIdLambda!, {
+                    credentialsRole: this.apiRole,
+                })
+            );
     }
 
     private addContractResourceAndMethods() {
