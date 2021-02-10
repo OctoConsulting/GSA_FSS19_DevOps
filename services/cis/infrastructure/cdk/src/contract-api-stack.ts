@@ -1,5 +1,4 @@
 import * as cdk from '@aws-cdk/core';
-import { env } from 'process';
 import { ContractApiGatewayConstruct } from './constructs/contract-api-gateway-construct';
 import { ContractDynamoConstruct } from './constructs/contract-dynamo-construct';
 import { ContractLambdasConstruct } from './constructs/contract-lambdas-construct';
@@ -15,7 +14,7 @@ export class ContractApiStack extends cdk.Stack {
         const envParameters: EnvParameters = new EnvHelper().getEnvironmentParams(stackContext);
         console.log('envParameters', envParameters);
 
-        new ContractDynamoConstruct(this, 'contract-dynamo', {
+        const dynamoDbConstruct = new ContractDynamoConstruct(this, 'contract-dynamo', {
             enableEncryptionAtRest: envParameters.enableEncryptionAtRest,
             shortEnv: envParameters.shortEnv,
         });
@@ -24,6 +23,8 @@ export class ContractApiStack extends cdk.Stack {
             shortEnv: envParameters.shortEnv,
             vpc: envParameters.vpc,
             logRetentionInDays: envParameters.logRetentionInDays,
+            contractTable: dynamoDbConstruct.getContractTable(),
+            xRayTracing: envParameters.xRayTracing,
         });
 
         const contractLambdaFunctions: ContractLambdaFunctions = contractLambas.getContractLambdaFunctions();

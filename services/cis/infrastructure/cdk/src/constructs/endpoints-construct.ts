@@ -17,11 +17,11 @@ export class EndpointsConstruct extends cdk.Construct {
     }
 
     setEndpoints() {
-        const myVpc = ec2.Vpc.fromLookup(this, 'dynamo-db-end-point-vpc-lookup', {
+        const myVpc = ec2.Vpc.fromLookup(this, 'vpc-lookup', {
             vpcId: this.props.envParameters.vpc,
         });
 
-        myVpc.addGatewayEndpoint('contract-db-end-point', {
+        myVpc.addGatewayEndpoint('dynamo-db', {
             service: ec2.GatewayVpcEndpointAwsService.DYNAMODB,
         });
     }

@@ -29,8 +29,10 @@ export class ContractLambdasConstruct extends cdk.Construct {
             type: LambdaConstructProps.LambdaTypeEnum.JAVA,
             logRetentionInDays: this.props.logRetentionInDays,
             timeout: 15,
+            xRayTracing: this.props.xRayTracing,
         });
         this.contractLambdaFunctions.getContractDetailsByContractIdLambda = lambdaFun.lambdaFunction;
+        this.props.contractTable.grantReadData(lambdaFun.lambdaFunction);
     }
 
     private createGetContractDetailsByEntityIdLambda() {
@@ -47,8 +49,10 @@ export class ContractLambdasConstruct extends cdk.Construct {
             type: LambdaConstructProps.LambdaTypeEnum.JAVA,
             logRetentionInDays: this.props.logRetentionInDays,
             timeout: 15,
+            xRayTracing: this.props.xRayTracing,
         });
         this.contractLambdaFunctions.getContractDetailsByEntityIdLambda = lambdaFun.lambdaFunction;
+        this.props.contractTable.grantReadData(lambdaFun.lambdaFunction);
     }
 
     private createGetContractsLambda() {
@@ -65,8 +69,10 @@ export class ContractLambdasConstruct extends cdk.Construct {
             type: LambdaConstructProps.LambdaTypeEnum.JAVA,
             logRetentionInDays: this.props.logRetentionInDays,
             timeout: 15,
+            xRayTracing: this.props.xRayTracing,
         });
         this.contractLambdaFunctions.getContractsLambda = lambdaFun.lambdaFunction;
+        this.props.contractTable.grantReadData(lambdaFun.lambdaFunction);
     }
 
     public getContractLambdaFunctions(): ContractLambdaFunctions {

@@ -11,6 +11,7 @@ export class EnvHelper {
             enableEncryptionAtRest: stackContext.enableEncryptionAtRest,
             logRetentionInDays: stackContext.logRetentionInDays,
             apiKeySecruity: stackContext.apiKeySecruity,
+            xRayTracing: stackContext.xRayTracing,
         };
         return envParameters;
     }

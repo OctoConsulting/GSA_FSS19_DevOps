@@ -9,6 +9,7 @@ export interface LambdaConstructProps {
     handler?: string;
     logRetentionInDays?: number;
     type: LambdaConstructProps.LambdaTypeEnum;
+    xRayTracing?: boolean;
 }
 
 export namespace LambdaConstructProps {
