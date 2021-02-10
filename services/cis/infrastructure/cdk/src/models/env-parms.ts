@@ -5,4 +5,5 @@ export interface EnvParameters {
     certArn?: string;
     enableEncryptionAtRest: boolean;
     logRetentionInDays: number;
+    apiKeySecruity: boolean;
 }

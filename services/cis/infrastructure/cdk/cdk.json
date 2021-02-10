@@ -11,11 +11,13 @@
         "contract-api-dev": {
             "vpc": "vpc-0d1b73fc53abfcae7",
             "logRetentionInDays": 7,
+            "apiKeySecruity": false,
             "enableEncryptionAtRest": false
         },
         "contract-api-qa": {
             "vpc": "vpc-0543348a8ffcd0ec9",
             "logRetentionInDays": 30,
+            "apiKeySecruity": false,
             "enableEncryptionAtRest": false
         },
         "fss-shared-dev": {

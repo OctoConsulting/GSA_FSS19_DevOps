@@ -10,6 +10,7 @@ export class EnvHelper {
             certArn: stackContext.certArn,
             enableEncryptionAtRest: stackContext.enableEncryptionAtRest,
             logRetentionInDays: stackContext.logRetentionInDays,
+            apiKeySecruity: stackContext.apiKeySecruity,
         };
         return envParameters;
     }

@@ -5,6 +5,7 @@ import * as acm from '@aws-cdk/aws-certificatemanager';
 import * as iam from '@aws-cdk/aws-iam';
 import * as route53 from '@aws-cdk/aws-route53';
 import * as route53Targets from '@aws-cdk/aws-route53-targets';
+import * as secretsmanager from '@aws-cdk/aws-secretsmanager';
 
 export class ContractApiGatewayConstruct extends cdk.Construct {
     private props: ContractApiGatewayConstructParms;
@@ -19,7 +20,25 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
         this.addGetContractsIntegration(contractResource);
         this.addGetContractDetailsByContractIdIntegration(contractResource);
         this.addGetContractDetailsByEntityIdIntegration(contractResource);
+        this.createApiKey();
         this.addRoute53Alias();
+    }
+
+    createApiKey() {
+        if (!this.props.envParameters.apiKeySecruity) {
+            return;
+        }
+        const secret = new secretsmanager.Secret(this, 'Secret', {
+            generateSecretString: {
+                generateStringKey: 'api_key',
+                secretStringTemplate: JSON.stringify({ username: 'web_user' }),
+                excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',
+            },
+        });
+        this.restApi.addApiKey('ApiKey', {
+            apiKeyName: `contract-api-${this.props.envParameters.shortEnv}`,
+            value: secret.secretValueFromJson('api_key').toString(),
+        });
     }
 
     private addGetContractsIntegration(contractResource: apigw.Resource) {
