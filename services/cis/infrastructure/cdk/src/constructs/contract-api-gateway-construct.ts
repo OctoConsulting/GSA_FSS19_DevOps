@@ -79,11 +79,15 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
         this.restApi = new apigw.RestApi(this, 'my-rest-api', {
             description: `contract-api-${this.props.envParameters.shortEnv}`,
             restApiName: `contract-api-${this.props.envParameters.shortEnv}`,
-            endpointTypes: [apigw.EndpointType.REGIONAL],
             deployOptions: {
                 stageName: `${this.props.envParameters.shortEnv}`,
                 loggingLevel: apigw.MethodLoggingLevel.INFO,
                 dataTraceEnabled: true,
+            },
+            policy: this.getApiGatewayResourcePolicy(),
+            endpointConfiguration: {
+                types: [apigw.EndpointType.PRIVATE],
+                vpcEndpoints: [this.props.iVpcEndpoint!],
             },
             domainName: this.props.envParameters.domainSuffix
                 ? {
@@ -96,6 +100,23 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
                       endpointType: apigw.EndpointType.REGIONAL,
                   }
                 : undefined,
+        });
+    }
+    getApiGatewayResourcePolicy() {
+        return new iam.PolicyDocument({
+            statements: [
+                new iam.PolicyStatement({
+                    actions: ['execute-api:Invoke'],
+                    effect: iam.Effect.ALLOW,
+                    resources: ['*'],
+                    principals: [new iam.AnyPrincipal()],
+                    conditions: {
+                        StringEquals: {
+                            'aws:SourceVpce': this.props.iVpcEndpoint!.vpcEndpointId,
+                        },
+                    },
+                }),
+            ],
         });
     }
 

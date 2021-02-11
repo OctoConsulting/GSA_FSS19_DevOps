@@ -4,6 +4,7 @@ import { ContractDynamoConstruct } from './constructs/contract-dynamo-construct'
 import { ContractLambdasConstruct } from './constructs/contract-lambdas-construct';
 import { EnvHelper } from './helper/env-helper';
 import { ContractLambdaFunctions } from './models/contract/contract-lambda-functions';
+import { CrossStackImporter } from './models/contract/CrossStackImporter';
 import { EnvParameters } from './models/env-parms';
 
 export class ContractApiStack extends cdk.Stack {
@@ -18,6 +19,7 @@ export class ContractApiStack extends cdk.Stack {
             enableEncryptionAtRest: envParameters.enableEncryptionAtRest,
             shortEnv: envParameters.shortEnv,
         });
+        const crossStackImporter = new CrossStackImporter(this, 'corss-stack-imports', envParameters);
 
         const contractLambas = new ContractLambdasConstruct(this, 'contract-lambdas', {
             shortEnv: envParameters.shortEnv,
@@ -32,6 +34,7 @@ export class ContractApiStack extends cdk.Stack {
         new ContractApiGatewayConstruct(this, 'contract-api', {
             envParameters,
             contractLambdaFunctions,
+            iVpcEndpoint: crossStackImporter.getCrossStackImports().apiGatewayVpcEndpoint,
         });
     }
 }
