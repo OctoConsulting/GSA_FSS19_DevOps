@@ -9,6 +9,9 @@ export class EnvHelper {
             domainSuffix: stackContext.domainSuffix,
             certArn: stackContext.certArn,
             enableEncryptionAtRest: stackContext.enableEncryptionAtRest,
+            logRetentionInDays: stackContext.logRetentionInDays,
+            apiKeySecruity: stackContext.apiKeySecruity,
+            xRayTracing: stackContext.xRayTracing,
         };
         return envParameters;
     }

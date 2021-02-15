@@ -1,8 +1,10 @@
 import * as cdk from '@aws-cdk/core';
-import { env } from 'process';
 import { ContractApiGatewayConstruct } from './constructs/contract-api-gateway-construct';
 import { ContractDynamoConstruct } from './constructs/contract-dynamo-construct';
+import { ContractLambdasConstruct } from './constructs/contract-lambdas-construct';
 import { EnvHelper } from './helper/env-helper';
+import { ContractLambdaFunctions } from './models/contract/contract-lambda-functions';
+import { CrossStackImporter } from './models/contract/CrossStackImporter';
 import { EnvParameters } from './models/env-parms';
 
 export class ContractApiStack extends cdk.Stack {
@@ -13,13 +15,26 @@ export class ContractApiStack extends cdk.Stack {
         const envParameters: EnvParameters = new EnvHelper().getEnvironmentParams(stackContext);
         console.log('envParameters', envParameters);
 
-        new ContractDynamoConstruct(this, 'contract-dynamo', {
+        const dynamoDbConstruct = new ContractDynamoConstruct(this, 'contract-dynamo', {
             enableEncryptionAtRest: envParameters.enableEncryptionAtRest,
             shortEnv: envParameters.shortEnv,
         });
+        const crossStackImporter = new CrossStackImporter(this, 'corss-stack-imports', envParameters);
+
+        const contractLambas = new ContractLambdasConstruct(this, 'contract-lambdas', {
+            shortEnv: envParameters.shortEnv,
+            vpc: envParameters.vpc,
+            logRetentionInDays: envParameters.logRetentionInDays,
+            contractTable: dynamoDbConstruct.getContractTable(),
+            xRayTracing: envParameters.xRayTracing,
+        });
+
+        const contractLambdaFunctions: ContractLambdaFunctions = contractLambas.getContractLambdaFunctions();
 
         new ContractApiGatewayConstruct(this, 'contract-api', {
             envParameters,
+            contractLambdaFunctions,
+            iVpcEndpoint: crossStackImporter.getCrossStackImports().apiGatewayVpcEndpoint,
         });
     }
 }

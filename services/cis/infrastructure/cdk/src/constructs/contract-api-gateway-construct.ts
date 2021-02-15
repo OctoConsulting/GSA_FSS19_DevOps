@@ -5,50 +5,89 @@ import * as acm from '@aws-cdk/aws-certificatemanager';
 import * as iam from '@aws-cdk/aws-iam';
 import * as route53 from '@aws-cdk/aws-route53';
 import * as route53Targets from '@aws-cdk/aws-route53-targets';
+import * as secretsmanager from '@aws-cdk/aws-secretsmanager';
 
 export class ContractApiGatewayConstruct extends cdk.Construct {
     private props: ContractApiGatewayConstructParms;
     private restApi: apigw.RestApi;
+    private apiRole: iam.Role;
     constructor(parent: cdk.Construct, id: string, props: ContractApiGatewayConstructParms) {
         super(parent, id);
         this.props = props;
         this.createRestApi();
-        const apiRole = this.createApiRole();
+        this.createApiRole();
         const contractResource = this.addContractResourceAndMethods();
         this.addGetContractsIntegration(contractResource);
-        this.addGetContractDetailsIntegration(contractResource);
-        this.addGetContractEntities(contractResource);
+        this.addGetContractDetailsByContractIdIntegration(contractResource);
+        this.addGetContractDetailsByEntityIdIntegration(contractResource);
+        this.createApiKey();
         this.addRoute53Alias();
     }
 
-    addGetContractsIntegration(contractResource: apigw.Resource) {
-        contractResource.addMethod('GET', new apigw.MockIntegration());
+    createApiKey() {
+        if (!this.props.envParameters.apiKeySecruity) {
+            return;
+        }
+        const secret = new secretsmanager.Secret(this, 'Secret', {
+            generateSecretString: {
+                generateStringKey: 'api_key',
+                secretStringTemplate: JSON.stringify({ username: 'web_user' }),
+                excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',
+            },
+        });
+        this.restApi.addApiKey('ApiKey', {
+            apiKeyName: `contract-api-${this.props.envParameters.shortEnv}`,
+            value: secret.secretValueFromJson('api_key').toString(),
+        });
     }
 
-    addGetContractDetailsIntegration(contractResource: apigw.Resource) {
-        contractResource.addResource('{contractid}').addMethod('GET', new apigw.MockIntegration());
+    private addGetContractsIntegration(contractResource: apigw.Resource) {
+        contractResource.addMethod(
+            'POST',
+            new apigw.LambdaIntegration(this.props.contractLambdaFunctions.getContractsLambda!, {
+                credentialsRole: this.apiRole,
+            })
+        );
     }
 
-    addGetContractEntities(contractResource: apigw.Resource) {
+    private addGetContractDetailsByContractIdIntegration(contractResource: apigw.Resource) {
+        contractResource.addResource('{contractid}').addMethod(
+            'GET',
+            new apigw.LambdaIntegration(this.props.contractLambdaFunctions.getContractDetailsByContractIdLambda!, {
+                credentialsRole: this.apiRole,
+            })
+        );
+    }
+
+    private addGetContractDetailsByEntityIdIntegration(contractResource: apigw.Resource) {
         contractResource
-            .addResource('entityid')
+            .addResource('entities')
             .addResource('{entityid}')
-            .addMethod('POST', new apigw.MockIntegration());
+            .addMethod(
+                'GET',
+                new apigw.LambdaIntegration(this.props.contractLambdaFunctions.getContractDetailsByEntityIdLambda!, {
+                    credentialsRole: this.apiRole,
+                })
+            );
     }
 
-    addContractResourceAndMethods() {
+    private addContractResourceAndMethods() {
         return this.restApi.root.addResource('contractinformation').addResource('v1').addResource('contracts');
     }
 
-    createRestApi() {
+    private createRestApi() {
         this.restApi = new apigw.RestApi(this, 'my-rest-api', {
             description: `contract-api-${this.props.envParameters.shortEnv}`,
             restApiName: `contract-api-${this.props.envParameters.shortEnv}`,
-            endpointTypes: [apigw.EndpointType.REGIONAL],
             deployOptions: {
                 stageName: `${this.props.envParameters.shortEnv}`,
                 loggingLevel: apigw.MethodLoggingLevel.INFO,
                 dataTraceEnabled: true,
+            },
+            policy: this.getApiGatewayResourcePolicy(),
+            endpointConfiguration: {
+                types: [apigw.EndpointType.PRIVATE],
+                vpcEndpoints: [this.props.iVpcEndpoint!],
             },
             domainName: this.props.envParameters.domainSuffix
                 ? {
@@ -63,23 +102,39 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
                 : undefined,
         });
     }
+    getApiGatewayResourcePolicy() {
+        return new iam.PolicyDocument({
+            statements: [
+                new iam.PolicyStatement({
+                    actions: ['execute-api:Invoke'],
+                    effect: iam.Effect.ALLOW,
+                    resources: ['*'],
+                    principals: [new iam.AnyPrincipal()],
+                    conditions: {
+                        StringEquals: {
+                            'aws:SourceVpce': this.props.iVpcEndpoint!.vpcEndpointId,
+                        },
+                    },
+                }),
+            ],
+        });
+    }
 
-    createApiRole(): iam.Role {
-        const apiRole = new iam.Role(this, 'api-role', {
+    private createApiRole() {
+        this.apiRole = new iam.Role(this, 'api-role', {
             roleName: 'apiRole',
             assumedBy: new iam.ServicePrincipal('apigateway.amazonaws.com'),
         });
 
-        apiRole.addToPolicy(
+        this.apiRole.addToPolicy(
             new iam.PolicyStatement({
                 resources: ['*'],
                 actions: ['lambda:InvokeFunction'],
             })
         );
-        return apiRole;
     }
 
-    addRoute53Alias() {
+    private addRoute53Alias() {
         if (!this.props.envParameters.domainSuffix) {
             return;
         }

@@ -4,4 +4,7 @@ export interface EnvParameters {
     domainSuffix?: string;
     certArn?: string;
     enableEncryptionAtRest: boolean;
+    logRetentionInDays: number;
+    apiKeySecruity: boolean;
+    xRayTracing: boolean;
 }

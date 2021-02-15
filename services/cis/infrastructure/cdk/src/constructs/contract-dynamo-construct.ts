@@ -3,15 +3,15 @@ import { ContractDynamoConstructParms } from '../models/contract/contract-dynamo
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
 export class ContractDynamoConstruct extends cdk.Construct {
     private contractTable: dynamodb.Table;
-
     private props: ContractDynamoConstructParms;
+
     constructor(parent: cdk.Construct, id: string, props: ContractDynamoConstructParms) {
         super(parent, id);
         this.props = props;
         this.createDynamoDbTable();
     }
 
-    createDynamoDbTable() {
+    private createDynamoDbTable() {
         /**
          * Create Table
          */
@@ -28,7 +28,7 @@ export class ContractDynamoConstruct extends cdk.Construct {
         this.setOutputs();
     }
 
-    createMainTable() {
+    private createMainTable() {
         this.contractTable = new dynamodb.Table(this, 'dynamodb-table', {
             tableName: `contract-${this.props.shortEnv}`,
             partitionKey: { name: 'contractId', type: dynamodb.AttributeType.STRING },
@@ -41,7 +41,7 @@ export class ContractDynamoConstruct extends cdk.Construct {
         });
     }
 
-    addGSI() {
+    private addGSI() {
         this.contractTable.addGlobalSecondaryIndex({
             indexName: 'by_sk',
             partitionKey: {
@@ -52,7 +52,7 @@ export class ContractDynamoConstruct extends cdk.Construct {
         });
     }
 
-    setOutputs() {
+    private setOutputs() {
         new cdk.CfnOutput(this, 'table-name-output', {
             value: this.contractTable.tableName,
             description: 'Contract DynamoDB table name',

@@ -25,6 +25,8 @@
         "@aws-cdk/core": "1.87.1",
         "@aws-cdk/aws-apigateway": "1.87.1",
         "@aws-cdk/aws-route53-targets": "1.87.1",
+        "@aws-cdk/aws-wafv2": "1.87.1",
+        "@aws-cdk/aws-secretsmanager": "1.87.1",
         "@aws-cdk/aws-route53": "1.87.1",
         "source-map-support": "0.5.16"
     }
