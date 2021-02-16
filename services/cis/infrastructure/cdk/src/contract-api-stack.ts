@@ -1,7 +1,9 @@
 import * as cdk from '@aws-cdk/core';
+import { env } from 'process';
 import { ContractApiGatewayConstruct } from './constructs/contract-api-gateway-construct';
 import { ContractDynamoConstruct } from './constructs/contract-dynamo-construct';
 import { ContractLambdasConstruct } from './constructs/contract-lambdas-construct';
+import { S3Construct } from './constructs/shared/s3-construct';
 import { EnvHelper } from './helper/env-helper';
 import { ContractLambdaFunctions } from './models/contract/contract-lambda-functions';
 import { CrossStackImporter } from './models/contract/CrossStackImporter';
@@ -35,6 +37,10 @@ export class ContractApiStack extends cdk.Stack {
             envParameters,
             contractLambdaFunctions,
             iVpcEndpoint: crossStackImporter.getCrossStackImports().apiGatewayVpcEndpoint,
+        });
+
+        new S3Construct(this, 'contract-s3', {
+            bucketName: `fss-contract-bucket-raw-events-${envParameters.shortEnv}`,
         });
     }
 }
