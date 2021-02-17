@@ -1,7 +1,7 @@
 import * as cdk from '@aws-cdk/core';
 import * as ec2 from '@aws-cdk/aws-ec2';
-import { EnvParameters } from '../env-parms';
-import { CrossStackImports } from '../CrossStackImports';
+import { EnvParameters } from '../models/env-parms';
+import { CrossStackImports } from '../models/CrossStackImports';
 
 export class CrossStackImporter extends cdk.Construct {
     private crossStackImports: CrossStackImports;

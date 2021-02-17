@@ -1,12 +1,11 @@
 import * as cdk from '@aws-cdk/core';
-import { env } from 'process';
 import { ContractApiGatewayConstruct } from './constructs/contract-api-gateway-construct';
 import { ContractDynamoConstruct } from './constructs/contract-dynamo-construct';
 import { ContractLambdasConstruct } from './constructs/contract-lambdas-construct';
 import { S3Construct } from './constructs/shared/s3-construct';
+import { CrossStackImporter } from './helper/CrossStackImporter';
 import { EnvHelper } from './helper/env-helper';
 import { ContractLambdaFunctions } from './models/contract/contract-lambda-functions';
-import { CrossStackImporter } from './models/contract/CrossStackImporter';
 import { EnvParameters } from './models/env-parms';
 
 export class ContractApiStack extends cdk.Stack {
