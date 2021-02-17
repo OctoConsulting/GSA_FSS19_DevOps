@@ -1,5 +1,5 @@
 {
-    "name": "fss-19-cdk",
+    "name": "fss-cis-cdk",
     "version": "0.1.0",
     "bin": {
         "cdk": "src/index.js"

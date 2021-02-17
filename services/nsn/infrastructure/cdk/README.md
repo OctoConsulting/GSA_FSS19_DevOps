@@ -15,6 +15,7 @@ $env:SHORT_ENV='qa'
 ## Deploy Stacks
 
 ```
+cdk synth nsn-api
 cdk deploy nsn-api
 ```
 
