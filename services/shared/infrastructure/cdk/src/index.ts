@@ -11,9 +11,6 @@ if (!process.env.SHORT_ENV || !process.env.AWS_ACCOUNT || !process.env.AWS_REGIO
 const { AWS_ACCOUNT, AWS_REGION, SHORT_ENV } = process.env;
 const env = { account: AWS_ACCOUNT, region: AWS_REGION };
 
-/**
- * FSS Shared Stack - TODO - Move to seperate cdk project
- */
 const fssSharedStack = new FssSharedStack(app, 'fss-shared', { env, stackName: `fss-shared-${SHORT_ENV}` });
 cdk.Tags.of(fssSharedStack).add('Env', SHORT_ENV.toUpperCase());
 cdk.Tags.of(fssSharedStack).add('ApplicationID', 'fss');
