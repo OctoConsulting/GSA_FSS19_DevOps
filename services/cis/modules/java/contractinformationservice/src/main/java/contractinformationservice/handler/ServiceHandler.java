@@ -30,11 +30,7 @@ public class ServiceHandler implements RequestHandler<RequestWrapper, RequestWra
 		try {
 			if (reqns.getNumOfRecord() != reqns.getPurchaseOrders().size()) {
 
-				// throw new CCSExceptions(ContractConstants.INVALID_DATA);
-				//logger.log("Record count from the : "+ reqns.getNumOfRecord());
-				SoapFaultException fault = new SoapFaultException(ContractConstants.INVALID_DATA);
-
-				inputStream.setBody(ContractServiceUtil.marshall(fault));
+				inputStream.setBody(ContractServiceUtil.marshallException("soap:Server", ContractConstants.INVALID_DATA));
 				return inputStream;
 
 			}
@@ -42,19 +38,15 @@ public class ServiceHandler implements RequestHandler<RequestWrapper, RequestWra
 			while (i < reqns.getPurchaseOrders().size()) {
 				if (reqns.getPurchaseOrders().get(i).getPOLineNumber() != i + 1) {
 					// throw new CCSExceptions(ContractConstants.INVALID_DATA);
-
-					SoapFaultException fault = new SoapFaultException(ContractConstants.INVALID_DATA);
-
-					inputStream.setBody(ContractServiceUtil.marshall(fault));
+					
+					inputStream.setBody(ContractServiceUtil.marshallException("soap:Server", ContractConstants.INVALID_DATA));
 					return inputStream;
 				}
 				j = 0;
 				while (j < reqns.getPurchaseOrders().get(i).getRequisitionRecords().size()) {
 					if (reqns.getPurchaseOrders().get(i).getRequisitionRecords().get(j).getRequisitionLineNumber() != j
 							+ 1) {
-						SoapFaultException fault = new SoapFaultException(ContractConstants.INVALID_DATA);
-
-						inputStream.setBody(ContractServiceUtil.marshall(fault));
+						inputStream.setBody(ContractServiceUtil.marshallException("soap:Server", ContractConstants.INVALID_DATA));
 						return inputStream;
 					}
 					j++;
