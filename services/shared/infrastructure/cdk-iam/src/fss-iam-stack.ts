@@ -1,7 +1,7 @@
 import * as cdk from '@aws-cdk/core';
-import { EndpointsConstruct } from './constructs/endpoints-construct';
 import { EnvHelper } from './helper/env-helper';
 import { EnvParameters } from './models/env-parms';
+import { PolicyConstruct } from './constructs/policy-construct';
 
 export class FssIamStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -9,9 +9,11 @@ export class FssIamStack extends cdk.Stack {
 
         const stackContext = this.node.tryGetContext(`${id}-${process.env.SHORT_ENV}`);
         const envParameters: EnvParameters = new EnvHelper().getEnvironmentParams(stackContext);
-
-        new EndpointsConstruct(this, 'endpoints', {
-            envParameters,
+        envParameters.iamSets.forEach((iamSet) => {
+            new PolicyConstruct(this, `${iamSet.groupName}`, {
+                iamSet,
+                shortEnv: envParameters.shortEnv,
+            });
         });
     }
 }

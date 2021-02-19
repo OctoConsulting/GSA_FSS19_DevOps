@@ -13,4 +13,4 @@ const env = { account: AWS_ACCOUNT, region: AWS_REGION };
 
 const fssSharedStack = new FssIamStack(app, 'fss-iam', { env, stackName: `fss-iam-${SHORT_ENV}` });
 cdk.Tags.of(fssSharedStack).add('Env', SHORT_ENV.toUpperCase());
-cdk.Tags.of(fssSharedStack).add('ApplicationID', 'fss');
+cdk.Tags.of(fssSharedStack).add('ApplicationID', 'fss-iam');

@@ -9,7 +9,24 @@
         "@aws-cdk/aws-kms:defaultKeyPolicies": true,
         "@aws-cdk/aws-s3:grantWriteWithoutAcl": true,
         "fss-iam-dev": {
-            "vpc": "vpc-0d1b73fc53abfcae7"
+            "vpc": "vpc-0d1b73fc53abfcae7",
+            "iamSets": [
+                {
+                    "groupName": "Developers",
+                    "users": [],
+                    "permissions": ["dynamo-read", "dynamo-crudItem"]
+                },
+                {
+                    "groupName": "BusinessAnalysts",
+                    "users": [],
+                    "permissions": ["dynamo-read"]
+                },
+                {
+                    "groupName": "Testers",
+                    "users": [],
+                    "permissions": ["dynamo-read"]
+                }
+            ]
         },
         "fss-iam-qa": {
             "vpc": "vpc-0543348a8ffcd0ec9"
