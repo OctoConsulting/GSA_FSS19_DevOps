@@ -14,6 +14,16 @@ export class DynamoBuilder extends BaseBuilder {
         return resourcePrefix.getPrefix('dynamodb');
     }
 
+    public getPolicyStatements(): PolicyStatement[] {
+        if (this.permission === 'dynamo-read') {
+            return this.read();
+        }
+        if (this.permission === 'dynamo-crudItem') {
+            return this.crudItem();
+        }
+        return this.unimplimented(this.permission);
+    }
+
     private read(): PolicyStatement[] {
         const getIndex = new PolicyStatement({
             actions: ['dynamodb:Query', 'dynamodb:GetRecords'],
@@ -51,15 +61,5 @@ export class DynamoBuilder extends BaseBuilder {
             resources: [`${this.getServicePrefix()}table/*`],
         });
         return [crudItem];
-    }
-
-    public getPolicyStatements(): PolicyStatement[] {
-        if (this.permission === 'dynamo-read') {
-            return this.read();
-        }
-        if (this.permission === 'dynamo-crudItem') {
-            return this.crudItem();
-        }
-        return this.unimplimented(this.permission);
     }
 }
