@@ -12,19 +12,19 @@
             "vpc": "vpc-0d1b73fc53abfcae7",
             "iamSets": [
                 {
-                    "groupName": "Developers",
+                    "groupName": "FSS-Developers",
                     "users": [],
-                    "permissions": ["dynamo-read", "dynamo-crudItem"]
+                    "permissions": ["dynamo-read", "dynamo-crudItem", "logs-read"]
                 },
                 {
-                    "groupName": "BusinessAnalysts",
+                    "groupName": "FSS-BusinessAnalysts",
                     "users": [],
                     "permissions": ["dynamo-read"]
                 },
                 {
-                    "groupName": "Testers",
+                    "groupName": "FSS-Testers",
                     "users": [],
-                    "permissions": ["dynamo-read"]
+                    "permissions": ["dynamo-read", "logs-read"]
                 }
             ]
         },
