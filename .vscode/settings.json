@@ -3,7 +3,11 @@
     "files.exclude": {
         "**/cdk/src/**/*.js": true,
         "**/cdk/src/**/*.d.ts": true,
+        "**/cdk-iam/src/**/*.js": true,
+        "**/cdk-iam/src/**/*.d.ts": true,
         "**/cdk/lib/**/*.js": true,
-        "**/cdk/lib/**/*.d.ts": true
+        "**/cdk/lib/**/*.d.ts": true,
+        "**/cdk-iam/lib/**/*.js": true,
+        "**/cdk-iam/lib/**/*.d.ts": true
     }
 }
