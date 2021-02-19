@@ -9,10 +9,10 @@
         "@aws-cdk/aws-kms:defaultKeyPolicies": true,
         "@aws-cdk/aws-s3:grantWriteWithoutAcl": true,
         "fss-shared-dev": {
-            "vpc": "vpc-0d1b73fc53abfcae7"
+            "vpc": "vpc-02130393994755be9"
         },
         "fss-shared-qa": {
-            "vpc": "vpc-0543348a8ffcd0ec9"
+            "vpc": "vpc-02130393994755be9"
         }
     }
 }

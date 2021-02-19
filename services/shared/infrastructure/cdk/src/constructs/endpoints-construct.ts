@@ -13,6 +13,7 @@ export class EndpointsConstruct extends cdk.Construct {
         this.myVpc = ec2.Vpc.fromLookup(this, 'vpc-lookup', {
             vpcId: this.props.envParameters.vpc,
         });
+
         /**
          * Add Gateway Endpoint
          */
