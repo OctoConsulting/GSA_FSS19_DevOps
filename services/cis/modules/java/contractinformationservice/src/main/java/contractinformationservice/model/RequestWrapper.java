@@ -3,6 +3,8 @@ package contractinformationservice.model;
 public class RequestWrapper {
 
     private String body;
+    
+    private PathParameters pathParameters;
 
     public RequestWrapper() {}
 
@@ -17,4 +19,14 @@ public class RequestWrapper {
     public String getBody() {
         return body;
     }
+
+	public PathParameters getPathParameters() {
+		return pathParameters;
+	}
+
+	public void setPathParameters(PathParameters pathParameters) {
+		this.pathParameters = pathParameters;
+	}
+    
+    
 } 

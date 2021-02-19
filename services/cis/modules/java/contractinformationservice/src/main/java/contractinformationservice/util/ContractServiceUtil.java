@@ -22,6 +22,7 @@ import javax.xml.ws.soap.SOAPFaultException;
 public class ContractServiceUtil {
 	
 	private static final String PREFERRED_PREFIX = "soap";
+	private static final String SOAP_ENV_NAMESPACE = "http://schemas.xmlsoap.org/soap/envelope/";
 	 
 	public static <T> T unmarshall(String xml, Class<T> clazz)
 	{
@@ -90,18 +91,13 @@ public class ContractServiceUtil {
 
 			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,true);
 			QName qName = new QName("http://contract/", SOAPFault.class.getSimpleName());
-			//JAXBElement<T> root = new JAXBElement(qName, data.getClass(),data);
-			//jaxbMarshaller.marshal(root, stringWriter);
 
 			MessageFactory mf = MessageFactory.newInstance();
 			SOAPMessage message = mf.createMessage();
 			SOAPBody body = message.getSOAPBody();
-			//JAXBElement<SoapFaultException> root = new JAXBElement(qName, SoapFaultException.class,soapFault);
 			jaxbMarshaller.marshal(soapFault, body);
 
 			message.saveChanges();
-			//return stringWriter.toString();
-
 
 			ByteArrayOutputStream outstream = new ByteArrayOutputStream();
 			message.writeTo(System.out);
@@ -121,6 +117,8 @@ public class ContractServiceUtil {
 			MessageFactory messageFactory = MessageFactory.newInstance();
 			SOAPMessage msg = messageFactory.createMessage();
 
+			msg.getSOAPPart().getEnvelope().removeNamespaceDeclaration(msg.getSOAPPart().getEnvelope().getPrefix());
+			msg.getSOAPPart().getEnvelope().addNamespaceDeclaration(PREFERRED_PREFIX, SOAP_ENV_NAMESPACE);
 
 			msg.getSOAPPart().getEnvelope().setPrefix(PREFERRED_PREFIX);
 			msg.getSOAPBody().setPrefix(PREFERRED_PREFIX);
