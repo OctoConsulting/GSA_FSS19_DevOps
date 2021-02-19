@@ -3,7 +3,6 @@ package contractinformationservice.handler;
 import java.util.List;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 import contractinformationservice.model.RequestWrapper;
@@ -11,7 +10,6 @@ import contractinformationservice.service.ContractService;
 import contractinformationservice.service.ContractServiceImpl;
 import contractinformationservice.util.ContractConstants;
 import contractinformationservice.util.ContractServiceUtil;
-import contractinfromationservice.exception.SoapFaultException;
 import gov.gsa.fas.contractservice.contract.CSDetailPO;
 import gov.gsa.fas.contractservice.contract.GetContractDataResponse;
 import gov.gsa.fas.contractservice.contract.PORecordsType;

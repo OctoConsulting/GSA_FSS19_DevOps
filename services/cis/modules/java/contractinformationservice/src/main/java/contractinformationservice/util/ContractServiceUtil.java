@@ -61,6 +61,12 @@ public class ContractServiceUtil {
 			MessageFactory mf = MessageFactory.newInstance();
 			SOAPMessage message = mf.createMessage();
 			SOAPBody body = message.getSOAPBody();
+			message.getSOAPPart().getEnvelope().removeNamespaceDeclaration(message.getSOAPPart().getEnvelope().getPrefix());
+			message.getSOAPPart().getEnvelope().addNamespaceDeclaration(PREFERRED_PREFIX, SOAP_ENV_NAMESPACE);
+
+			message.getSOAPPart().getEnvelope().setPrefix(PREFERRED_PREFIX);
+			message.getSOAPBody().setPrefix(PREFERRED_PREFIX);
+			message.getSOAPHeader().setPrefix(PREFERRED_PREFIX);
 			JAXBElement<T> root = new JAXBElement(qName, data.getClass(),data);
 			jaxbMarshaller.marshal(root, body);
 
