@@ -13,6 +13,8 @@ export class FssSharedStack extends cdk.Stack {
 
         new VpcConstruct(this, 'vpc', {
             vpcId: envParameters.vpc,
+            maxAzs: envParameters.maxAzs!,
+            availabilityZones: this.availabilityZones
         });
 
         new EndpointsConstruct(this, 'endpoints', {

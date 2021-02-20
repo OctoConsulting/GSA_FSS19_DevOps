@@ -6,6 +6,7 @@ export class EnvHelper {
         const envParameters: EnvParameters = {
             shortEnv,
             vpc: stackContext.vpc,
+            maxAzs: stackContext.maxAzs,
             domainSuffix: stackContext.domainSuffix,
             certArn: stackContext.certArn,
             enableEncryptionAtRest: stackContext.enableEncryptionAtRest,
