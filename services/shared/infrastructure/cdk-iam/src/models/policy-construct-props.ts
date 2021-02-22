@@ -1,4 +1,4 @@
-import { IamSet } from './iam-permissions';
+import { IamSet } from './iam-set';
 
 export interface PolicyConstructProps {
     iamSet: IamSet;
