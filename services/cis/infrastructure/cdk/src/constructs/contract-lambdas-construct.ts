@@ -19,13 +19,11 @@ export class ContractLambdasConstruct extends cdk.Construct {
         const lambdaFun = new LambdaConstruct(this, 'get-contract-details-by-contract-id-lambda', {
             functionName: `get-contract-details-by-contract-id-lambda-${this.props.shortEnv}`,
             vpcId: this.props.vpc,
-            assetLocation: `../../modules/java/contract-lambda/target/contract-api-1.0-aws.jar`,
+            assetLocation: `../../modules/java/contractinformationservice/target/contractservice-0.0.1-SNAPSHOT.jar`,
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
-                MAIN_CLASS: 'com.gsa.MainApp',
-                SPRING_CLOUD_FUNCTION_DEFINITION: 'getContractDetailsByContractId',
             },
-            handler: 'org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest',
+            handler: 'gov.gsa.fas.contractservice.handler.ContractDetailsServiceHandler::handleRequest',
             type: LambdaConstructProps.LambdaTypeEnum.JAVA,
             logRetentionInDays: this.props.logRetentionInDays,
             timeout: 15,
@@ -39,13 +37,11 @@ export class ContractLambdasConstruct extends cdk.Construct {
         const lambdaFun = new LambdaConstruct(this, 'get-contract-details-by-entity-id-lambda', {
             functionName: `get-contract-details-by-entity-id-lambda-${this.props.shortEnv}`,
             vpcId: this.props.vpc,
-            assetLocation: `../../modules/java/contract-lambda/target/contract-api-1.0-aws.jar`,
+            assetLocation: `../../modules/java/contractinformationservice/target/contractservice-0.0.1-SNAPSHOT.jar`,
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
-                MAIN_CLASS: 'com.gsa.MainApp',
-                SPRING_CLOUD_FUNCTION_DEFINITION: 'getContractDetailsByEntityId',
             },
-            handler: 'org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest',
+            handler: 'gov.gsa.fas.contractservice.handler.ListContractsServiceHandler::handleRequest',
             type: LambdaConstructProps.LambdaTypeEnum.JAVA,
             logRetentionInDays: this.props.logRetentionInDays,
             timeout: 15,
@@ -59,13 +55,11 @@ export class ContractLambdasConstruct extends cdk.Construct {
         const lambdaFun = new LambdaConstruct(this, 'get-contracts-lambda', {
             functionName: `get-contracts-lambda-${this.props.shortEnv}`,
             vpcId: this.props.vpc,
-            assetLocation: `../../modules/java/contract-lambda/target/contract-api-1.0-aws.jar`,
+            assetLocation: `../../modules/java/contractinformationservice/target/contractservice-0.0.1-SNAPSHOT.jar`,
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
-                MAIN_CLASS: 'com.gsa.MainApp',
-                SPRING_CLOUD_FUNCTION_DEFINITION: 'getContracts',
             },
-            handler: 'org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest',
+            handler: 'gov.gsa.fas.contractservice.handler.ServiceHandler::handleRequest',
             type: LambdaConstructProps.LambdaTypeEnum.JAVA,
             logRetentionInDays: this.props.logRetentionInDays,
             timeout: 15,
