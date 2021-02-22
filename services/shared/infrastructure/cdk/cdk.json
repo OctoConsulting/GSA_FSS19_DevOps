@@ -10,7 +10,7 @@
         "@aws-cdk/aws-s3:grantWriteWithoutAcl": true,
         "fss-shared-dev": {
             "vpc": "vpc-02130393994755be9",
-            "maxAzs": 3
+            "maxAzs": 2
         },
         "fss-shared-qa": {
             "vpc": "vpc-02130393994755be9"

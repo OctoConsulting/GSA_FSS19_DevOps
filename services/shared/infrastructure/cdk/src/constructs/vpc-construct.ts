@@ -12,12 +12,13 @@ export class VpcConstruct extends cdk.Construct {
     private ngws: ec2.CfnNatGateway[];
     private igw: ec2.CfnInternetGateway;
     private att: ec2.CfnVPCGatewayAttachment;
+    private maxAzs: number;
     constructor(parent: cdk.Construct, id: string, props: VpcConstructParms) {
         super(parent, id);
         this.props = props;
 
         this.myVpc = ec2.Vpc.fromLookup(this, 'vpc-setup-lookup', {
-            vpcId: props.vpcId,
+            vpcId: props.envParameters.vpc
         });
         /**
          * Public, Private and Isolated Subnets
@@ -28,26 +29,32 @@ export class VpcConstruct extends cdk.Construct {
         this.networkBuilder = new NetworkBuilder(vpcRange);
         this.subnetConfiguration = [
             {
-                name: 'Isolated',
-                subnetType: ec2.SubnetType.ISOLATED,
-                cidrMask: 23,
-            },
-            {
-                name: 'Private',
+                name: 'PrivateCICD',
                 subnetType: ec2.SubnetType.PRIVATE,
                 cidrMask: 24,
             },
             {
-                name: 'Reserved',
+                name: `Private${props.envParameters.shortEnv}`,
+                subnetType: ec2.SubnetType.PRIVATE,
+                cidrMask: 24,
+            },
+            {
+                name: 'Isolated',
                 subnetType: ec2.SubnetType.ISOLATED,
-                reserved: true,
+                cidrMask: 28,
             },
             {
                 name: 'Public',
                 subnetType: ec2.SubnetType.PUBLIC,
                 cidrMask: 28
             },
+            {
+                name: 'Reserved',
+                subnetType: ec2.SubnetType.ISOLATED,
+                reserved: true,
+            },
         ]
+        this.maxAzs = this.props.envParameters.maxAzs ?? 3;
         this.addInternetGateway(); 
         this.ngws = [];
         this.privateSubnets = [];
@@ -58,12 +65,11 @@ export class VpcConstruct extends cdk.Construct {
         this.igw = new ec2.CfnInternetGateway(this, 'IGW');
         this.att = new ec2.CfnVPCGatewayAttachment(this, 'VPCGW', {
             internetGatewayId: this.igw.ref,
-            vpcId: this.props.vpcId,
+            vpcId: this.props.envParameters.vpc
         });
     }
     addSubnets() {
-        const maxAzs = this.props.maxAzs ?? 3;
-        this.props.availabilityZones = this.props.availabilityZones.slice(0, maxAzs);
+        this.props.availabilityZones = this.props.availabilityZones.slice(0, this.maxAzs);
         const remainingSpaceSubnets: ec2.SubnetConfiguration[] = [];
         for (const subnet of this.subnetConfiguration) {
             if (subnet.cidrMask === undefined) {
@@ -88,7 +94,7 @@ export class VpcConstruct extends cdk.Construct {
             const name = `${subnetConfig.name}Subnet${index + 1}`;
             const subnetProps: ec2.SubnetProps = {
                 availabilityZone: zone,
-                vpcId: this.props.vpcId,
+                vpcId: this.props.envParameters.vpc,
                 cidrBlock: this.networkBuilder.addSubnet(cidrMask),
                 mapPublicIpOnLaunch: (subnetConfig.subnetType === ec2.SubnetType.PUBLIC),
             };
@@ -98,7 +104,7 @@ export class VpcConstruct extends cdk.Construct {
                 const publicSubnet = new ec2.PublicSubnet(this, name, subnetProps);
                 publicSubnet.addDefaultInternetRoute(this.igw.ref, this.att);
                 subnet = publicSubnet;
-                this.ngws[index] = publicSubnet.addNatGateway();                
+                this.ngws.push(publicSubnet.addNatGateway());
                 break;
               case ec2.SubnetType.PRIVATE:
                 const privateSubnet = new ec2.PrivateSubnet(this, name, subnetProps);
@@ -122,7 +128,7 @@ export class VpcConstruct extends cdk.Construct {
     private addNatRoutes() {
         let i = 0;
         for (const sub of this.privateSubnets) {
-            sub.addDefaultNatRoute(this.ngws[i++].ref);
+            sub.addDefaultNatRoute(this.ngws[i++ % this.maxAzs].ref);
         }
     }    
 }

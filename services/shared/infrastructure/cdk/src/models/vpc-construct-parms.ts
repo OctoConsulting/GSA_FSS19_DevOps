@@ -1,7 +1,6 @@
 import { EnvParameters } from './env-parms';
 
 export interface VpcConstructParms {
-    vpcId: string;
-    maxAzs: number;
+    envParameters: EnvParameters;
     availabilityZones: string[];
 }

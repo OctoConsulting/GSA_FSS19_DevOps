@@ -12,13 +12,12 @@ export class FssSharedStack extends cdk.Stack {
         const envParameters: EnvParameters = new EnvHelper().getEnvironmentParams(stackContext);
 
         new VpcConstruct(this, 'vpc', {
-            vpcId: envParameters.vpc,
-            maxAzs: envParameters.maxAzs!,
+            envParameters: envParameters,
             availabilityZones: this.availabilityZones
         });
 
-        new EndpointsConstruct(this, 'endpoints', {
-            envParameters,
-        });
+        // new EndpointsConstruct(this, 'endpoints', {
+        //     envParameters,
+        // });
     }
 }
