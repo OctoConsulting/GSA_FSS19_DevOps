@@ -6,11 +6,15 @@ import java.util.List;
 
 import com.amazonaws.util.StringUtils;
 
+import contractinformationservice.model.PathParameters;
+import contractinformationservice.model.RequestWrapper;
 import contractinformationservice.util.ContractConstants;
+import contractinformationservice.util.ContractServiceUtil;
 import gov.gsa.fas.contractservice.contract.CSDetailPO;
+import gov.gsa.fas.contractservice.contract.ContractsType;
 import gov.gsa.fas.contractservice.contract.PORecordsType;
 
-public class ContractServiceImpl implements ContractService{
+public class ContractServiceImpl implements ContractService {
 
 	List<CSDetailPO> pOsResponse = new ArrayList<CSDetailPO>();
 	public List<CSDetailPO> getContractData(List<PORecordsType> inPORequest) {
@@ -45,4 +49,36 @@ public class ContractServiceImpl implements ContractService{
 		contractDetail.setResult(ContractConstants.SUCCESS);
 		return contractDetail;
 	}
+
+	@Override
+	public RequestWrapper getContractDetailsResponse(RequestWrapper inputStream) {
+		
+		RequestWrapper outputStream = this.validateContractDetailsRequest(inputStream);
+		
+		if(outputStream !=null) {
+			return outputStream;
+		}
+		
+		ContractsType contractsType = getContractDetails(inputStream.getPathParameters().getContractid());
+		return new RequestWrapper(ContractServiceUtil.marshall(contractsType));
+	}
+	
+	/**
+	 * Validate Input PO Request 
+	 * @param inPOLines
+	 * @return
+	 */
+	private RequestWrapper validateContractDetailsRequest(RequestWrapper inputStream) {
+		
+		if (null == inputStream.getPathParameters()  || null == inputStream.getPathParameters().getContractid() || 1 > inputStream.getPathParameters().getContractid().length() ){
+			inputStream.setBody(ContractServiceUtil.marshallException("soap:Server", ContractConstants.INVALID_DATA_CONTRACT_NUMBER_JS007));
+			return inputStream;
+		}
+		return null;
+	}
+	
+	public ContractsType getContractDetails(String contractId) {
+		return new ContractsType();
+	}
+	
 }

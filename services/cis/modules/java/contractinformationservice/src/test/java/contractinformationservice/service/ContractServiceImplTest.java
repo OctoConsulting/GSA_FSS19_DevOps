@@ -1,6 +1,7 @@
 package contractinformationservice.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -8,6 +9,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import contractinformationservice.model.PathParameters;
+import contractinformationservice.model.RequestWrapper;
 import contractinformationservice.util.ContractConstants;
 import contractinformationservice.util.ContractServiceUtil;
 import gov.gsa.fas.contractservice.contract.CSDetailPO;
@@ -160,6 +163,23 @@ public class ContractServiceImplTest {
 		assertEquals(ContractConstants.MISSING_TOTAL, csDetails.get(0).getResult());
 		assertEquals(ContractConstants.MISSING_PURCHASE_NUMBER, csDetails.get(1).getResult());
 		
+	}
+	
+	@Test
+	public void testGetContractDetailsResponse() {	
+		RequestWrapper inputStream = new RequestWrapper();
+		RequestWrapper responseStream = contractService.getContractDetailsResponse(inputStream);
+		assertTrue(responseStream.getBody().contains(ContractConstants.INVALID_DATA_CONTRACT_NUMBER_JS007));
+	}
+	
+	@Test
+	public void testGetContractDetailsResponseSuspense() {	
+		RequestWrapper inputStream = new RequestWrapper();
+		PathParameters pathParams = new PathParameters();
+		pathParams.setContractid("123456789");
+		inputStream.setPathParameters(pathParams);
+		RequestWrapper responseStream = contractService.getContractDetailsResponse(inputStream);
+		assertTrue(!responseStream.getBody().contains(ContractConstants.INVALID_DATA_CONTRACT_NUMBER_JS007));
 	}
 
 }

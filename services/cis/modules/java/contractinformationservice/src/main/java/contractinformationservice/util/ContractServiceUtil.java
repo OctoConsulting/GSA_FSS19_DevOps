@@ -14,10 +14,7 @@ import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPFactory;
-import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.ws.soap.SOAPFaultException;
 
 public class ContractServiceUtil {
 	
@@ -34,14 +31,7 @@ public class ContractServiceUtil {
 			JAXBContext jc = JAXBContext.newInstance(clazz);
 			Unmarshaller unmarshaller = jc.createUnmarshaller();
 			obj = clazz.cast(unmarshaller.unmarshal(message.getSOAPBody().extractContentAsDocument()));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SOAPException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}catch (JAXBException e) {
-			// TODO Auto-generated catch block
+		} catch (JAXBException | SOAPException | IOException  e) {
 			e.printStackTrace();
 		}
 
@@ -52,11 +42,8 @@ public class ContractServiceUtil {
 		try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(data.getClass());
 			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-			StringWriter stringWriter=new StringWriter();
 			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,true);
 			QName qName = new QName("http://contract/", data.getClass().getSimpleName());
-			//JAXBElement<T> root = new JAXBElement(qName, data.getClass(),data);
-			//jaxbMarshaller.marshal(root, stringWriter);
 
 			MessageFactory mf = MessageFactory.newInstance();
 			SOAPMessage message = mf.createMessage();
@@ -83,38 +70,6 @@ public class ContractServiceUtil {
 		}
 		return null;
 	}
-
-	public static String createSOAPFaultException(String faultString) {
-		SOAPFault soapFault;
-		try {
-
-			SOAPFactory soapFactory = SOAPFactory.newInstance();
-			soapFault = soapFactory.createFault();
-			soapFault.setFaultString(faultString);
-
-			JAXBContext jaxbContext = JAXBContext.newInstance(SOAPFaultException.class);
-			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-
-			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,true);
-			QName qName = new QName("http://contract/", SOAPFault.class.getSimpleName());
-
-			MessageFactory mf = MessageFactory.newInstance();
-			SOAPMessage message = mf.createMessage();
-			SOAPBody body = message.getSOAPBody();
-			jaxbMarshaller.marshal(soapFault, body);
-
-			message.saveChanges();
-
-			ByteArrayOutputStream outstream = new ByteArrayOutputStream();
-			message.writeTo(System.out);
-			String strMsg = new String(outstream.toByteArray());
-			return strMsg;
-		} catch (SOAPException | JAXBException | IOException e) {
-			System.out.println(e);
-			throw new RuntimeException("SOAP error");
-		}
-
-	}
 	
 	public static <T> String marshallException(String faultCode, String faultMessage) {
 		String returnString = "";
@@ -138,11 +93,7 @@ public class ContractServiceUtil {
 			msg.writeTo(b);
 			returnString = new String(b.toByteArray());
 
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SOAPException e) {
-			// TODO Auto-generated catch block
+		} catch (SOAPException | IOException  e) {
 			e.printStackTrace();
 		}
 
