@@ -9,24 +9,18 @@
         "@aws-cdk/aws-kms:defaultKeyPolicies": true,
         "@aws-cdk/aws-s3:grantWriteWithoutAcl": true,
         "contract-api-dev": {
-            "vpc": "vpc-0d1b73fc53abfcae7",
+            "vpc": "vpc-02130393994755be9",
             "logRetentionInDays": 7,
             "apiKeySecruity": false,
-            "enableEncryptionAtRest": false,
-            "xRayTracing": false
+            "enableEncryptionAtRest": true,
+            "xRayTracing": true
         },
         "contract-api-qa": {
-            "vpc": "vpc-0543348a8ffcd0ec9",
+            "vpc": "vpc-02130393994755be9",
             "logRetentionInDays": 30,
             "apiKeySecruity": false,
             "enableEncryptionAtRest": false,
             "xRayTracing": true
-        },
-        "fss-shared-dev": {
-            "vpc": "vpc-0d1b73fc53abfcae7"
-        },
-        "fss-shared-qa": {
-            "vpc": "vpc-0543348a8ffcd0ec9"
         }
     }
 }
