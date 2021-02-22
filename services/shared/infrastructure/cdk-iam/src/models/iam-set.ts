@@ -1,5 +1,5 @@
 export interface IamSet {
-    group: string;
+    groupName: string;
     users: string[];
     permissions: string[];
 }

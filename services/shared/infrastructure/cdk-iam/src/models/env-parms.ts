@@ -1,4 +1,4 @@
-import { IamSet } from './iam-permissions';
+import { IamSet } from './iam-set';
 
 export interface EnvParameters {
     shortEnv: string;

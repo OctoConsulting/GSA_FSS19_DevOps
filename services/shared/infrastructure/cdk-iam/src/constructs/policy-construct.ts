@@ -23,7 +23,7 @@ export class PolicyConstruct extends cdk.Construct {
             groups: [group],
         });
 
-        this.props.iamSet.permissions.forEach((permission) => {
+        this.props.iamSet.permissions.forEach((permission: string) => {
             builderFactory
                 .getPolicyBuilder(permission)
                 .getPolicyStatements()
