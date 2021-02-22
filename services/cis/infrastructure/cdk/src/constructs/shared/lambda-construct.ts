@@ -20,7 +20,7 @@ export class LambdaConstruct extends cdk.Construct {
             memorySize: props.memorySize ? props.memorySize : 512,
             runtime:
                 props.type === LambdaConstructProps.LambdaTypeEnum.JAVA
-                    ? lambda.Runtime.JAVA_11
+                    ? lambda.Runtime.JAVA_8
                     : lambda.Runtime.NODEJS_12_X,
             handler: props.handler
                 ? props.handler
