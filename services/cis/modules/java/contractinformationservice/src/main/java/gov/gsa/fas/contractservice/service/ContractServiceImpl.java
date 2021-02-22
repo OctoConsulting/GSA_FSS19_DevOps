@@ -1,4 +1,4 @@
-package contractinformationservice.service;
+package gov.gsa.fas.contractservice.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -6,10 +6,10 @@ import java.util.List;
 
 import com.amazonaws.util.StringUtils;
 
-import contractinformationservice.model.PathParameters;
-import contractinformationservice.model.RequestWrapper;
-import contractinformationservice.util.ContractConstants;
-import contractinformationservice.util.ContractServiceUtil;
+import gov.gsa.fas.contractservice.model.PathParameters;
+import gov.gsa.fas.contractservice.model.RequestWrapper;
+import gov.gsa.fas.contractservice.util.ContractConstants;
+import gov.gsa.fas.contractservice.util.ContractServiceUtil;
 import gov.gsa.fas.contractservice.contract.CSDetailPO;
 import gov.gsa.fas.contractservice.contract.ContractsType;
 import gov.gsa.fas.contractservice.contract.PORecordsType;

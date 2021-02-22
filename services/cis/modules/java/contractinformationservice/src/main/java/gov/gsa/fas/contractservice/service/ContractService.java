@@ -1,8 +1,8 @@
-package contractinformationservice.service;
+package gov.gsa.fas.contractservice.service;
 
 import java.util.List;
 
-import contractinformationservice.model.RequestWrapper;
+import gov.gsa.fas.contractservice.model.RequestWrapper;
 import gov.gsa.fas.contractservice.contract.CSDetailPO;
 import gov.gsa.fas.contractservice.contract.PORecordsType;
 

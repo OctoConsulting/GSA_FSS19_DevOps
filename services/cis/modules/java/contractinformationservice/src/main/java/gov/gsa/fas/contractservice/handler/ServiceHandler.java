@@ -1,15 +1,15 @@
-package contractinformationservice.handler;
+package gov.gsa.fas.contractservice.handler;
 
 import java.util.List;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
-import contractinformationservice.model.RequestWrapper;
-import contractinformationservice.service.ContractService;
-import contractinformationservice.service.ContractServiceImpl;
-import contractinformationservice.util.ContractConstants;
-import contractinformationservice.util.ContractServiceUtil;
+import gov.gsa.fas.contractservice.model.RequestWrapper;
+import gov.gsa.fas.contractservice.service.ContractService;
+import gov.gsa.fas.contractservice.service.ContractServiceImpl;
+import gov.gsa.fas.contractservice.util.ContractConstants;
+import gov.gsa.fas.contractservice.util.ContractServiceUtil;
 import gov.gsa.fas.contractservice.contract.CSDetailPO;
 import gov.gsa.fas.contractservice.contract.GetContractDataResponse;
 import gov.gsa.fas.contractservice.contract.PORecordsType;

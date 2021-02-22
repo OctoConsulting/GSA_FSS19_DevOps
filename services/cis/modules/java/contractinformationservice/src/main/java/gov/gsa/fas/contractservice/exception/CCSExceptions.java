@@ -1,4 +1,4 @@
-package contractinfromationservice.exception;
+package gov.gsa.fas.contractservice.exception;
 
 
 public class CCSExceptions extends Exception{

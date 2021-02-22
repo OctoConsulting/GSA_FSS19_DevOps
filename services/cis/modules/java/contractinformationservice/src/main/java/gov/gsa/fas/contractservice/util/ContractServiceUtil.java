@@ -1,4 +1,4 @@
-package contractinformationservice.util;
+package gov.gsa.fas.contractservice.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

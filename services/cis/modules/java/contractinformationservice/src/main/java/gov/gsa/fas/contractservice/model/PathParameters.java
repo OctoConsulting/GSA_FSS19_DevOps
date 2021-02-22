@@ -1,4 +1,4 @@
-package contractinformationservice.model;
+package gov.gsa.fas.contractservice.model;
 
 public class PathParameters {
 

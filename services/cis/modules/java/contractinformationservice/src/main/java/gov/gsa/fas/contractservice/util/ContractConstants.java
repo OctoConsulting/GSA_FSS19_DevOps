@@ -1,4 +1,4 @@
-package contractinformationservice.util;
+package gov.gsa.fas.contractservice.util;
 
 public class ContractConstants {
 	

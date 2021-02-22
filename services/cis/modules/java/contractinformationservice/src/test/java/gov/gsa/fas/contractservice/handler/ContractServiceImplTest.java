@@ -1,4 +1,4 @@
-package contractinformationservice.service;
+package gov.gsa.fas.contractservice.handler;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -9,10 +9,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import contractinformationservice.model.PathParameters;
-import contractinformationservice.model.RequestWrapper;
-import contractinformationservice.util.ContractConstants;
-import contractinformationservice.util.ContractServiceUtil;
+import gov.gsa.fas.contractservice.model.PathParameters;
+import gov.gsa.fas.contractservice.model.RequestWrapper;
+import gov.gsa.fas.contractservice.service.ContractService;
+import gov.gsa.fas.contractservice.service.ContractServiceImpl;
+import gov.gsa.fas.contractservice.util.ContractConstants;
+import gov.gsa.fas.contractservice.util.ContractServiceUtil;
 import gov.gsa.fas.contractservice.contract.CSDetailPO;
 import gov.gsa.fas.contractservice.contract.PORecordsType;
 import gov.gsa.fas.contractservice.contract.PORequestType;

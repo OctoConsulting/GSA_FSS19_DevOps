@@ -1,13 +1,13 @@
-package contractinformationservice.handler;
+package gov.gsa.fas.contractservice.handler;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
-import contractinformationservice.model.PathParameters;
-import contractinformationservice.model.RequestWrapper;
-import contractinformationservice.service.ContractService;
-import contractinformationservice.service.ContractServiceImpl;
-import contractinformationservice.util.ContractConstants;
+import gov.gsa.fas.contractservice.model.PathParameters;
+import gov.gsa.fas.contractservice.model.RequestWrapper;
+import gov.gsa.fas.contractservice.service.ContractService;
+import gov.gsa.fas.contractservice.service.ContractServiceImpl;
+import gov.gsa.fas.contractservice.util.ContractConstants;
 
 public class ContractDetailsServiceHandler implements RequestHandler<RequestWrapper, RequestWrapper> {
 	public RequestWrapper handleRequest(RequestWrapper inputStream, Context context) {
