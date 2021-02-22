@@ -1,7 +1,7 @@
 const { AWS_ACCOUNT, AWS_REGION } = process.env;
 
 function getPrefix(resourceName: string) {
-    return `arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT}:`;
+    return `arn:aws:${resourceName}:${AWS_REGION}:${AWS_ACCOUNT}:`;
 }
 
 const resourcePrefix = {

@@ -1,6 +1,7 @@
 import { PolicyStatement } from '@aws-cdk/aws-iam';
 
 export class BaseBuilder {
+    protected arnPrefix: string;
     constructor() {}
 
     getPolicyStatements(): PolicyStatement[] {
@@ -8,7 +9,7 @@ export class BaseBuilder {
     }
 
     getServicePrefix() {
-        throw new Error('Child class must implient this method');
+        return this.arnPrefix;
     }
 
     protected unimplimented(permission: string): PolicyStatement[] {

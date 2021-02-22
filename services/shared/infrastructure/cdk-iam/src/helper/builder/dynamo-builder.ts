@@ -5,13 +5,10 @@ import { BaseBuilder } from './common/BaseBulider';
 export class DynamoBuilder extends BaseBuilder {
     private permission: string;
 
-    constructor(permission: string) {
+    constructor(permission: string, arnPrefix: string) {
         super();
         this.permission = permission;
-    }
-
-    getServicePrefix() {
-        return resourcePrefix.getPrefix('dynamodb');
+        this.arnPrefix = arnPrefix;
     }
 
     public getPolicyStatements(): PolicyStatement[] {

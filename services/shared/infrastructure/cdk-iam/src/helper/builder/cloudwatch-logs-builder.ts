@@ -5,13 +5,10 @@ import { BaseBuilder } from './common/BaseBulider';
 export class CloudwatchLogsBuilder extends BaseBuilder {
     private permission: string;
 
-    constructor(permission: string) {
+    constructor(permission: string, arnPrefix: string) {
         super();
         this.permission = permission;
-    }
-
-    getServicePrefix() {
-        return resourcePrefix.getPrefix('log-group');
+        this.arnPrefix = arnPrefix;
     }
 
     public getPolicyStatements(): PolicyStatement[] {
@@ -42,6 +39,7 @@ export class CloudwatchLogsBuilder extends BaseBuilder {
                 'logs:StopQuery',
                 'logs:GetLogDelivery',
                 'logs:ListLogDeliveries',
+                'logs:GetLogEvents',
             ],
             resources: ['*'],
         });
