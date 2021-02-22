@@ -27,18 +27,12 @@ export class DynamoBuilder extends BaseBuilder {
             resources: [`${this.getServicePrefix()}table/*/index/*`],
         });
         const list = new PolicyStatement({
-            actions: ['dynamodb:ListTables', 'dynamodb:ListStreams'],
+            actions: ['dynamodb:List*', 'dynamodb:BatchGet*', 'dynamodb:Describe*', 'dynamodb:Get*'],
             resources: ['*'],
         });
 
         const getTable = new PolicyStatement({
-            actions: [
-                'dynamodb:BatchGetItem',
-                'dynamodb:DescribeTable',
-                'dynamodb:GetItem',
-                'dynamodb:ListTagsOfResource',
-                'dynamodb:Query',
-            ],
+            actions: ['dynamodb:Query', 'dynamodb:Scan'],
             resources: [`${this.getServicePrefix()}table/*`],
         });
         return [getIndex, list, getTable];

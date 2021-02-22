@@ -1,4 +1,5 @@
 import { ApiGatewayBuilder } from './apigateway-builder';
+import { CloudwatchBuilder } from './cloudwatch-builder';
 import { CloudwatchLogsBuilder } from './cloudwatch-logs-builder';
 import { BaseBuilder } from './common/BaseBulider';
 import { DynamoBuilder } from './dynamo-builder';
@@ -15,6 +16,8 @@ function getPolicyBuilder(permission: string, arnPrefix: string): BaseBuilder {
     if (permission.startsWith('xray')) return new XrayBuilder(permission, arnPrefix);
 
     if (permission.startsWith('lambda')) return new LambdaBuilder(permission, arnPrefix);
+
+    if (permission.startsWith('cloudwatch')) return new CloudwatchBuilder(permission, arnPrefix);
 
     throw Error(`Policy Builder entry missing in builder-factory.js for ${permission}`);
 }

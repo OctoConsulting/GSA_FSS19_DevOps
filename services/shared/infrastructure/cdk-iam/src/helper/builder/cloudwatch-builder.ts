@@ -1,7 +1,7 @@
 import { PolicyStatement } from '@aws-cdk/aws-iam';
 import { BaseBuilder } from './common/BaseBulider';
 
-export class ApiGatewayBuilder extends BaseBuilder {
+export class CloudwatchBuilder extends BaseBuilder {
     private permission: string;
 
     constructor(permission: string, arnPrefix: string) {
@@ -11,11 +11,8 @@ export class ApiGatewayBuilder extends BaseBuilder {
     }
 
     public getPolicyStatements(): PolicyStatement[] {
-        if (this.permission === 'apigateway-read') {
+        if (this.permission === 'cloudwatch-read') {
             return this.read();
-        }
-        if (this.permission === 'apigateway-runapi') {
-            return this.runapi();
         }
 
         return this.unimplimented(this.permission);
@@ -23,17 +20,9 @@ export class ApiGatewayBuilder extends BaseBuilder {
 
     private read(): PolicyStatement[] {
         const read = new PolicyStatement({
-            actions: ['apigateway:GET'],
+            actions: ['cloudwatch:Describe*', 'cloudwatch:Get*', 'cloudwatch:List*'],
             resources: [`${this.getServicePrefix()}*`],
         });
         return [read];
-    }
-
-    private runapi(): PolicyStatement[] {
-        const runapi = new PolicyStatement({
-            actions: ['apigateway:PUT', 'apigateway:POST'],
-            resources: [`${this.getServicePrefix()}*`],
-        });
-        return [runapi];
     }
 }
