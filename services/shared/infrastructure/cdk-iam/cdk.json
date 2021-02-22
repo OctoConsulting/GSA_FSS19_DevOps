@@ -19,7 +19,9 @@
                         "dynamo-crudItem",
                         "logs-read",
                         "apigateway-read",
+                        "apigateway-runapi",
                         "xray-read",
+                        "cloudwatch-read",
                         "lambda-read"
                     ]
                 },
