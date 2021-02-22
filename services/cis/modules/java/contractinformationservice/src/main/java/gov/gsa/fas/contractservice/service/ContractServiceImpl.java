@@ -6,39 +6,52 @@ import java.util.List;
 
 import com.amazonaws.util.StringUtils;
 
+import gov.gsa.fas.contractservice.contract.CSDetailPO;
+import gov.gsa.fas.contractservice.contract.ContractsType;
+import gov.gsa.fas.contractservice.contract.ListContractsType;
+import gov.gsa.fas.contractservice.contract.PORecordsType;
 import gov.gsa.fas.contractservice.model.PathParameters;
 import gov.gsa.fas.contractservice.model.RequestWrapper;
 import gov.gsa.fas.contractservice.util.ContractConstants;
 import gov.gsa.fas.contractservice.util.ContractServiceUtil;
-import gov.gsa.fas.contractservice.contract.CSDetailPO;
-import gov.gsa.fas.contractservice.contract.ContractsType;
-import gov.gsa.fas.contractservice.contract.PORecordsType;
 
 public class ContractServiceImpl implements ContractService {
 
 	List<CSDetailPO> pOsResponse = new ArrayList<CSDetailPO>();
+
+	public RequestWrapper getListContractResponse(RequestWrapper inputStream) {
+		RequestWrapper outputStream = this.validateListContractRequest(inputStream);
+
+		if (outputStream != null) {
+			return outputStream;
+		}
+
+		ListContractsType listContractsType = getListContracts(inputStream.getPathParameters().getEntityid());
+		return new RequestWrapper(ContractServiceUtil.marshall(listContractsType));
+	}
+
 	public List<CSDetailPO> getContractData(List<PORecordsType> inPORequest) {
-		
-		inPORequest.forEach(x->{
+
+		inPORequest.forEach(x -> {
 			pOsResponse.add(validateRequest(x));
 		});
 		return pOsResponse;
 	}
 
 	/**
-	 * Validate Input PO Request 
+	 * Validate Input PO Request
+	 * 
 	 * @param inPOLines
 	 * @return
 	 */
 	private CSDetailPO validateRequest(PORecordsType inPOLines) {
-		
+
 		CSDetailPO contractDetail = new CSDetailPO();
-		if(StringUtils.isNullOrEmpty(inPOLines.getContractNum())){
-			contractDetail.setResult(ContractConstants.MISSING_CONTRACT_NUMBER); 
+		if (StringUtils.isNullOrEmpty(inPOLines.getContractNum())) {
+			contractDetail.setResult(ContractConstants.MISSING_CONTRACT_NUMBER);
 			return contractDetail;
 		}
-		if (inPOLines.getTotalPOCost() == null
-				|| BigDecimal.ZERO.compareTo(inPOLines.getTotalPOCost()) != -1) {
+		if (inPOLines.getTotalPOCost() == null || BigDecimal.ZERO.compareTo(inPOLines.getTotalPOCost()) != -1) {
 			contractDetail.setResult(ContractConstants.MISSING_TOTAL);
 			return contractDetail;
 		}
@@ -52,33 +65,50 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public RequestWrapper getContractDetailsResponse(RequestWrapper inputStream) {
-		
+
 		RequestWrapper outputStream = this.validateContractDetailsRequest(inputStream);
-		
-		if(outputStream !=null) {
+
+		if (outputStream != null) {
 			return outputStream;
 		}
-		
+
 		ContractsType contractsType = getContractDetails(inputStream.getPathParameters().getContractid());
 		return new RequestWrapper(ContractServiceUtil.marshall(contractsType));
 	}
-	
+
 	/**
-	 * Validate Input PO Request 
+	 * Validate Input PO Request
+	 * 
 	 * @param inPOLines
 	 * @return
 	 */
 	private RequestWrapper validateContractDetailsRequest(RequestWrapper inputStream) {
-		
-		if (null == inputStream.getPathParameters()  || null == inputStream.getPathParameters().getContractid() || 1 > inputStream.getPathParameters().getContractid().length() ){
-			inputStream.setBody(ContractServiceUtil.marshallException("soap:Server", ContractConstants.INVALID_DATA_CONTRACT_NUMBER_JS007));
+
+		if (null == inputStream.getPathParameters() || null == inputStream.getPathParameters().getContractid()
+				|| 1 > inputStream.getPathParameters().getContractid().length()) {
+			inputStream.setBody(ContractServiceUtil.marshallException("soap:Server",
+					ContractConstants.INVALID_DATA_CONTRACT_NUMBER_JS007));
 			return inputStream;
 		}
 		return null;
 	}
 	
+	private RequestWrapper validateListContractRequest(RequestWrapper inputStream) {
+		PathParameters pathParameters = inputStream.getPathParameters();
+		
+		if (pathParameters == null || StringUtils.isNullOrEmpty(pathParameters.getEntityid()) || pathParameters.getEntityid().length() != 9) {
+			inputStream.setBody(ContractServiceUtil.marshallException("soap:Server", ContractConstants.INVALID_DATA_DUNS_NUMBER_JS007));
+			return inputStream;
+		}
+		return null;
+	}
+
 	public ContractsType getContractDetails(String contractId) {
 		return new ContractsType();
 	}
 	
+	private ListContractsType getListContracts(String entityid) {
+		return new ListContractsType();
+	}
+
 }

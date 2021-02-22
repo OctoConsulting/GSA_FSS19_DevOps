@@ -183,5 +183,22 @@ public class ContractServiceImplTest {
 		RequestWrapper responseStream = contractService.getContractDetailsResponse(inputStream);
 		assertTrue(!responseStream.getBody().contains(ContractConstants.INVALID_DATA_CONTRACT_NUMBER_JS007));
 	}
+	
+	@Test
+	public void testListContractsResponseNull() {	
+		RequestWrapper inputStream = new RequestWrapper();
+		RequestWrapper responseStream = contractService.getListContractResponse(inputStream);
+		assertTrue(responseStream.getBody().contains(ContractConstants.INVALID_DATA_DUNS_NUMBER_JS007));
+	}
+	
+	@Test
+	public void testListContractsResponseValid() {	
+		RequestWrapper inputStream = new RequestWrapper();
+		PathParameters pathParams = new PathParameters();
+		pathParams.setEntityid("123456789");
+		inputStream.setPathParameters(pathParams);
+		RequestWrapper responseStream = contractService.getListContractResponse(inputStream);
+		assertTrue(!responseStream.getBody().contains(ContractConstants.INVALID_DATA_DUNS_NUMBER_JS007));
+	}
 
 }
