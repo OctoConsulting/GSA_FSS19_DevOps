@@ -14,7 +14,14 @@
                 {
                     "groupName": "FSS-Developers",
                     "users": [],
-                    "permissions": ["dynamo-read", "dynamo-crudItem", "logs-read", "apigateway-read", "xray-read"]
+                    "permissions": [
+                        "dynamo-read",
+                        "dynamo-crudItem",
+                        "logs-read",
+                        "apigateway-read",
+                        "xray-read",
+                        "lambda-read"
+                    ]
                 },
                 {
                     "groupName": "FSS-BusinessAnalysts",

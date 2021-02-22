@@ -1,7 +1,6 @@
 import { PolicyStatement } from '@aws-cdk/aws-iam';
 import { BaseBuilder } from './common/BaseBulider';
-
-export class XrayBuilder extends BaseBuilder {
+export class LambdaBuilder extends BaseBuilder {
     private permission: string;
 
     constructor(permission: string, arnPrefix: string) {
@@ -11,18 +10,21 @@ export class XrayBuilder extends BaseBuilder {
     }
 
     public getPolicyStatements(): PolicyStatement[] {
-        if (this.permission === 'xray-read') {
+        if (this.permission === 'lambda-read') {
             return this.read();
         }
-
         return this.unimplimented(this.permission);
     }
 
     private read(): PolicyStatement[] {
         const read = new PolicyStatement({
-            actions: ['xray:GET*', 'xray:BatchGet*'],
+            actions: ['lambda:List*', 'lambda:Get*', 'lambda:GetAccountSettings'],
             resources: [`${this.getServicePrefix()}*`],
         });
-        return [read];
+        const commonPolicy = new PolicyStatement({
+            actions: ['lambda:GetAccountSettings', 'lambda:List*'],
+            resources: ['*'],
+        });
+        return [read, commonPolicy];
     }
 }

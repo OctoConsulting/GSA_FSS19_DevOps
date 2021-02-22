@@ -1,17 +1,13 @@
 import { PolicyStatement } from '@aws-cdk/aws-iam';
-import { resourcePrefix } from '../resource-helper';
 import { BaseBuilder } from './common/BaseBulider';
 
 export class ApiGatewayBuilder extends BaseBuilder {
     private permission: string;
 
-    constructor(permission: string) {
+    constructor(permission: string, arnPrefix: string) {
         super();
         this.permission = permission;
-    }
-
-    getServicePrefix() {
-        return resourcePrefix.getPrefix('apigateway');
+        this.arnPrefix = arnPrefix;
     }
 
     public getPolicyStatements(): PolicyStatement[] {

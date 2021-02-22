@@ -9,13 +9,14 @@
         "build": "tsc",
         "watch": "tsc -w",
         "cdk": "cdk synth",
-        "deploy": "cdk deploy --require-approval never"
+        "deploy": "cdk deploy --require-approval never --profile fss"
     },
     "devDependencies": {
         "@aws-cdk/assert": "1.87.1",
         "@types/jest": "^26.0.10",
         "@types/node": "10.17.27",
         "aws-cdk": "1.87.1",
+        "@aws-cdk/core.Arn": "1.87.1",
         "ts-node": "9.0.0",
         "typescript": "3.9.7"
     },
