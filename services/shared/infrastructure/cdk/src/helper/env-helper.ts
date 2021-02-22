@@ -7,12 +7,6 @@ export class EnvHelper {
             shortEnv,
             vpc: stackContext.vpc,
             maxAzs: stackContext.maxAzs,
-            domainSuffix: stackContext.domainSuffix,
-            certArn: stackContext.certArn,
-            enableEncryptionAtRest: stackContext.enableEncryptionAtRest,
-            logRetentionInDays: stackContext.logRetentionInDays,
-            apiKeySecruity: stackContext.apiKeySecruity,
-            xRayTracing: stackContext.xRayTracing,
         };
         return envParameters;
     }
