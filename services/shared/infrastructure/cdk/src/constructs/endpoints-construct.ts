@@ -24,6 +24,11 @@ export class EndpointsConstruct extends cdk.Construct {
     private setDynamoDbEndpoint() {
         this.myVpc.addGatewayEndpoint('dynamo-db', {
             service: ec2.GatewayVpcEndpointAwsService.DYNAMODB,
+            subnets: [
+                {
+                    subnetType: ec2.SubnetType.ISOLATED,
+                },
+            ],
         });
     }
 
@@ -31,6 +36,9 @@ export class EndpointsConstruct extends cdk.Construct {
         const apiGatewayEndPoint: ec2.InterfaceVpcEndpoint = this.myVpc.addInterfaceEndpoint('api-gateway-endpoint', {
             privateDnsEnabled: true,
             service: ec2.InterfaceVpcEndpointAwsService.APIGATEWAY,
+            subnets: {
+                subnetType: ec2.SubnetType.ISOLATED,
+            },
         });
         this.endpoints.apiGatewayEndPoint = apiGatewayEndPoint;
         new cdk.CfnOutput(this, `api-gateway-endpoint-cfnout`, {
