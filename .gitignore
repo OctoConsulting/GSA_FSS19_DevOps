@@ -2,3 +2,5 @@ services/cis/infrastructure/cdk/cdk.context.json
 services/cis/modules/java/contract-lambda/.DS_Store
 **/cdk.context.json
 **/.DS_Store
+**/node_modules
+**/cdk.out

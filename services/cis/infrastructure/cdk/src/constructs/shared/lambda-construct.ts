@@ -3,7 +3,6 @@ import * as lambda from '@aws-cdk/aws-lambda';
 import * as awsLogs from '@aws-cdk/aws-logs';
 import * as ec2 from '@aws-cdk/aws-ec2';
 import { LambdaConstructProps } from '../../models/lambda-construct-props';
-import { createTracing } from 'trace_events';
 
 export class LambdaConstruct extends cdk.Construct {
     private props: LambdaConstructProps;
@@ -29,6 +28,9 @@ export class LambdaConstruct extends cdk.Construct {
                 ? 'com.gsa.MyHandler::handleRequest'
                 : 'index.handler',
             vpc: props.vpcId ? myVpc : undefined,
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.ISOLATED,
+            },
             tracing: this.props.xRayTracing ? lambda.Tracing.ACTIVE : lambda.Tracing.DISABLED,
             code: lambda.Code.fromAsset(props.assetLocation),
             timeout: cdk.Duration.seconds(props.timeout ? props.timeout : 30),
