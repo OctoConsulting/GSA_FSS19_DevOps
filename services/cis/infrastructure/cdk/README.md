@@ -15,7 +15,6 @@ $env:SHORT_ENV='dev'
 ## Deploy Stacks
 
 ```
-cdk deploy fss-shared
 cdk deploy contract-api
 ```
 

@@ -3,7 +3,7 @@
 MacOs/Linux Shell:
 
 ```
-export SHORT_ENV='qa' AWS_ACCOUNT='749429076732' AWS_REGION='us-east-1'
+export SHORT_ENV='dev' AWS_ACCOUNT='902479997164' AWS_REGION='us-east-1'
 ```
 
 Windows PowerShell:
