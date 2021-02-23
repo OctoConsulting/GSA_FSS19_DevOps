@@ -50,9 +50,8 @@ public class ContractConstants {
 	public static final String SUCCESS = "SUCCESS";
 	
 	// Error Codes Get contract Data
-	public static final String MISSING_TOTAL = "FAIL JS999: Missing Total PO Cost.";
-	public static final String MISSING_CONTRACT_NUMBER="FAIL JS999: Missing contract Number/Contract number is too short/too long." +
-			" Contract Number submitted was Empty";
+	public static final String MISSING_TOTAL = "FAIL JS999: Missing Total PO Cost";
+	public static final String MISSING_CONTRACT_NUMBER="FAIL JS999: Missing contract Number";
 	public static final String MISSING_PURCHASE_NUMBER="FAIL JS999: Missing Purchase Order Number";
 	public static final String INVALID_DATA ="J090_Invalid Data Request";
 	
