@@ -2,7 +2,6 @@
 import 'source-map-support/register';
 import * as cdk from '@aws-cdk/core';
 import { ContractApiStack } from './contract-api-stack';
-import { FssSharedStack } from './fss-shared-stack';
 
 const app = new cdk.App();
 
