@@ -1,4 +1,4 @@
-package gov.gsa.fss19.nsn.handler;
+package gov.gsa.fas.nsn.handler;
 
 import java.util.Map;
 
@@ -12,7 +12,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
-import gov.gsa.fss19.model.GatewayResponse;
+import gov.gsa.fas.nsn.model.GatewayResponse;
 
 public class NSNDataDeleteHandler implements RequestHandler<Map<String, Object>, GatewayResponse> {
 

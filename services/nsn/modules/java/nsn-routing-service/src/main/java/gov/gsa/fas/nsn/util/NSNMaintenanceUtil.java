@@ -1,4 +1,4 @@
-package gov.gsa.fss19.nsn.util;
+package gov.gsa.fas.nsn.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,4 +1,4 @@
-package gov.gsa.fss19.model;
+package gov.gsa.fas.nsn.model;
 
 import com.google.gson.Gson;
 

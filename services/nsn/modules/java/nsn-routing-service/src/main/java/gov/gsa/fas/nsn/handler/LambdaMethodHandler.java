@@ -1,4 +1,4 @@
-package gov.gsa.fss19.nsn.handler;
+package gov.gsa.fas.nsn.handler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,9 +23,9 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.util.CollectionUtils;
 import com.google.gson.Gson;
 
-import gov.gsa.fss19.model.GatewayResponse;
-import gov.gsa.fss19.model.NSNData;
-import gov.gsa.fss19.model.NSNDbData;
+import gov.gsa.fas.nsn.model.GatewayResponse;
+import gov.gsa.fas.nsn.model.NSNData;
+import gov.gsa.fas.nsn.model.NSNDbData;
 
 public class LambdaMethodHandler implements RequestHandler<Map<String, Object>, GatewayResponse> {
 

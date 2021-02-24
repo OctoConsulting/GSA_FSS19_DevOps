@@ -1,8 +1,8 @@
-package gov.gsa.fss19.handler;
+package gov.gsa.fas.handler;
 
 import org.junit.Test;
 
-import gov.gsa.fss19.nsn.handler.NSNDataPostHandler;
+import gov.gsa.fas.nsn.handler.NSNDataPostHandler;
 
 public class NSNDataPostHandlerTest {
 

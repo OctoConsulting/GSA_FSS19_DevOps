@@ -1,4 +1,4 @@
-package gov.gsa.fss19.model;
+package gov.gsa.fas.nsn.model;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
@@ -6,44 +6,44 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 @DynamoDBTable(tableName = "NSN_DATA")
 public class NSNDbData {
 
-	private String NSN_ID;
-	private String CIV_MGR;
-	private String MIL_MGR;
-	private String OWA_CD;
-	private String RIC;
+	private String nsn_id;
+	private String civ_mgr;
+	private String mil_mgr;
+	private String owa_cd;
+	private String ric;
 	private String CREATE_DATE;
 	private String CREATED_BY;
 	
 	@DynamoDBHashKey(attributeName = "NSN_ID")
 	public String getNSN_ID() {
-		return NSN_ID;
+		return nsn_id;
 	}
 	public void setNSN_ID(String nSN_ID) {
-		NSN_ID = nSN_ID;
+		nsn_id = nSN_ID;
 	}
 	public String getCIV_MGR() {
-		return CIV_MGR;
+		return civ_mgr;
 	}
 	public void setCIV_MGR(String cIV_MGR) {
-		CIV_MGR = cIV_MGR;
+		civ_mgr = cIV_MGR;
 	}
 	public String getMIL_MGR() {
-		return MIL_MGR;
+		return mil_mgr;
 	}
 	public void setMIL_MGR(String mIL_MGR) {
-		MIL_MGR = mIL_MGR;
+		mil_mgr = mIL_MGR;
 	}
 	public String getOWA_CD() {
-		return OWA_CD;
+		return owa_cd;
 	}
 	public void setOWA_CD(String oWA_CD) {
-		OWA_CD = oWA_CD;
+		owa_cd = oWA_CD;
 	}
 	public String getRIC() {
-		return RIC;
+		return ric;
 	}
 	public void setRIC(String rIC) {
-		RIC = rIC;
+		ric = rIC;
 	}
 	public String getCREATE_DATE() {
 		return CREATE_DATE;
@@ -59,8 +59,8 @@ public class NSNDbData {
 	}
 	@Override
 	public String toString() {
-		return "NSNDbData [NSN_ID=" + NSN_ID + ", CIV_MGR=" + CIV_MGR + ", MIL_MGR=" + MIL_MGR + ", OWA_CD=" + OWA_CD
-				+ ", RIC=" + RIC + ", CREATE_DATE=" + CREATE_DATE + ", CREATED_BY=" + CREATED_BY + "]";
+		return "NSNDbData [NSN_ID=" + nsn_id + ", CIV_MGR=" + civ_mgr + ", MIL_MGR=" + mil_mgr + ", OWA_CD=" + owa_cd
+				+ ", RIC=" + ric + ", CREATE_DATE=" + CREATE_DATE + ", CREATED_BY=" + CREATED_BY + "]";
 	}
 	
 	

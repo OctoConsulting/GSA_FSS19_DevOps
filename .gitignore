@@ -4,3 +4,10 @@ services/cis/modules/java/contract-lambda/.DS_Store
 **/.DS_Store
 **/node_modules
 **/cdk.out
+services/nsn/.classpath
+services/nsn/.project
+*.prefs
+*.class
+services/nsn/modules/java/nsn-routing-service/target/*
+services/nsn/modules/java/nsn-routing-service/.classpath
+services/nsn/modules/java/nsn-routing-service/.project
