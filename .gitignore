@@ -11,3 +11,10 @@ services/nsn/.project
 services/nsn/modules/java/nsn-routing-service/target/*
 services/nsn/modules/java/nsn-routing-service/.classpath
 services/nsn/modules/java/nsn-routing-service/.project
+services/cis/modules/java/contract-information-service/target/*
+services/cis/modules/java/contract-information-service/.class-path
+services/cis/modules/java/contract-information-service/.project
+services/cis/modules/java/contract-information-service/.mvn
+services/cis/modules/java/contract-information-service/.mvn/*
+services/cis/modules/java/contract-information-service/mvnw
+services/cis/modules/java/contract-information-service/mvnw.cmd
