@@ -1,7 +1,5 @@
 package gov.gsa.fas.nsn.handler;
 
-import java.util.Map;
-
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
@@ -17,19 +15,20 @@ import com.google.gson.Gson;
 
 import gov.gsa.fas.nsn.model.GatewayResponse;
 import gov.gsa.fas.nsn.model.NSNData;
+import gov.gsa.fas.nsn.model.RequestWrapper;
 
-public class NSNDataPutHandler implements RequestHandler<Map<String, Object>, GatewayResponse>  {
+public class NSNDataPutHandler implements RequestHandler<RequestWrapper, GatewayResponse>  {
 	
 	static AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
     static DynamoDB dynamoDB = new DynamoDB(client);
     static String tableName = "NSN_DATA";
 
     @Override
-	public GatewayResponse handleRequest(Map<String, Object> inputDataMap, Context context) {
+	public GatewayResponse handleRequest(RequestWrapper request, Context context) {
     	LambdaLogger logger = context.getLogger();
-    	logger.log("Got input - "+inputDataMap);
+    	logger.log("Got input - "+request);
     	
-    	String inputDataStr = (String) inputDataMap.get("body");
+    	String inputDataStr = request.getBody();
     	Gson gson = new Gson();
     	NSNData inputData = gson.fromJson(inputDataStr, NSNData.class);
     	

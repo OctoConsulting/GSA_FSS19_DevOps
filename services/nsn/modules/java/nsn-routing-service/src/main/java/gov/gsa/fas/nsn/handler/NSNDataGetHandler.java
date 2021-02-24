@@ -26,8 +26,10 @@ import com.google.gson.Gson;
 import gov.gsa.fas.nsn.model.GatewayResponse;
 import gov.gsa.fas.nsn.model.NSNData;
 import gov.gsa.fas.nsn.model.NSNDbData;
+import gov.gsa.fas.nsn.model.PathParameters;
+import gov.gsa.fas.nsn.model.RequestWrapper;
 
-public class LambdaMethodHandler implements RequestHandler<Map<String, Object>, GatewayResponse> {
+public class NSNDataGetHandler implements RequestHandler<RequestWrapper, GatewayResponse> {
 
 	static AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
 	static DynamoDB dynamoDB = new DynamoDB(client);
@@ -37,14 +39,14 @@ public class LambdaMethodHandler implements RequestHandler<Map<String, Object>, 
 	private static final String NSN_KEY = "NSN";
 
 	@Override
-	public GatewayResponse handleRequest(Map<String, Object> inputMap, Context context) {
+	public GatewayResponse handleRequest(RequestWrapper request, Context context) {
 		LambdaLogger logger = context.getLogger();
 		
-		logger.log("Got input - "+inputMap);
+		logger.log("Got input - "+request);
 		try {
-			Map<String, String> routingIdMap = (Map<String, String>)inputMap.get("pathParameters");
-			logger.log("routingIdMap - "+routingIdMap);
-			String routingId = routingIdMap.get("routingId");
+			PathParameters pathParameters = request.getPathParameters();
+			logger.log("routingIdMap - "+pathParameters);
+			String routingId = pathParameters.getRoutingId();
 			logger.log("routingId - "+routingId);
 			
 			DynamoDBMapper mapper = new DynamoDBMapper(client);
@@ -62,7 +64,7 @@ public class LambdaMethodHandler implements RequestHandler<Map<String, Object>, 
 
 				NSNDbData nsnDbData = dbData.get(i);
 				logger.log("nsnDbData - "+nsnDbData);
-				String nsnId = nsnDbData .getNSN_ID();
+				String nsnId = nsnDbData .getNsn_id();
 				
 				logger.log("nsn ID from db - "+nsnId);
 
@@ -201,13 +203,13 @@ public class LambdaMethodHandler implements RequestHandler<Map<String, Object>, 
 */
 	private NSNData populateNSNData(NSNDbData item) {
 		NSNData nsnData = new NSNData();
-		nsnData.setRoutingId(item.getNSN_ID());
-		nsnData.setIsCivMgr(item.getCIV_MGR() == null ? "" : Boolean.parseBoolean(item.getCIV_MGR()) ? "Y" : "N");
-		nsnData.setIsMilMgr(item.getMIL_MGR() == null ? "" : Boolean.parseBoolean(item.getMIL_MGR()) ? "Y" : "N");
-		nsnData.setOwa(item.getOWA_CD() == null ? "" : item.getOWA_CD());
-		nsnData.setRic(item.getRIC() == null ? "" : item.getRIC());
-		nsnData.setCreateDate(item.getCREATE_DATE() == null ? "" : item.getCREATE_DATE());
-		nsnData.setCreatedBy(item.getCREATED_BY() == null ? "" : item.getCREATED_BY());
+		nsnData.setRoutingId(item.getNsn_id());
+		nsnData.setIsCivMgr(item.getCiv_mgr() == null ? "" : Boolean.parseBoolean(item.getCiv_mgr()) ? "Y" : "N");
+		nsnData.setIsMilMgr(item.getMil_mgr() == null ? "" : Boolean.parseBoolean(item.getMil_mgr()) ? "Y" : "N");
+		nsnData.setOwa(item.getOwa_cd() == null ? "" : item.getOwa_cd());
+		nsnData.setRic(item.getRic() == null ? "" : item.getRic());
+		nsnData.setCreateDate(item.getCreate_date() == null ? "" : item.getCreate_date());
+		nsnData.setCreatedBy(item.getCreated_byß() == null ? "" : item.getCreated_byß());
 
 		return nsnData;
 	}

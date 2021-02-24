@@ -13,21 +13,23 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 import gov.gsa.fas.nsn.model.GatewayResponse;
+import gov.gsa.fas.nsn.model.PathParameters;
+import gov.gsa.fas.nsn.model.RequestWrapper;
 
-public class NSNDataDeleteHandler implements RequestHandler<Map<String, Object>, GatewayResponse> {
+public class NSNDataDeleteHandler implements RequestHandler<RequestWrapper, GatewayResponse> {
 
 	static AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
 	static DynamoDB dynamoDB = new DynamoDB(client);
 	static String tableName = "NSN_DATA";
 	
 	@Override
-	public GatewayResponse handleRequest(Map<String, Object> inputMap, Context context) {
+	public GatewayResponse handleRequest(RequestWrapper request, Context context) {
 		LambdaLogger logger = context.getLogger();
 		
-		logger.log("Got input - "+inputMap);
-		Map<String, String> routingIdMap = (Map<String, String>)inputMap.get("pathParameters");
-		logger.log("routingIdMap - "+routingIdMap);
-		String routingId = routingIdMap.get("routingId");
+		logger.log("Got input - "+request);
+		PathParameters pathParameters = request.getPathParameters();
+		logger.log("routingIdMap - "+pathParameters);
+		String routingId = pathParameters.getRoutingId();
 		logger.log("routingId - "+routingId);
 		Table table = dynamoDB.getTable(tableName);
     	

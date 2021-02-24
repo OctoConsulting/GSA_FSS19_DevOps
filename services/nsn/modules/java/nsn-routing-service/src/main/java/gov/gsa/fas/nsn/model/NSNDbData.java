@@ -11,57 +11,51 @@ public class NSNDbData {
 	private String mil_mgr;
 	private String owa_cd;
 	private String ric;
-	private String CREATE_DATE;
-	private String CREATED_BY;
+	private String create_date;
+	private String created_byß;
 	
 	@DynamoDBHashKey(attributeName = "NSN_ID")
-	public String getNSN_ID() {
+	public String getNsn_id() {
 		return nsn_id;
 	}
-	public void setNSN_ID(String nSN_ID) {
-		nsn_id = nSN_ID;
+	public void setNsn_id(String nsn_id) {
+		this.nsn_id = nsn_id;
 	}
-	public String getCIV_MGR() {
+	public String getCiv_mgr() {
 		return civ_mgr;
 	}
-	public void setCIV_MGR(String cIV_MGR) {
-		civ_mgr = cIV_MGR;
+	public void setCiv_mgr(String civ_mgr) {
+		this.civ_mgr = civ_mgr;
 	}
-	public String getMIL_MGR() {
+	public String getMil_mgr() {
 		return mil_mgr;
 	}
-	public void setMIL_MGR(String mIL_MGR) {
-		mil_mgr = mIL_MGR;
+	public void setMil_mgr(String mil_mgr) {
+		this.mil_mgr = mil_mgr;
 	}
-	public String getOWA_CD() {
+	public String getOwa_cd() {
 		return owa_cd;
 	}
-	public void setOWA_CD(String oWA_CD) {
-		owa_cd = oWA_CD;
+	public void setOwa_cd(String owa_cd) {
+		this.owa_cd = owa_cd;
 	}
-	public String getRIC() {
+	public String getRic() {
 		return ric;
 	}
-	public void setRIC(String rIC) {
-		ric = rIC;
+	public void setRic(String ric) {
+		this.ric = ric;
 	}
-	public String getCREATE_DATE() {
-		return CREATE_DATE;
+	public String getCreate_date() {
+		return create_date;
 	}
-	public void setCREATE_DATE(String cREATE_DATE) {
-		CREATE_DATE = cREATE_DATE;
+	public void setCreate_date(String create_date) {
+		this.create_date = create_date;
 	}
-	public String getCREATED_BY() {
-		return CREATED_BY;
+	public String getCreated_byß() {
+		return created_byß;
 	}
-	public void setCREATED_BY(String cREATED_BY) {
-		CREATED_BY = cREATED_BY;
+	public void setCreated_byß(String created_byß) {
+		this.created_byß = created_byß;
 	}
-	@Override
-	public String toString() {
-		return "NSNDbData [NSN_ID=" + nsn_id + ", CIV_MGR=" + civ_mgr + ", MIL_MGR=" + mil_mgr + ", OWA_CD=" + owa_cd
-				+ ", RIC=" + ric + ", CREATE_DATE=" + CREATE_DATE + ", CREATED_BY=" + CREATED_BY + "]";
-	}
-	
 	
 }
