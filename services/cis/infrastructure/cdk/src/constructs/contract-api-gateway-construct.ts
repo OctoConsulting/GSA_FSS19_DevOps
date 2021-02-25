@@ -6,6 +6,7 @@ import * as iam from '@aws-cdk/aws-iam';
 import * as route53 from '@aws-cdk/aws-route53';
 import * as route53Targets from '@aws-cdk/aws-route53-targets';
 import * as secretsmanager from '@aws-cdk/aws-secretsmanager';
+import { constants } from '../models/constants';
 
 export class ContractApiGatewayConstruct extends cdk.Construct {
     private props: ContractApiGatewayConstructParms;
@@ -14,12 +15,21 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
     constructor(parent: cdk.Construct, id: string, props: ContractApiGatewayConstructParms) {
         super(parent, id);
         this.props = props;
+        /**
+         * Create Base REST API
+         */
         this.createRestApi();
+
+        /**
+         * Create API Gateway Role
+         */
         this.createApiRole();
-        const contractResource = this.addContractResourceAndMethods();
-        this.addGetContractsIntegration(contractResource);
-        this.addGetContractDetailsByContractIdIntegration(contractResource);
-        this.addGetContractDetailsByEntityIdIntegration(contractResource);
+
+        /**
+         * Add Resource and Methods.
+         */
+        this.addResourceAndMethods();
+
         this.createApiKey();
         this.addRoute53Alias();
     }
@@ -36,7 +46,7 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
             },
         });
         this.restApi.addApiKey('ApiKey', {
-            apiKeyName: `contract-api-${this.props.envParameters.shortEnv}`,
+            apiKeyName: `${constants.API_PREFIX}-${this.props.envParameters.shortEnv}`,
             value: secret.secretValueFromJson('api_key').toString(),
         });
     }
@@ -71,14 +81,20 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
             );
     }
 
-    private addContractResourceAndMethods() {
-        return this.restApi.root.addResource('contractinformation').addResource('v1').addResource('contracts');
+    private addResourceAndMethods() {
+        const contractResource = this.restApi.root
+            .addResource('contractinformation')
+            .addResource('v1')
+            .addResource('contracts');
+        this.addGetContractsIntegration(contractResource);
+        this.addGetContractDetailsByContractIdIntegration(contractResource);
+        this.addGetContractDetailsByEntityIdIntegration(contractResource);
     }
 
     private createRestApi() {
         this.restApi = new apigw.RestApi(this, 'my-rest-api', {
-            description: `contract-api-${this.props.envParameters.shortEnv}`,
-            restApiName: `contract-api-${this.props.envParameters.shortEnv}`,
+            description: `${constants.API_PREFIX}-${this.props.envParameters.shortEnv}`,
+            restApiName: `${constants.API_PREFIX}-${this.props.envParameters.shortEnv}`,
             deployOptions: {
                 stageName: `${this.props.envParameters.shortEnv}`,
                 loggingLevel: apigw.MethodLoggingLevel.INFO,
@@ -91,7 +107,7 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
             },
             domainName: this.props.envParameters.domainSuffix
                 ? {
-                      domainName: `contract-api-${this.props.envParameters.shortEnv}.${this.props.envParameters.domainSuffix}`,
+                      domainName: `${constants.API_PREFIX}-${this.props.envParameters.shortEnv}.${this.props.envParameters.domainSuffix}`,
                       certificate: acm.Certificate.fromCertificateArn(
                           this,
                           'my-cert',
@@ -122,7 +138,7 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
 
     private createApiRole() {
         this.apiRole = new iam.Role(this, 'api-role', {
-            roleName: `contract-api-gateway-role-${this.props.envParameters.shortEnv}`,
+            roleName: `${constants.API_PREFIX}-gateway-role-${this.props.envParameters.shortEnv}`,
             assumedBy: new iam.ServicePrincipal('apigateway.amazonaws.com'),
         });
 

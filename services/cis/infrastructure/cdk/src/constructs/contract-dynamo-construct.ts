@@ -34,6 +34,7 @@ export class ContractDynamoConstruct extends cdk.Construct {
             partitionKey: { name: 'contractId', type: dynamodb.AttributeType.STRING },
             sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
             pointInTimeRecovery: true,
+            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
             encryption: this.props.enableEncryptionAtRest
                 ? dynamodb.TableEncryption.CUSTOMER_MANAGED
                 : dynamodb.TableEncryption.DEFAULT,
