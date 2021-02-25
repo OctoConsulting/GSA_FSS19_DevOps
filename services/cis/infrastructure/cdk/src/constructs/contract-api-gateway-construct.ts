@@ -122,13 +122,17 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
 
     private createApiRole() {
         this.apiRole = new iam.Role(this, 'api-role', {
-            roleName: 'apiRole',
+            roleName: `contract-api-gateway-role-${this.props.envParameters.shortEnv}`,
             assumedBy: new iam.ServicePrincipal('apigateway.amazonaws.com'),
         });
 
         this.apiRole.addToPolicy(
             new iam.PolicyStatement({
-                resources: ['*'],
+                resources: [
+                    this.props.contractLambdaFunctions.getContractDetailsByContractIdLambda?.functionArn!,
+                    this.props.contractLambdaFunctions.getContractDetailsByEntityIdLambda?.functionArn!,
+                    this.props.contractLambdaFunctions.getContractsLambda?.functionArn!,
+                ],
                 actions: ['lambda:InvokeFunction'],
             })
         );
