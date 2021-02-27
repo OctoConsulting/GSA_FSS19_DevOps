@@ -15,19 +15,22 @@ export class FssSharedStack extends cdk.Stack {
 
         // ===== make sure cdk.context.json is populated first ======
         const myVpc:IVpc = Vpc.fromLookup(this, 'vpc-setup-lookup', {
-            vpcId: envParameters.vpc
+            vpcId: envParameters.vpcId
         });
         if (!existsSync('cdk.context.json'))
             return;
         // ==========================================================
 
-        new VpcConstruct(this, 'vpc', {
+        const vpc = new VpcConstruct(this, 'vpc', {
             envParameters: envParameters,
             availabilityZones: this.availabilityZones,
+            vpc: myVpc
         });
 
         new EndpointsConstruct(this, 'endpoints', {
-            envParameters,
+            envParameters: envParameters,
+            vpc: myVpc,
+            isolatedSubnets: vpc.getIsolatedSubnets()
         });
     }
 }

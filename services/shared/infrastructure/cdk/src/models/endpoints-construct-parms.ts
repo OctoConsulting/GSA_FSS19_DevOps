@@ -1,5 +1,8 @@
 import { EnvParameters } from './env-parms';
+import { IVpc, ISubnet } from '@aws-cdk/aws-ec2'
 
 export interface EndpointsConstructParms {
     envParameters: EnvParameters;
+    vpc: IVpc;
+    isolatedSubnets: ISubnet[];
 }
