@@ -1,10 +1,10 @@
+import { SubnetConfiguration } from '@aws-cdk/aws-ec2';
+
 export interface EnvParameters {
     shortEnv: string;
-    vpc: string;
-    domainSuffix?: string;
-    certArn?: string;
-    enableEncryptionAtRest: boolean;
-    logRetentionInDays: number;
-    apiKeySecruity: boolean;
-    xRayTracing: boolean;
+    vpcId: string;
+    maxAzs?: number;
+    addonRoutesCidrs?: string[];
+    addonRoutesVgw?: string;
+    subnetConfiguration: SubnetConfiguration[];
 }
