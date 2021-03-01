@@ -39,13 +39,21 @@ export class PolicyConstruct extends cdk.Construct {
 
     getArnPrefix(permission: string): string {
         var accountNo = undefined;
+        var region = undefined;
+        var resource = '*';
         if (permission.startsWith('apigateway')) {
             accountNo = '';
         }
+        if (permission.startsWith('iam')) {
+            resource = '';
+            region = '';
+        }
+
         const arnPrefix = this.stack.formatArn({
             service: permission.substr(0, permission.indexOf('-')),
-            resource: '*',
+            resource: resource,
             account: accountNo,
+            region: region,
         });
         return arnPrefix;
     }
