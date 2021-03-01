@@ -28,12 +28,30 @@
                 {
                     "groupName": "FSS-BusinessAnalysts",
                     "users": [],
-                    "permissions": ["dynamo-read"]
+                    "permissions": [
+                        "dynamo-read",
+                        "dynamo-crudItem",
+                        "logs-read",
+                        "apigateway-read",
+                        "apigateway-runapi",
+                        "xray-read",
+                        "cloudwatch-read",
+                        "lambda-read"
+                    ]
                 },
                 {
                     "groupName": "FSS-Testers",
                     "users": [],
-                    "permissions": ["dynamo-read", "logs-read"]
+                    "permissions": [
+                        "dynamo-read",
+                        "dynamo-crudItem",
+                        "logs-read",
+                        "apigateway-read",
+                        "apigateway-runapi",
+                        "xray-read",
+                        "cloudwatch-read",
+                        "lambda-read"
+                    ]
                 }
             ]
         },
