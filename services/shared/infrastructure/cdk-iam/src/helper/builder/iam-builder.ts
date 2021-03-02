@@ -20,7 +20,12 @@ export class IamBuilder extends BaseBuilder {
 
     private mfa(): PolicyStatement[] {
         const viewAccountInfo = new PolicyStatement({
-            actions: ['iam:GetAccountPasswordPolicy', 'iam:GetAccountSummary', 'iam:ListVirtualMFADevices'],
+            actions: [
+                'iam:GetAccountPasswordPolicy',
+                'iam:GetAccountSummary',
+                'iam:ListVirtualMFADevices',
+                'iam:ListUsers',
+            ],
             resources: ['*'],
         });
 
@@ -36,7 +41,7 @@ export class IamBuilder extends BaseBuilder {
 
         const allowManageOwnUserMfa = new PolicyStatement({
             actions: ['iam:DeactivateMFADevice', 'iam:EnableMFADevice', 'iam:ListMFADevices', 'iam:ResyncMFADevice'],
-            resources: [`${this.getServicePrefix()}` + 'mfa/${aws:username}'],
+            resources: [`${this.getServicePrefix()}` + 'user/${aws:username}'],
         });
 
         const denyAllExceptListedIfNoMFA = new PolicyStatement({
@@ -47,6 +52,7 @@ export class IamBuilder extends BaseBuilder {
                 'iam:GetUser',
                 'iam:ListMFADevices',
                 'iam:ListVirtualMFADevices',
+                'iam:ListUsers',
                 'iam:ResyncMFADevice',
                 'sts:GetSessionToken',
             ],
