@@ -11,25 +11,30 @@ export class NsnLambdasConstruct extends cdk.Construct {
     constructor(parent: cdk.Construct, id: string, props: NsnLambdasConstructParms) {
         super(parent, id);
         this.props = props;
-        this.postRoutingLambda();
+        this.lambdaFunctions.postRoutingLambda = this.nsnLambda('post-nsn-routing-lambda', 'postNsn');
+        this.lambdaFunctions.getRoutingLambda = this.nsnLambda('get-nsn-routing-lambda', 'getNsn');
+        this.lambdaFunctions.putRoutingLambda = this.nsnLambda('put-nsn-routing-lambda', 'putNsn');
+        this.lambdaFunctions.deleteRoutingLambda = this.nsnLambda('delete-nsn-routing-lambda', 'deleteNsn');
     }
 
-    private postRoutingLambda() {
-        const lambdaFun = new LambdaConstruct(this, 'post-nsn-routing-lambda', {
-            functionName: `post-nsn-routing-lambda-${this.props.shortEnv}`,
+    private nsnLambda(name: string, handler: string) {
+        const lambdaFun = new LambdaConstruct(this, `${name}`, {
+            functionName: `${name}-${this.props.shortEnv}`,
             vpcId: this.props.vpc,
             assetLocation: `../../modules/${this.zipPathInsideModules}`,
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
+                TABLE_NAME: this.props.nsnTable.tableName,
             },
-            handler: 'saveNSNData',
+            handler: handler,
             type: LambdaConstructProps.LambdaTypeEnum.NODEJS,
             logRetentionInDays: this.props.logRetentionInDays,
             timeout: 15,
             xRayTracing: this.props.xRayTracing,
         });
-        this.lambdaFunctions.postRoutingLambda = lambdaFun.lambdaFunction;
+
         this.props.nsnTable.grantReadData(lambdaFun.lambdaFunction);
+        return lambdaFun.lambdaFunction;
     }
 
     public getLambdaFunctions(): LambdaFunctions {

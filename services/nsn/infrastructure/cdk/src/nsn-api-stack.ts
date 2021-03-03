@@ -31,9 +31,9 @@ export class NsnApiStack extends cdk.Stack {
             envParameters: envParameters,
             lambdaFunctions: {
                 deleteRoutingLambda: lambdas.getLambdaFunctions().postRoutingLambda,
-                getRoutingLambda: lambdas.getLambdaFunctions().postRoutingLambda,
+                getRoutingLambda: lambdas.getLambdaFunctions().getRoutingLambda,
                 postRoutingLambda: lambdas.getLambdaFunctions().postRoutingLambda,
-                putRoutingLambda: lambdas.getLambdaFunctions().postRoutingLambda,
+                putRoutingLambda: lambdas.getLambdaFunctions().putRoutingLambda,
             },
             iVpcEndpoint: crossStackImporter.getCrossStackImports().apiGatewayVpcEndpoint,
         });
