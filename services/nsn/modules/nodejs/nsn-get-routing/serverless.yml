@@ -1,0 +1,86 @@
+service: nsn-get-routing
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  profile: serverlessUser
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource: '*'
+  environment:
+    TABLE_NAME: ""
+
+plugins:
+  - serverless-webpack
+  - serverless-offline
+  - serverless-dynamodb-local
+
+package:
+  individually: true
+
+custom:
+  dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: false
+      migrate: true
+    migration:
+        dir: offline/migrations
+
+resources:
+  Resources:
+    DynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties:
+        TableName: nsn_data
+        AttributeDefinitions:
+          - AttributeName: group_id
+            AttributeType: N
+          - AttributeName: routing_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: group_id
+            KeyType: HASH
+          - AttributeName: routing_id
+            KeyType: S
+        BillingMode: PAY_PER_REQUEST 
+functions:
+  saveNSNData:
+    handler: saveNSNData
+    events:
+      - http:
+          path: nsn/routing
+          method: post
+          cors: true
+  retrieveNSNData:
+    handler: retrieveNSNData
+    events:
+      - http:
+          path: nsn/routing/{id}
+          method: GET
+        request:
+          parameters:
+            paths:
+              id: true
+  deleteNSNData:
+    handler: deleteNSNData
+    events:
+      - http:
+          path: nsn/routing/{id}
+          method: DELETE
+        request:
+          parameters:
+            paths:
+              id: true
+  updateNSNData:
+    handler: updateNSNData
+    events:
+      - http:
+          path: nsn/routing/
+          method: PUT

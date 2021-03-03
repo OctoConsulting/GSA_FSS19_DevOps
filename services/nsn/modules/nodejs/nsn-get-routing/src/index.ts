@@ -1,20 +1,11 @@
-import { Context, Callback, APIGatewayProxyEvent } from 'aws-lambda';
-import { mainProcessor } from './processor/main-processor';
+import {saveNSNData} from './processor/nsn-routing-create-processor'
+import {retrieveNSNData} from './processor/nsn-routing-get-processor'
+import {deleteNSNData} from './processor/nsn-routing-delete-processor'
+import {updateNSNData} from './processor/nsn-routing-update-processor'
 
-export const handler = (event: APIGatewayProxyEvent, context: Context, callback: Callback) => {
-    const mainProcess = async () => {
-        const response = await mainProcessor.start({
-            body: event.body!,
-        });
-        return response;
-    };
-
-    mainProcess()
-        .then((result) => {
-            callback(null, result);
-        })
-        .catch((error) => {
-            let errorMsg = !error.message ? error : error.message;
-            callback(errorMsg);
-        });
+module.exports = {
+    saveNSNData,
+    retrieveNSNData,
+    deleteNSNData,
+    updateNSNData
 };
