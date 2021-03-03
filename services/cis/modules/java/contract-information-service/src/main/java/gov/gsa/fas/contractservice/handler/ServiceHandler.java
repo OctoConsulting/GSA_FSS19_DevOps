@@ -23,13 +23,12 @@ public class ServiceHandler implements RequestHandler<RequestWrapper, RequestWra
 	
 	public RequestWrapper handleRequest(RequestWrapper inputStream, Context context) {
 
-		logger.info("printing inputStream.getBody() : " + inputStream.getBody());
+		logger.info("printing inputStream.getBody() {} " , inputStream.getBody());
 		
 		if(inputStream.getBody()==null) {
 			logger.info("printing inputStream.getBody() is NULL ");
 		}
 		
-		//LambdaLogger logger = context.getLogger();
 		PORequestType reqns = ContractServiceUtil.unmarshall(inputStream.getBody(),
 				PORequestType.class);
 		
@@ -37,29 +36,27 @@ public class ServiceHandler implements RequestHandler<RequestWrapper, RequestWra
 			logger.info("issues with unmarshalling the RequestBody to Object  ");
 		}
 
-		List<PORecordsType> inPORecords = reqns.getPurchaseOrders();
+		List<PORecordsType> inPORecords = reqns!=null?reqns.getPurchaseOrders():null;
 		GetContractDataResponse finalPORes = new GetContractDataResponse();
-		int i = 0, j = 0;
+		int i = 0;
 		try {
-			if (reqns.getNumOfRecord() != reqns.getPurchaseOrders().size()) {
+			if (reqns!=null && reqns.getNumOfRecord() != reqns.getPurchaseOrders().size()) {
 
-				inputStream.setBody(ContractServiceUtil.marshallException("soap:Server", ContractConstants.INVALID_DATA));
+				inputStream.setBody(ContractServiceUtil.marshallException(ContractConstants.FAULT_CODE, ContractConstants.INVALID_DATA));
 				return inputStream;
 
 			}
 
-			while (i < reqns.getPurchaseOrders().size()) {
+			while (reqns!=null && i < reqns.getPurchaseOrders().size()) {
 				if (reqns.getPurchaseOrders().get(i).getPOLineNumber() != i + 1) {
-					// throw new CCSExceptions(ContractConstants.INVALID_DATA);
-					
-					inputStream.setBody(ContractServiceUtil.marshallException("soap:Server", ContractConstants.INVALID_DATA));
+					inputStream.setBody(ContractServiceUtil.marshallException(ContractConstants.FAULT_CODE, ContractConstants.INVALID_DATA));
 					return inputStream;
 				}
-				j = 0;
+				int j = 0;
 				while (j < reqns.getPurchaseOrders().get(i).getRequisitionRecords().size()) {
 					if (reqns.getPurchaseOrders().get(i).getRequisitionRecords().get(j).getRequisitionLineNumber() != j
 							+ 1) {
-						inputStream.setBody(ContractServiceUtil.marshallException("soap:Server", ContractConstants.INVALID_DATA));
+						inputStream.setBody(ContractServiceUtil.marshallException(ContractConstants.FAULT_CODE, ContractConstants.INVALID_DATA));
 						return inputStream;
 					}
 					j++;
@@ -67,14 +64,13 @@ public class ServiceHandler implements RequestHandler<RequestWrapper, RequestWra
 				i++;
 			}
 
-			ContractService ContractService = new ContractServiceImpl();
+			ContractService contractService = new ContractServiceImpl();
 
-			List<CSDetailPO> csDetails = ContractService.getContractData(inPORecords);
+			List<CSDetailPO> csDetails = contractService.getContractData(inPORecords);
 			finalPORes.setCSDetails(csDetails);
 			inputStream.setBody(ContractServiceUtil.marshall(finalPORes));
 		} catch (Exception e) {
 			logger.error("Exception in ServiceHandler.handleRequest ", e);
-			e.printStackTrace();
 		}
 		return inputStream;
 
@@ -85,8 +81,7 @@ public class ServiceHandler implements RequestHandler<RequestWrapper, RequestWra
 
 		RequestWrapper wrapper =new RequestWrapper();
 		wrapper.setBody("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:con=\"http://contract/\"><soapenv:Header/><soapenv:Body><con:PORequest><NumOfRecord>1</NumOfRecord><PurchaseOrders POLineNumber=\"01\"><PurchaseOrderNum>NMNJH753C8</PurchaseOrderNum><totalPOCost>12.75</totalPOCost> <ContractNum>47QSEA20T000E</ContractNum><BuyerCode></BuyerCode><RequisitionRecords requisitionLineNumber=\"1\"><requisitionNumber>POPlIT4200022</requisitionNumber><itemNumber>7510015904409</itemNumber> <reportingOffice>N</reportingOffice><pricingZone>01</pricingZone> </RequisitionRecords></PurchaseOrders></con:PORequest> </soapenv:Body> </soapenv:Envelope>");
-		
-				//ContractConstants.TEST_MULTIPLE_PO_BODY);
+
 		RequestWrapper outputStream = s.handleRequest(wrapper, null);
 		System.out.println(outputStream.getBody());
 	}
