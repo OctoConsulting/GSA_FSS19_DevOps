@@ -5,6 +5,8 @@ import { LambdaConstructProps } from '../models/lambda-construct-props';
 import { ContractLambdaFunctions } from '../models/contract/contract-lambda-functions';
 
 export class ContractLambdasConstruct extends cdk.Construct {
+    private jarPathInsideModules =
+        'java/contract-information-service/target/contract-information-service-0.0.1-SNAPSHOT.jar';
     private props: ContractLambdasConstructParms;
     private contractLambdaFunctions: ContractLambdaFunctions = {};
     constructor(parent: cdk.Construct, id: string, props: ContractLambdasConstructParms) {
@@ -19,7 +21,7 @@ export class ContractLambdasConstruct extends cdk.Construct {
         const lambdaFun = new LambdaConstruct(this, 'get-contract-details-by-contract-id-lambda', {
             functionName: `get-contract-details-by-contract-id-lambda-${this.props.shortEnv}`,
             vpcId: this.props.vpc,
-            assetLocation: `../../modules/java/contractinformationservice/target/contractservice-0.0.1-SNAPSHOT.jar`,
+            assetLocation: `../../modules/${this.jarPathInsideModules}`,
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
             },
@@ -37,7 +39,7 @@ export class ContractLambdasConstruct extends cdk.Construct {
         const lambdaFun = new LambdaConstruct(this, 'get-contract-details-by-entity-id-lambda', {
             functionName: `get-contract-details-by-entity-id-lambda-${this.props.shortEnv}`,
             vpcId: this.props.vpc,
-            assetLocation: `../../modules/java/contractinformationservice/target/contractservice-0.0.1-SNAPSHOT.jar`,
+            assetLocation: `../../modules/${this.jarPathInsideModules}`,
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
             },
@@ -55,7 +57,7 @@ export class ContractLambdasConstruct extends cdk.Construct {
         const lambdaFun = new LambdaConstruct(this, 'get-contracts-lambda', {
             functionName: `get-contracts-lambda-${this.props.shortEnv}`,
             vpcId: this.props.vpc,
-            assetLocation: `../../modules/java/contractinformationservice/target/contractservice-0.0.1-SNAPSHOT.jar`,
+            assetLocation: `../../modules/${this.jarPathInsideModules}`,
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
             },

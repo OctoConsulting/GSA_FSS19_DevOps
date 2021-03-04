@@ -9,10 +9,50 @@
         "@aws-cdk/aws-kms:defaultKeyPolicies": true,
         "@aws-cdk/aws-s3:grantWriteWithoutAcl": true,
         "fss-shared-dev": {
-            "vpc": "vpc-0d1b73fc53abfcae7"
+            "vpcId": "vpc-02130393994755be9",
+            "maxAzs": 2,
+            "addonRoutesCidrs": [
+                "10.0.0.0/8",
+                "10.176.0.0/15",
+                "10.181.0.0/16",
+                "10.183.0.0/16",
+                "10.184.0.0/15",
+                "159.142.0.0/16",
+                "172.16.0.0/12",
+                "192.168.0.0/16",
+                "206.137.126.0/24"
+            ],
+            "addonRoutesVgw": "vgw-088b7aba402f16f23",
+            "subnetConfiguration": [
+                {
+                    "name": "PrivateCICD",
+                    "subnetType": "PRIVATE",
+                    "cidrMask": 24
+                },
+                {
+                    "name": "PrivateDev",
+                    "subnetType": "PRIVATE",
+                    "cidrMask": 24
+                },
+                {
+                    "name": "Isolated",
+                    "subnetType": "ISOLATED",
+                    "cidrMask": 28
+                },
+                {
+                    "name": "Public",
+                    "subnetType": "PUBLIC",
+                    "cidrMask": 28
+                },
+                {
+                    "name": "Reserved",
+                    "subnetType": "ISOLATED",
+                    "reserved": true
+                }
+            ]
         },
         "fss-shared-qa": {
-            "vpc": "vpc-0543348a8ffcd0ec9"
+            "vpcId": "vpc-02130393994755be9"
         }
     }
 }

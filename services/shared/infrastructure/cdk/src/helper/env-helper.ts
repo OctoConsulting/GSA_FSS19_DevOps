@@ -5,13 +5,11 @@ export class EnvHelper {
         const shortEnv = process.env.SHORT_ENV!;
         const envParameters: EnvParameters = {
             shortEnv,
-            vpc: stackContext.vpc,
-            domainSuffix: stackContext.domainSuffix,
-            certArn: stackContext.certArn,
-            enableEncryptionAtRest: stackContext.enableEncryptionAtRest,
-            logRetentionInDays: stackContext.logRetentionInDays,
-            apiKeySecruity: stackContext.apiKeySecruity,
-            xRayTracing: stackContext.xRayTracing,
+            vpcId: stackContext.vpcId,
+            maxAzs: stackContext.maxAzs,
+            addonRoutesCidrs: stackContext.addonRoutesCidrs,
+            addonRoutesVgw: stackContext.addonRoutesVgw,
+            subnetConfiguration: stackContext.subnetConfiguration
         };
         return envParameters;
     }
