@@ -66,7 +66,7 @@ public class ContractConstants {
 	
 	public static final String INVALID_DATA_CONTRACT_NUMBER_JS007 = "JS007_Invalid Contract Number -";
 	
-	public static final String INVALID_DATA_DUNS_NUMBER_JS007 = "JS007_Invalid Duns Number ";
+	public static final String INVALID_DATA_DUNS_NUMBER_JS007 = "JS007_Invalid Data Request- Invalid Entity ID";
 	
 	public static final String FAULT_CODE = "soap:Server";
 	
