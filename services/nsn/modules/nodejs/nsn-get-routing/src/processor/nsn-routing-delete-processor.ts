@@ -13,13 +13,20 @@ export const deleteNSNData = async (event: APIGatewayProxyEvent): Promise<APIGat
           };
     }
     let routingId = event.pathParameters['id'];
-    console.log("Routing ID - "+routingId);
+    if(!routingId){
+      return {
+          statusCode: 400,
+          body: JSON.stringify({ message: 'Routing id is needed to delete NSN data' }),
+        };
+  }
+    
     try {
 
       var params = {
         TableName: 'nsn_data',
         Key: {
-          routingId: routingId
+          group_id: parseInt(routingId.substring(0, 2), 10),
+          routing_id: routingId
         }
       };
 
@@ -34,7 +41,7 @@ export const deleteNSNData = async (event: APIGatewayProxyEvent): Promise<APIGat
           }; 
        }
        console.log("About to delete NSN record for routing id - "+routingId);
-       await dynamoDocumentClient.delete(params);
+       await dynamoDocumentClient.delete(params).promise();
        console.log("NSN record for routing id - "+routingId);
 
         return {

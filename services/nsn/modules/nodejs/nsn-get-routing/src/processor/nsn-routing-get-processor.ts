@@ -2,6 +2,7 @@ import { NsnData } from '../model/nsn-data';
 import { DynamoDB } from '../../node_modules/aws-sdk';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import {dynamoDocumentClient} from "../config"
+import {error, success, validation} from "../model/responseAPI"
 
 export const retrieveNSNData = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 
@@ -36,10 +37,6 @@ export const retrieveNSNData = async (event: APIGatewayProxyEvent): Promise<APIG
           console.log("Fetching NSN data by group id - "+routingId);
         const params = {
             TableName: 'nsn_data',
-            /*Key: {
-              "group_id": {N: groupId},
-              "routing_id": {S:''}
-            }*/
             Key: {
               group_id: groupId,
               routing_id: routingId
@@ -63,10 +60,6 @@ export const retrieveNSNData = async (event: APIGatewayProxyEvent): Promise<APIG
           const params = {
               TableName: 'nsn_data',
               KeyConditionExpression: 'group_id = :group_id and begins_with(routing_id, :routing_id)',
-              // ExpressionAttributeNames: {
-              //    "#groupId": "group_id",
-              //    "#routingId": 'routing_id'
-              //  },
               ExpressionAttributeValues: {
                 ":group_id": groupId,
                 ":routing_id": routingId
@@ -76,7 +69,7 @@ export const retrieveNSNData = async (event: APIGatewayProxyEvent): Promise<APIG
 
             nsnData = await dynamoDocumentClient.query(params).promise();
             console.log("Found items - "+nsnData.Items);
-            if(nsnData.Items == null){
+            if(!nsnData.Items || nsnData.Items.length === 0){
               return {
                 statusCode: 404,
                 body: "No NSN Data found for routingId - "+routingId

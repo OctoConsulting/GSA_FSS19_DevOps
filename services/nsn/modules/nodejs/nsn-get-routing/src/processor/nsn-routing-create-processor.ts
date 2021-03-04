@@ -21,6 +21,21 @@ export const saveNSNData = async (event: APIGatewayProxyEvent): Promise<APIGatew
             body: JSON.stringify({ message: 'Group id is mandetory to create NSN record' }),
           };
     }
+    const params = {
+        TableName: 'nsn_data',
+        Key: {
+          group_id: group_id,
+          routing_id: routing_id
+        }
+      };
+      let existingNsnData = await dynamoDocumentClient.get(params).promise();
+      
+      if(existingNsnData.Item != null){
+        return {
+          statusCode: 422,
+          body: "NSN routing record already exists for the routing id - "+routing_id
+      }; 
+     }
 
     const nsnData: NsnData = {
         group_id,
@@ -34,7 +49,6 @@ export const saveNSNData = async (event: APIGatewayProxyEvent): Promise<APIGatew
     }
 
     try {
-        debugger
 
         const model = {TableName: "nsn_data", Item: nsnData};
         await dynamoDocumentClient.put(model).promise();

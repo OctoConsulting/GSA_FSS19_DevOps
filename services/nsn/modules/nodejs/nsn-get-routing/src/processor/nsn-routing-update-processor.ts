@@ -13,7 +13,7 @@ export const updateNSNData = async (event: APIGatewayProxyEvent): Promise<APIGat
           };
     }
     
-    const { group_id, routing_id, owa, isCivMgr, isMilMgr, ric, createdBy} = JSON.parse(event.body);
+    const { group_id, routing_id, owa, isCivMgr, isMilMgr, ric} = JSON.parse(event.body);
     
     if(!routing_id){
         return {
@@ -26,8 +26,9 @@ export const updateNSNData = async (event: APIGatewayProxyEvent): Promise<APIGat
       var params = {
         TableName: 'nsn_data',
         Key: {
-          routing_id: routing_id
-        }
+            group_id: group_id,
+            routing_id: routing_id
+          }
       };
 
       console.log("Fetching data from dynamoDB for update...")
@@ -40,25 +41,20 @@ export const updateNSNData = async (event: APIGatewayProxyEvent): Promise<APIGat
             body: "No NSN Data found for update for routing_id - "+routing_id
           }; 
        }
-       console.log("About to delete NSN record for routing id - "+routing_id);
-       await dynamoDocumentClient.delete(params);
-       console.log("NSN record for routing id - "+routing_id);
 
 
-    const nsnData: NsnData = {
+       const nsnData: NsnData = {
         group_id,
         routing_id,
         owa,
         isCivMgr,
         isMilMgr,
-        ric,
-        createdBy,
-        createDate: new Date().getTime().toString()
+        ric
     }
 
     try {
 
-        const model = {TableName: "nsn_data", Item: updateNsnData};
+        const model = {TableName: "nsn_data", Item: nsnData};
         await dynamoDocumentClient.put(model).promise();
 
         return {

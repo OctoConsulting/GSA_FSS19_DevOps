@@ -7,6 +7,6 @@ export interface NsnData {
     isCivMgr: string,
     isMilMgr: string,
     ric: string,
-    createdBy: string,
-    createDate: string;
+    createdBy?: string,
+    createDate?: string;
 }
