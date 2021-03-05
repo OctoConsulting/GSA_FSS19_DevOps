@@ -5,7 +5,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import {dynamoDocumentClient} from "../config"
 import {apiResponses} from '../model/responseAPI'
 
-export const saveNSNData = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     
     console.log('Saving the NSN data - '+event);
     if(event.body === null){
@@ -45,7 +45,7 @@ export const saveNSNData = async (event: APIGatewayProxyEvent): Promise<APIGatew
 
         const model = {TableName: "nsn_data", Item: nsnData};
         await dynamoDocumentClient.put(model).promise();
-        return apiResponses._201(model);
+        return apiResponses._201({message: "Success!!", "nsn_data": model.Item});
     } catch (err) {
         console.log('Error ---- '+err);
         return apiResponses._500({message: 'Error creating NSN record'});
@@ -54,5 +54,5 @@ export const saveNSNData = async (event: APIGatewayProxyEvent): Promise<APIGatew
 
 
 module.exports = {
-    saveNSNData: saveNSNData
+    postNsn: postNsn
 }

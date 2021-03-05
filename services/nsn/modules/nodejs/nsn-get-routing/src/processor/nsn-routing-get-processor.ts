@@ -4,9 +4,9 @@ import { NsnData } from '../model/nsn-data';
 import { DynamoDB } from '../../node_modules/aws-sdk';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import {dynamoDocumentClient} from "../config"
-import {apiResponses} from "../model/responseAPI"
+import {apiResponses, response} from "../model/responseAPI"
 
-export const retrieveNSNData = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 
     console.log('Getting the NSN data - '+event.pathParameters);
     if(event.pathParameters === null){
@@ -70,5 +70,5 @@ export const retrieveNSNData = async (event: APIGatewayProxyEvent): Promise<APIG
 
 
 module.exports = {
-  retrieveNSNData: retrieveNSNData
+  getNsn: getNsn
 }

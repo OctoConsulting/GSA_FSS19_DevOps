@@ -6,7 +6,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import {dynamoDocumentClient} from "../config"
 import {apiResponses} from '../model/responseAPI'
 
-export const deleteNSNData = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 
     console.log('Getting the NSN data - '+event.pathParameters);
     if(event.pathParameters === null){
@@ -46,5 +46,5 @@ export const deleteNSNData = async (event: APIGatewayProxyEvent): Promise<APIGat
 
 
 module.exports = {
-  deleteNSNData: deleteNSNData
+  deleteNsn: deleteNsn
 }

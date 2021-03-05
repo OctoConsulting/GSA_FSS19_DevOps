@@ -6,7 +6,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import {dynamoDocumentClient} from "../config"
 import {apiResponses} from '../model/responseAPI'
 
-export const updateNSNData = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 
     console.log('Updating the NSN data - '+event);
     if(event.body === null){
@@ -59,5 +59,5 @@ export const updateNSNData = async (event: APIGatewayProxyEvent): Promise<APIGat
 
 
 module.exports = {
-    updateNSNData: updateNSNData
+    putNsn: putNsn
 }

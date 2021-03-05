@@ -1,11 +1,11 @@
-import {saveNSNData} from './processor/nsn-routing-create-processor'
-import {retrieveNSNData} from './processor/nsn-routing-get-processor'
-import {deleteNSNData} from './processor/nsn-routing-delete-processor'
-import {updateNSNData} from './processor/nsn-routing-update-processor'
+import {postNsn} from './processor/nsn-routing-create-processor'
+import {getNsn} from './processor/nsn-routing-get-processor'
+import {deleteNsn} from './processor/nsn-routing-delete-processor'
+import {putNsn} from './processor/nsn-routing-update-processor'
 
 module.exports = {
-    saveNSNData,
-    retrieveNSNData,
-    deleteNSNData,
-    updateNSNData
+    postNsn,
+    getNsn,
+    deleteNsn,
+    putNsn
 };
