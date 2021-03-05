@@ -5,7 +5,14 @@ public class ContractConstants {
 	
 	public static final String DB_CONNECTION_END_POINT = "http://localhost:8000";
 	public static final String REGION = "us-east1";
-	public static final String CONTRACT_SERVICE_TABLE_NAME = "CONTRACT_SERVICE";
+	public static final String CONTRACT_SERVICE_TABLE_NAME = "contract_data";
+	public static final String CONTRACT_SERVICE_GSI = "contract_details_identity";
+	public static final String CONTRACT_SERVICE_PK = "internal_contract_number";
+	public static final String CONTRACT_SERVICE_SK_D402 = "detail_d402";
+	public static final String CONTRACT_SERVICE_SK_D403 = "detail_d403";
+	public static final String CONTRACT_SERVICE_SK_D407 = "detail_d407";
+	public static final String CONTRACT_SERVICE_SK_D410 = "detail_d410";
+	public static final String CONTRACT_SERVICE_SK_D430 = "detail_d430";
 	
 	public static final String TEST_BODY = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:con=\"http://contract/\"><soapenv:Header/><soapenv:Body><con:PORequest><NumOfRecord>1</NumOfRecord><PurchaseOrders POLineNumber=\"01\"><PurchaseOrderNum>NMNJH753C8</PurchaseOrderNum>"
 			+ " <totalPOCost>12.75</totalPOCost>" + "  <ContractNum>47QSEA20T000E</ContractNum>"
@@ -63,6 +70,11 @@ public class ContractConstants {
 	public static final String JS002_END_DATE = "JS002: Contract has ended. Contract %1$s end date was %2$s";
 	public static final String JS003_TERMINATION_DATE = "JS003: JS003: Contract has been terminated. Contract %1$s was terminated on %2$s";
 	public static final String MISSING_REQUISITION_NUMBER = "FAIL JS999: Missing Requisition Number";
+	public static final String MISSING_REPORTING_OFFICE = "FAIL JS999: Missing or bad Reporting Office value; The value submitted was: \"\"";
+	public static final String JS004_CONTRACT_DATA = "FAIL JS004: Buyer Code not defined for the Reporting Office : The Buyer code %1$s not defined in Reporting Office %2$s";
+	public static final String JS005_CONTRACT_DATA = "FAIL JS005: Buyer Dollar Limit exceeded:The Buyer/Spervisor %1$s has only $ %2$s and the PO Total Cost was %3$";
+	public static final String JS000_CONTRACT_DATA = "FAIL " + "JS000: Contract not found Contract %1$s is not a valid contract number";
+	
 	
 	public static final String INVALID_DATA_CONTRACT_NUMBER_JS007 = "JS007_Invalid Contract Number -";
 	
