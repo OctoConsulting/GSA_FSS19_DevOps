@@ -1,6 +1,6 @@
 import { PolicyStatement } from '@aws-cdk/aws-iam';
-import { resourcePrefix } from '../resource-helper';
 import { BaseBuilder } from './common/BaseBulider';
+import { KmsBuilder } from './kms-builder';
 
 export class DynamoBuilder extends BaseBuilder {
     private permission: string;
@@ -51,6 +51,8 @@ export class DynamoBuilder extends BaseBuilder {
             ],
             resources: [`${this.getServicePrefix()}table/*`],
         });
-        return [crudItem];
+        const kmsEncrypt = new KmsBuilder('kms-encrypt', '*').getPolicyStatements();
+        const kmsDecrypt = new KmsBuilder('kms-decrypt', '*').getPolicyStatements();
+        return [crudItem, ...kmsEncrypt, ...kmsDecrypt];
     }
 }
