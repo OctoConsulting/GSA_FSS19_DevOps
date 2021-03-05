@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
@@ -21,12 +24,14 @@ import com.google.gson.Gson;
 
 import gov.gsa.fas.contractservice.exception.CCSExceptions;
 import gov.gsa.fas.contractservice.model.Address;
+import gov.gsa.fas.contractservice.model.App2;
 import gov.gsa.fas.contractservice.model.CDFMaster;
 import gov.gsa.fas.contractservice.model.ContractDataMaster;
 import gov.gsa.fas.contractservice.util.ContractConstants;
 
 public class ContractServiceDAOImpl implements ContractServiceDAO {
 
+	Logger logger = LoggerFactory.getLogger(ContractServiceDAOImpl.class);
 	AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
 			.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
 					ContractConstants.DB_CONNECTION_END_POINT, ContractConstants.REGION))
@@ -40,6 +45,14 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	@Override
 	public ContractDataMaster getContractByGSAM(String gsamContractNum) throws CCSExceptions {
 		try {
+			
+			App2 app2 = new App2();
+			try {
+				app2.insertdata(dynamoDBDefault);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			gsamContractNum = "GSAM_".concat(gsamContractNum);
 			String internalContractNumber = "";
 			List<String> internalContractNumberList = getContractInternalIDByGSI(gsamContractNum,

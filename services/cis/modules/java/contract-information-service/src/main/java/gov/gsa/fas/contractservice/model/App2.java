@@ -29,11 +29,11 @@ public class App2 {
 
 		createTable(dynamoDB);
 
-		insertdata(dynamoDB);
+	//	insertdata(dynamoDB);
 
 	}
 
-	private static void insertdata(DynamoDB dynamoDB) throws InterruptedException {
+	public void insertdata(DynamoDB dynamoDB) throws InterruptedException {
 		Table table = dynamoDB.getTable("contract_data");
 		Item item = new Item().withPrimaryKey("internal_contract_number", "NFKA271")
 				.withString("contract_details_identity", "GSAM_47QSEA20T000E");
