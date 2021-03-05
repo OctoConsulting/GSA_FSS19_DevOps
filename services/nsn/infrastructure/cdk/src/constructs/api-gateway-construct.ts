@@ -20,7 +20,7 @@ export class ApiGatewayConstruct extends cdk.Construct {
         this.addRoute53Alias();
     }
     private addApiResourcesAndMethods() {
-        const baseResource = this.restApi.root.addResource('nsnclassgroup').addResource('v1').addResource('routing');
+        const baseResource = this.restApi.root.addResource('nsnrouting').addResource('v1').addResource('details');
         this.addPostRoutingIntegration(baseResource);
         this.addPutRoutingIntegration(baseResource);
         this.addGetAndDeleteRoutingIntegration(baseResource);
@@ -45,7 +45,7 @@ export class ApiGatewayConstruct extends cdk.Construct {
     }
 
     private addGetAndDeleteRoutingIntegration(baseResource: apigw.Resource) {
-        const routingMethod = baseResource.addResource('{id}');
+        const routingMethod = baseResource.addResource('{routingId}');
 
         routingMethod.addMethod(
             'GET',
