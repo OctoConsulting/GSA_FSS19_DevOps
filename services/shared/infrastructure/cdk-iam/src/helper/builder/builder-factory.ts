@@ -4,6 +4,7 @@ import { CloudwatchLogsBuilder } from './cloudwatch-logs-builder';
 import { BaseBuilder } from './common/BaseBulider';
 import { DynamoBuilder } from './dynamo-builder';
 import { IamBuilder } from './iam-builder';
+import { KmsBuilder } from './kms-builder';
 import { LambdaBuilder } from './lambda-builder';
 import { XrayBuilder } from './xray-builder';
 
@@ -21,6 +22,8 @@ function getPolicyBuilder(permission: string, arnPrefix: string): BaseBuilder {
     if (permission.startsWith('cloudwatch')) return new CloudwatchBuilder(permission, arnPrefix);
 
     if (permission.startsWith('iam')) return new IamBuilder(permission, arnPrefix);
+
+    if (permission.startsWith('kms')) return new KmsBuilder(permission, arnPrefix);
 
     throw Error(`Policy Builder entry missing in builder-factory.js for ${permission}`);
 }
