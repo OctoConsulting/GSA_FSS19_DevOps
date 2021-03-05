@@ -19,6 +19,7 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException;
 import com.google.gson.Gson;
 
+import gov.gsa.fas.contractservice.contract.ContractsType;
 import gov.gsa.fas.contractservice.exception.CCSExceptions;
 import gov.gsa.fas.contractservice.model.Address;
 import gov.gsa.fas.contractservice.model.CDFMaster;
@@ -37,7 +38,7 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	
 	DynamoDB dynamoDBDefault = new DynamoDB(clientDefault);
 	
-
+	
 	@Override
 	public ContractDataMaster getContractByGSAM(String gsamContractNum) throws CCSExceptions {
 		try {
@@ -153,6 +154,33 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 		Address address = new Gson().fromJson(data, Address.class);
 
 		return address;
+	}
+
+	@Override
+	public String getInteralContractNOByGSAM(String gsamContractNum) throws CCSExceptions {
+		gsamContractNum = "GSAM_".concat(gsamContractNum);
+		String internalContractNumber = null;
+		List<String> internalContractNumberList = getContractInternalIDByGSI(gsamContractNum, ContractConstants.CONTRACT_SERVICE_SK_D402); // refactor to pass the sortKey
+		if(internalContractNumberList!=null && internalContractNumberList.size()>0) {
+			internalContractNumber = internalContractNumberList.get(0);
+		}
+		return internalContractNumber;
+	}
+
+	@Override
+	public String getInteralContractNOByFCON(String fContractNum) throws CCSExceptions {
+		fContractNum = "FCON_".concat(fContractNum);
+		String internalContractNumber = null;
+		List<String> internalContractNumberList = getContractInternalIDByGSI(fContractNum, ContractConstants.CONTRACT_SERVICE_SK_D402); // refactor to pass the sortKey
+		if(internalContractNumberList!=null && internalContractNumberList.size()>0) {
+			internalContractNumber = internalContractNumberList.get(0);
+		}
+		return internalContractNumber;
+	}
+
+	@Override
+	public ContractsType getContractDetails(String internalContractNum) throws CCSExceptions {
+		return null;
 	}
 	
 	

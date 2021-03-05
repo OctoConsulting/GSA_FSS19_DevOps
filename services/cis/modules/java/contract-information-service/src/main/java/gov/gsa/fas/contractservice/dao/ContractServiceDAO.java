@@ -2,6 +2,7 @@ package gov.gsa.fas.contractservice.dao;
 
 import java.util.List;
 
+import gov.gsa.fas.contractservice.contract.ContractsType;
 import gov.gsa.fas.contractservice.exception.CCSExceptions;
 import gov.gsa.fas.contractservice.model.Address;
 import gov.gsa.fas.contractservice.model.CDFMaster;
@@ -14,4 +15,10 @@ public interface ContractServiceDAO {
 	List<CDFMaster> getBuyerDetails(String gsamContractNum) throws CCSExceptions;
 	
 	Address getAddressDetail(String gsamContractNum) throws CCSExceptions;
+
+	String getInteralContractNOByGSAM(String gsamContractNum) throws CCSExceptions;
+	
+	String getInteralContractNOByFCON(String fContractNum) throws CCSExceptions;
+	
+	ContractsType getContractDetails(String internalContractNum) throws CCSExceptions;
 }
