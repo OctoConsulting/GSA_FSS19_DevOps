@@ -41,7 +41,7 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	@Override
 	public ContractDataMaster getContractByGSAM(String gsamContractNum) throws CCSExceptions {
 		try {
-			gsamContractNum = gsamContractNum.concat("_GSAM");
+			gsamContractNum = "GSAM_".concat(gsamContractNum);
 			String internalContractNumber = null;
 			List<String> internalContractNumberList = getContractInternalIDByGSI(gsamContractNum, ContractConstants.CONTRACT_SERVICE_SK_D402); // refactor to pass the sortKey
 			if(internalContractNumberList!=null && internalContractNumberList.size()>0) {
