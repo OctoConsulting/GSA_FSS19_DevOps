@@ -1,5 +1,6 @@
 package gov.gsa.fas.contractservice.dao;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -41,11 +42,17 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	public ContractDataMaster getContractByGSAM(String gsamContractNum) throws CCSExceptions {
 		try {
 			gsamContractNum = gsamContractNum.concat("_GSAM");
-			String data = getContractDataBySortKey(gsamContractNum, ContractConstants.CONTRACT_SERVICE_SK_D402);
-
+			String internalContractNumber = null;
+			List<String> internalContractNumberList = getContractInternalIDByGSI(gsamContractNum, ContractConstants.CONTRACT_SERVICE_SK_D402); // refactor to pass the sortKey
+			if(internalContractNumberList!=null && internalContractNumberList.size()>0) {
+				internalContractNumber = internalContractNumberList.get(0);
+			}
+			
+			
+			String cmfMasterDataJSON = getDetailsByPartitionKey(internalContractNumber,ContractConstants.CONTRACT_SERVICE_SK_D402);
 			Gson gson = new Gson();
 
-			ContractDataMaster contractMaster = gson.fromJson(data, ContractDataMaster.class);
+			ContractDataMaster contractMaster = gson.fromJson(cmfMasterDataJSON, ContractDataMaster.class);
 			return contractMaster;
 		} catch (AmazonDynamoDBException ex) {
 			throw new CCSExceptions(ex.getErrorMessage(), ex);
@@ -62,13 +69,13 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	 * @param dynamoDB
 	 * @return
 	 */
-	private String getContractDataBySortKey(String gsiValue, String sortKeyValue) throws AmazonDynamoDBException {
+	private List<String> getContractInternalIDByGSI(String gsiValue, String sortKeyValue) throws AmazonDynamoDBException {
 
-		String data = "";
+		List<String> internalContractList = new ArrayList<String>();
 		
 		DynamoDB db = getDynamoDB();
 
-		Table table = dynamoDB.getTable(getDynamoDBTable());
+		Table table = db.getTable(getDynamoDBTable());
 
 		Index index = table.getIndex(ContractConstants.CONTRACT_SERVICE_GSI);
 
@@ -82,25 +89,34 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 		Item item1 = null;
 		while (iterator.hasNext()) {
 			item1 = iterator.next();
-			String internalContractNumber = item1.getString(ContractConstants.CONTRACT_SERVICE_PK);
+			internalContractList.add(item1.getString(ContractConstants.CONTRACT_SERVICE_PK));
 
-			QuerySpec specInternal = new QuerySpec()
-					.withKeyConditionExpression(ContractConstants.CONTRACT_SERVICE_PK + " = :gsam_cont_no AND "
-							+ ContractConstants.CONTRACT_SERVICE_GSI + "= :detail")
-
-					.withValueMap(new ValueMap().withString(":gsam_cont_no", internalContractNumber)
-							.withString(":detail", sortKeyValue));
-
-			ItemCollection<QueryOutcome> itemInternalColl = table.query(specInternal);
-
-			Iterator<Item> iteratorInternal = itemInternalColl.iterator();
-			Item itemInternal = null;
-			while (iteratorInternal.hasNext()) {
-				itemInternal = iteratorInternal.next();
-				data = itemInternal.getJSONPretty("details");
-			}
 		}
-		return data;
+		return internalContractList;
+	}
+
+	private String getDetailsByPartitionKey(String partitionKey,
+			String internalContractNumber) {
+		
+		DynamoDB db = getDynamoDB();
+		Table table = db.getTable(getDynamoDBTable());
+		String resultData = "";
+		QuerySpec specInternal = new QuerySpec()
+				.withKeyConditionExpression(ContractConstants.CONTRACT_SERVICE_PK + " = :gsam_cont_no AND "
+						+ ContractConstants.CONTRACT_SERVICE_GSI + "= :detail")
+
+				.withValueMap(new ValueMap().withString(":gsam_cont_no", internalContractNumber)
+						.withString(":detail", partitionKey));
+
+		ItemCollection<QueryOutcome> itemInternalColl = table.query(specInternal);
+
+		Iterator<Item> iteratorInternal = itemInternalColl.iterator();
+		Item itemInternal = null;
+		while (iteratorInternal.hasNext()) {
+			itemInternal = iteratorInternal.next();
+			resultData = itemInternal.getJSON("details");
+		}
+		return resultData;
 	}
 
 	private DynamoDB getDynamoDB() {
@@ -120,10 +136,9 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	}
 
 	@Override
-	public List<CDFMaster> getBuyerDetails(String gsamContractNum) throws CCSExceptions{
+	public List<CDFMaster> getBuyerDetails(String internalContractNumber) throws CCSExceptions{
 
-		gsamContractNum = gsamContractNum.concat("_GSAM");
-		String data = getContractDataBySortKey(gsamContractNum, ContractConstants.CONTRACT_SERVICE_SK_D430);
+		List<String> data = getContractInternalIDByGSI(gsamContractNum, ContractConstants.CONTRACT_SERVICE_SK_D430);
 
 		List<CDFMaster> cdfMaster = Arrays.asList(new Gson().fromJson(data, CDFMaster[].class));
 
@@ -131,10 +146,9 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	}
 
 	@Override
-	public Address getAddressDetail(String gsamContractNum) throws CCSExceptions{
+	public Address getAddressDetail(String internalContractNumber) throws CCSExceptions{
 		
-		gsamContractNum = gsamContractNum.concat("_GSAM");
-		String data = getContractDataBySortKey(gsamContractNum, ContractConstants.CONTRACT_SERVICE_SK_D410);
+		List<String> data = getContractInternalIDByGSI(gsamContractNum, ContractConstants.CONTRACT_SERVICE_SK_D410);
 
 		Address address = new Gson().fromJson(data, Address.class);
 
