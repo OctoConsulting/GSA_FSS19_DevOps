@@ -31,6 +31,11 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 					ContractConstants.DB_CONNECTION_END_POINT, ContractConstants.REGION))
 			.build();
 	DynamoDB dynamoDB = new DynamoDB(client);
+	
+	AmazonDynamoDB clientDefault = AmazonDynamoDBClientBuilder.defaultClient();
+	
+	DynamoDB dynamoDBDefault = new DynamoDB(clientDefault);
+	
 
 	@Override
 	public ContractDataMaster getContractByGSAM(String gsamContractNum) throws CCSExceptions {
@@ -60,8 +65,10 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	private String getContractDataBySortKey(String gsiValue, String sortKeyValue) throws AmazonDynamoDBException {
 
 		String data = "";
+		
+		DynamoDB db = getDynamoDB();
 
-		Table table = dynamoDB.getTable(ContractConstants.CONTRACT_SERVICE_TABLE_NAME);
+		Table table = dynamoDB.getTable(getDynamoDBTable());
 
 		Index index = table.getIndex(ContractConstants.CONTRACT_SERVICE_GSI);
 
@@ -94,6 +101,22 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 			}
 		}
 		return data;
+	}
+
+	private DynamoDB getDynamoDB() {
+		
+		if(System.getenv(ContractConstants.SHORT_ENV)!=null && System.getenv(ContractConstants.SHORT_ENV).trim().length()>0 ) {
+			return dynamoDBDefault;
+		}
+		return dynamoDB;
+	}
+	
+	private String getDynamoDBTable() {
+		
+		if(System.getenv(ContractConstants.SHORT_ENV)!=null && System.getenv(ContractConstants.SHORT_ENV).trim().length()>0 ) {
+			return ContractConstants.CONTRACT_SERVICE_TABLE_NAME_PREFIX+ContractConstants.SHORT_ENV;
+		}
+		return ContractConstants.CONTRACT_SERVICE_TABLE_NAME;
 	}
 
 	@Override

@@ -2,11 +2,12 @@ package gov.gsa.fas.contractservice.util;
 
 public class ContractConstants {
 	
-	
+	public static final String SHORT_ENV = "SHORT_ENV";
 	public static final String DB_CONNECTION_END_POINT = "http://localhost:8000";
 	public static final String REGION = "us-east1";
 	public static final String CONTRACT_SERVICE_TABLE_NAME = "contract_data";
-	public static final String CONTRACT_SERVICE_GSI = "contract_details_identity";
+	public static final String CONTRACT_SERVICE_TABLE_NAME_PREFIX = "contract-";
+	public static final String CONTRACT_SERVICE_GSI = "contract_details_identity_index";
 	public static final String CONTRACT_SERVICE_PK = "internal_contract_number";
 	public static final String CONTRACT_SERVICE_SK_D402 = "detail_d402";
 	public static final String CONTRACT_SERVICE_SK_D403 = "detail_d403";
