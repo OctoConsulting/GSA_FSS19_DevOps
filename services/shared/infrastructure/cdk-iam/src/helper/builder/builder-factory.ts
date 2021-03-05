@@ -8,7 +8,7 @@ import { LambdaBuilder } from './lambda-builder';
 import { XrayBuilder } from './xray-builder';
 
 function getPolicyBuilder(permission: string, arnPrefix: string): BaseBuilder {
-    if (permission.startsWith('dynamo')) return new DynamoBuilder(permission, arnPrefix);
+    if (permission.startsWith('dynamodb')) return new DynamoBuilder(permission, arnPrefix);
 
     if (permission.startsWith('logs')) return new CloudwatchLogsBuilder(permission, arnPrefix);
 

@@ -16,8 +16,8 @@
                     "users": [],
                     "permissions": [
                         "iam-mfa",
-                        "dynamo-read",
-                        "dynamo-crudItem",
+                        "dynamodb-read",
+                        "dynamodb-crudItem",
                         "logs-read",
                         "apigateway-read",
                         "apigateway-runapi",
@@ -31,8 +31,8 @@
                     "users": [],
                     "permissions": [
                         "iam-mfa",
-                        "dynamo-read",
-                        "dynamo-crudItem",
+                        "dynamodb-read",
+                        "dynamodb-crudItem",
                         "logs-read",
                         "apigateway-read",
                         "apigateway-runapi",
@@ -46,8 +46,8 @@
                     "users": [],
                     "permissions": [
                         "iam-mfa",
-                        "dynamo-read",
-                        "dynamo-crudItem",
+                        "dynamodb-read",
+                        "dynamodb-crudItem",
                         "logs-read",
                         "apigateway-read",
                         "apigateway-runapi",

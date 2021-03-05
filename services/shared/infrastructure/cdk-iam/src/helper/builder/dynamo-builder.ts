@@ -12,10 +12,10 @@ export class DynamoBuilder extends BaseBuilder {
     }
 
     public getPolicyStatements(): PolicyStatement[] {
-        if (this.permission === 'dynamo-read') {
+        if (this.permission === 'dynamodb-read') {
             return this.read();
         }
-        if (this.permission === 'dynamo-crudItem') {
+        if (this.permission === 'dynamodb-crudItem') {
             return this.crudItem();
         }
         return this.unimplimented(this.permission);
