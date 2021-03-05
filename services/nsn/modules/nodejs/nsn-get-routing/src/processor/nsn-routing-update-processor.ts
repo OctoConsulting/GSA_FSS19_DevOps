@@ -1,25 +1,22 @@
+'use strict';
+
 import { NsnData } from '../model/nsn-data';
 import { DynamoDB } from 'aws-sdk';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import {dynamoDocumentClient} from "../config"
+import {apiResponses} from '../model/responseAPI'
 
 export const updateNSNData = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 
     console.log('Updating the NSN data - '+event);
     if(event.body === null){
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ message: 'No routing data provided to update NSN routing record.' }),
-          };
+        return apiResponses._400({ message: 'No routing data provided to update NSN routing record.' });
     }
     
     const { group_id, routing_id, owa, isCivMgr, isMilMgr, ric} = JSON.parse(event.body);
     
     if(!routing_id){
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ message: 'Routing NSN number is mandetory to update NSN record' }),
-          };
+        return apiResponses._400({ message: 'Routing NSN number is mandetory to update NSN record' });
     }
 
     console.log("Routing ID - "+routing_id);
@@ -36,10 +33,7 @@ export const updateNSNData = async (event: APIGatewayProxyEvent): Promise<APIGat
        console.log("Data fetched from DB  to update - "+updateNsnData.Item)
 
        if(updateNsnData.Item == null){
-        return {
-            statusCode: 404,
-            body: "No NSN Data found for update for routing_id - "+routing_id
-          }; 
+        return apiResponses._404({ message: 'No NSN Data found for update for routing_id - '+routing_id });
        }
 
 
@@ -56,17 +50,10 @@ export const updateNSNData = async (event: APIGatewayProxyEvent): Promise<APIGat
 
         const model = {TableName: "nsn_data", Item: nsnData};
         await dynamoDocumentClient.put(model).promise();
-
-        return {
-            statusCode: 201,
-            body: JSON.stringify(model)
-        };
+        return apiResponses._200(model);
     } catch (err) {
         console.log("Error while updating - "+err);
-        return {
-            statusCode: 500,
-            body: JSON.stringify("Error updating NSN record")
-        };
+        return apiResponses._500({message: 'Error updating NSN record for routing ID - '+routing_id});
     }
 }
 

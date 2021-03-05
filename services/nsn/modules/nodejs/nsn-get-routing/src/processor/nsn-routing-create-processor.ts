@@ -1,25 +1,21 @@
+'use strict';
+
 import { NsnData } from '../model/nsn-data';
-import { DynamoDB } from '../../node_modules/aws-sdk';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import {dynamoDocumentClient} from "../config"
+import {apiResponses} from '../model/responseAPI'
 
 export const saveNSNData = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     
     console.log('Saving the NSN data - '+event);
     if(event.body === null){
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ message: 'No routing data provided to create NSN routing record.' }),
-          };
+        return apiResponses._400({message: 'No routing data provided to create NSN routing record.'});
     }
     
     const { group_id, routing_id, owa, isCivMgr, isMilMgr, ric, createdBy} = JSON.parse(event.body);
     
     if( !group_id){
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ message: 'Group id is mandetory to create NSN record' }),
-          };
+        return apiResponses._400({message: 'Group id is mandetory to create NSN record'});
     }
     const params = {
         TableName: 'nsn_data',
@@ -31,10 +27,7 @@ export const saveNSNData = async (event: APIGatewayProxyEvent): Promise<APIGatew
       let existingNsnData = await dynamoDocumentClient.get(params).promise();
       
       if(existingNsnData.Item != null){
-        return {
-          statusCode: 422,
-          body: "NSN routing record already exists for the routing id - "+routing_id
-      }; 
+        return apiResponses._422({message: 'NSN routing record already exists for the routing id - '+routing_id});
      }
 
     const nsnData: NsnData = {
@@ -52,17 +45,10 @@ export const saveNSNData = async (event: APIGatewayProxyEvent): Promise<APIGatew
 
         const model = {TableName: "nsn_data", Item: nsnData};
         await dynamoDocumentClient.put(model).promise();
-
-        return {
-            statusCode: 201,
-            body: JSON.stringify(model)
-        };
+        return apiResponses._201(model);
     } catch (err) {
         console.log('Error ---- '+err);
-        return {
-            statusCode: 500,
-            body: JSON.stringify("Error creating NSN record")
-        };
+        return apiResponses._500({message: 'Error creating NSN record'});
     }
 }
 

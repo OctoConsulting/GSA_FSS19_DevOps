@@ -1,53 +1,39 @@
-/**
- * @desc    Send any success response
- *
- * @param   {string} message
- * @param   {object | array} results
- * @param   {number} statusCode
- */
-export const success = (body: string, results: object | Array<string>, code: number) => {
+
+export const apiResponses = {
+    _200: (body: { [key: string]: any }) => {
+        return {
+            statusCode: 200,
+            body: JSON.stringify(body, null, 2),
+        };
+    },
+    _201: (body: { [key: string]: any }) => {
+      return {
+          statusCode: 201,
+          body: JSON.stringify(body, null, 2),
+      };
+    },
+    _400: (body: { [key: string]: any }) => {
+        return {
+            statusCode: 400,
+            body: JSON.stringify(body, null, 2),
+        };
+    },
+    _404: (body: { [key: string]: any }) => {
+      return {
+          statusCode: 404,
+          body: JSON.stringify(body, null, 2),
+      };
+    },
+    _422: (body: { [key: string]: any }) => {
+      return {
+          statusCode: 422,
+          body: JSON.stringify(body, null, 2),
+      };
+    },
+  _500: (body: { [key: string]: any }) => {
     return {
-      body,
-      error: false,
-      statusCode: code,
-      results
+        statusCode: 500,
+        body: JSON.stringify(body, null, 2),
     };
-  };
-  
-  /**
-   * @desc    Send any error response
-   *
-   * @param   {string} message
-   * @param   {number} statusCode
-   */
-  export const error = (body: string, code: number, err?: object) => {
-    // List of common HTTP request code
-    const codes = [200, 201, 400, 401, 404, 403, 422, 500];
-  
-    // Get matched code
-    const findCode = codes.find((code) => code == code);
-  
-    if (!findCode) code = 500;
-    else code = findCode;
-  
-    return {
-      body,
-      statusCode: code,
-      error: true,
-      exception: err
-    };
-  };
-  
-  /**
-   * @desc    Send any validation response
-   *
-   * @param   {object | array} errors
-   */
-  export const validation = (errors: object | Array<string>) => {
-    return {
-      body: "Validation errors",
-      error: true,
-      statusCode: 422,
-      errors
-    };
-  };
+  },
+};

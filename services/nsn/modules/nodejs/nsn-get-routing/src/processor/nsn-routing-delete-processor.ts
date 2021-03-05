@@ -1,23 +1,20 @@
+'use strict';
+
 import { NsnData } from '../model/nsn-data';
 import { DynamoDB } from 'aws-sdk';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import {dynamoDocumentClient} from "../config"
+import {apiResponses} from '../model/responseAPI'
 
 export const deleteNSNData = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 
     console.log('Getting the NSN data - '+event.pathParameters);
     if(event.pathParameters === null){
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ message: 'Routing id is needed to delete NSN data' }),
-          };
+      return apiResponses._400({message: 'Routing id is needed to delete NSN data'});
     }
     let routingId = event.pathParameters['id'];
     if(!routingId){
-      return {
-          statusCode: 400,
-          body: JSON.stringify({ message: 'Routing id is needed to delete NSN data' }),
-        };
+      return apiResponses._400({message: 'Routing id is needed to delete NSN data'});
   }
     
     try {
@@ -35,25 +32,15 @@ export const deleteNSNData = async (event: APIGatewayProxyEvent): Promise<APIGat
        console.log("Data fetched from DB - "+nsnData.Item)
 
        if(nsnData.Item == null){
-        return {
-            statusCode: 404,
-            body: "No NSN Data found for routingId - "+routingId
-          }; 
+        return apiResponses._404({message: 'No NSN Data found for routingId - '+routingId});
        }
        console.log("About to delete NSN record for routing id - "+routingId);
        await dynamoDocumentClient.delete(params).promise();
        console.log("NSN record for routing id - "+routingId);
-
-        return {
-            statusCode: 200,
-            body: JSON.stringify("NSN record for routing id "+routingId+" is deleted successfully.")
-        };
+       return apiResponses._200({message: 'NSN record for routing id '+ routingId +' is deleted successfully.'})
     } catch (err) {
       console.log("Error >>>>>> "+err)
-        return {
-            statusCode: 500,
-            body: JSON.stringify("Error fetching record for NSN id - "+routingId)
-        };
+      return apiResponses._500({message: 'Error deleting record for NSN id - '+routingId})
     }
 }
 
