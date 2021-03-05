@@ -3,7 +3,7 @@
 import { NsnData } from '../model/nsn-data';
 import { DynamoDB } from 'aws-sdk';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import {dynamoDocumentClient} from "../config"
+import {dynamoDocumentClient, getSettings} from "../config"
 import {apiResponses} from '../model/responseAPI'
 
 export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -20,7 +20,7 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
     try {
 
       var params = {
-        TableName: 'nsn_data',
+        TableName: getSettings().TABLE_NAME,
         Key: {
           group_id: parseInt(routingId.substring(0, 2), 10),
           routing_id: routingId

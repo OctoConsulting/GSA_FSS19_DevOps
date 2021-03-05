@@ -2,7 +2,7 @@
 
 import { NsnData } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import {dynamoDocumentClient} from "../config"
+import {dynamoDocumentClient, getSettings} from "../config"
 import {apiResponses} from '../model/responseAPI'
 
 export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -18,7 +18,7 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         return apiResponses._400({message: 'Group id is mandetory to create NSN record'});
     }
     const params = {
-        TableName: 'nsn_data',
+        TableName: getSettings().TABLE_NAME,
         Key: {
           group_id: group_id,
           routing_id: routing_id
@@ -43,9 +43,9 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     try {
 
-        const model = {TableName: "nsn_data", Item: nsnData};
+        const model = {TableName: getSettings().TABLE_NAME, Item: nsnData};
         await dynamoDocumentClient.put(model).promise();
-        return apiResponses._201({message: "Success!!", "nsn_data": model.Item});
+        return apiResponses._201(model.Item);
     } catch (err) {
         console.log('Error ---- '+err);
         return apiResponses._500({message: 'Error creating NSN record'});

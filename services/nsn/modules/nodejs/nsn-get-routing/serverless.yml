@@ -52,35 +52,41 @@ resources:
         BillingMode: PAY_PER_REQUEST 
 functions:
   saveNSNData:
-    handler: saveNSNData
+    handler: postNsn
     events:
       - http:
-          path: nsn/routing
+          path: /nsnrouting/v1/details/
           method: post
           cors: true
   retrieveNSNData:
-    handler: retrieveNSNData
+    handler: getNsn
     events:
       - http:
-          path: nsn/routing/{id}
+          path: /nsnrouting/v1/details/{id}
           method: GET
         request:
           parameters:
             paths:
               id: true
   deleteNSNData:
-    handler: deleteNSNData
+    handler: deleteNsn
     events:
       - http:
-          path: nsn/routing/{id}
+          path: /nsnrouting/v1/details/{id}
           method: DELETE
         request:
           parameters:
             paths:
               id: true
   updateNSNData:
-    handler: updateNSNData
+    handler: putNsn
     events:
       - http:
-          path: nsn/routing/
+          path: /nsnrouting/v1/details/
           method: PUT
+  test:
+    handler: test
+    events:
+      - http:
+        path: test
+        method: get

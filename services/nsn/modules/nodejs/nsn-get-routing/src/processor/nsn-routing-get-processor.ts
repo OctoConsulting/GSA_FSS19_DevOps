@@ -3,7 +3,7 @@
 import { NsnData } from '../model/nsn-data';
 import { DynamoDB } from '../../node_modules/aws-sdk';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import {dynamoDocumentClient} from "../config"
+import {dynamoDocumentClient, getSettings} from "../config"
 import {apiResponses, response} from "../model/responseAPI"
 
 export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -29,7 +29,7 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         if(routingId.length == 2){
           console.log("Fetching NSN data by group id - "+routingId);
         const params = {
-            TableName: 'nsn_data',
+            TableName: getSettings().TABLE_NAME,
             Key: {
               group_id: groupId,
               routing_id: routingId
@@ -44,7 +44,7 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         
         }else{
           const params = {
-              TableName: 'nsn_data',
+              TableName: getSettings().TABLE_NAME,
               KeyConditionExpression: 'group_id = :group_id and begins_with(routing_id, :routing_id)',
               ExpressionAttributeValues: {
                 ":group_id": groupId,
