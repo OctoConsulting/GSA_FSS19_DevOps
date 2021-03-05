@@ -34,7 +34,7 @@ public class App2 {
 	}
 
 	public void insertdata(DynamoDB dynamoDB) throws InterruptedException {
-		Table table = dynamoDB.getTable("contract_data");
+		Table table = dynamoDB.getTable("contract-dev");
 		Item item = new Item().withPrimaryKey("internal_contract_number", "NFKA271")
 				.withString("contract_details_identity", "GSAM_47QSEA20T000E");
 
