@@ -32,24 +32,24 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 					ContractConstants.DB_CONNECTION_END_POINT, ContractConstants.REGION))
 			.build();
 	DynamoDB dynamoDB = new DynamoDB(client);
-	
+
 	AmazonDynamoDB clientDefault = AmazonDynamoDBClientBuilder.defaultClient();
-	
+
 	DynamoDB dynamoDBDefault = new DynamoDB(clientDefault);
-	
 
 	@Override
 	public ContractDataMaster getContractByGSAM(String gsamContractNum) throws CCSExceptions {
 		try {
 			gsamContractNum = "GSAM_".concat(gsamContractNum);
-			String internalContractNumber = null;
-			List<String> internalContractNumberList = getContractInternalIDByGSI(gsamContractNum, ContractConstants.CONTRACT_SERVICE_SK_D402); // refactor to pass the sortKey
-			if(internalContractNumberList!=null && internalContractNumberList.size()>0) {
+			String internalContractNumber = "";
+			List<String> internalContractNumberList = getContractInternalIDByGSI(gsamContractNum,
+					ContractConstants.CONTRACT_SERVICE_SK_D402); // refactor to pass the sortKey
+			if (internalContractNumberList != null && internalContractNumberList.size() > 0) {
 				internalContractNumber = internalContractNumberList.get(0);
 			}
-			
-			
-			String cmfMasterDataJSON = getDetailsByPartitionKey(internalContractNumber,ContractConstants.CONTRACT_SERVICE_SK_D402);
+
+			String cmfMasterDataJSON = getDetailsByPartitionKey(internalContractNumber,
+					ContractConstants.CONTRACT_SERVICE_SK_D402 + "_" + internalContractNumber);
 			Gson gson = new Gson();
 
 			ContractDataMaster contractMaster = gson.fromJson(cmfMasterDataJSON, ContractDataMaster.class);
@@ -69,15 +69,16 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	 * @param dynamoDB
 	 * @return
 	 */
-	private List<String> getContractInternalIDByGSI(String gsiValue, String sortKeyValue) throws AmazonDynamoDBException {
+	private List<String> getContractInternalIDByGSI(String gsiValue, String sortKeyValue)
+			throws AmazonDynamoDBException {
 
 		List<String> internalContractList = new ArrayList<String>();
-		
+
 		DynamoDB db = getDynamoDB();
 
 		Table table = db.getTable(getDynamoDBTable());
 
-		Index index = table.getIndex(ContractConstants.CONTRACT_SERVICE_GSI);
+		Index index = table.getIndex(ContractConstants.CONTRACT_SERVICE_GSI_IDX);
 
 		QuerySpec spec = new QuerySpec()
 
@@ -95,9 +96,8 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 		return internalContractList;
 	}
 
-	private String getDetailsByPartitionKey(String partitionKey,
-			String internalContractNumber) {
-		
+	private String getDetailsByPartitionKey(String partitionKey, String sortKey) {
+
 		DynamoDB db = getDynamoDB();
 		Table table = db.getTable(getDynamoDBTable());
 		String resultData = "";
@@ -105,14 +105,13 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 				.withKeyConditionExpression(ContractConstants.CONTRACT_SERVICE_PK + " = :gsam_cont_no AND "
 						+ ContractConstants.CONTRACT_SERVICE_GSI + "= :detail")
 
-				.withValueMap(new ValueMap().withString(":gsam_cont_no", internalContractNumber)
-						.withString(":detail", partitionKey));
+				.withValueMap(new ValueMap().withString(":gsam_cont_no", partitionKey).withString(":detail", sortKey));
 
 		ItemCollection<QueryOutcome> itemInternalColl = table.query(specInternal);
 
 		Iterator<Item> iteratorInternal = itemInternalColl.iterator();
 		Item itemInternal = null;
-		while (iteratorInternal.hasNext()) {
+		while (iteratorInternal != null && iteratorInternal.hasNext()) {
 			itemInternal = iteratorInternal.next();
 			resultData = itemInternal.getJSON("details");
 		}
@@ -120,41 +119,50 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	}
 
 	private DynamoDB getDynamoDB() {
-		
-		if(System.getenv(ContractConstants.SHORT_ENV)!=null && System.getenv(ContractConstants.SHORT_ENV).trim().length()>0 ) {
+
+		if (System.getenv(ContractConstants.SHORT_ENV) != null
+				&& System.getenv(ContractConstants.SHORT_ENV).trim().length() > 0) {
 			return dynamoDBDefault;
 		}
 		return dynamoDB;
 	}
-	
+
 	private String getDynamoDBTable() {
-		
-		if(System.getenv(ContractConstants.SHORT_ENV)!=null && System.getenv(ContractConstants.SHORT_ENV).trim().length()>0 ) {
-			return ContractConstants.CONTRACT_SERVICE_TABLE_NAME_PREFIX+ContractConstants.SHORT_ENV;
+
+		if (System.getenv(ContractConstants.SHORT_ENV) != null
+				&& System.getenv(ContractConstants.SHORT_ENV).trim().length() > 0) {
+			return ContractConstants.CONTRACT_SERVICE_TABLE_NAME_PREFIX + ContractConstants.SHORT_ENV;
 		}
 		return ContractConstants.CONTRACT_SERVICE_TABLE_NAME;
 	}
 
 	@Override
-	public List<CDFMaster> getBuyerDetails(String internalContractNumber) throws CCSExceptions{
+	public List<CDFMaster> getBuyerDetails(String internalContractNumber) throws CCSExceptions {
 
-		List<String> data = getContractInternalIDByGSI(gsamContractNum, ContractConstants.CONTRACT_SERVICE_SK_D430);
+		String cdfMasterDataJSON = getDetailsByPartitionKey(internalContractNumber,
+				ContractConstants.CONTRACT_SERVICE_SK_D430 + "_" + internalContractNumber);
 
-		List<CDFMaster> cdfMaster = Arrays.asList(new Gson().fromJson(data, CDFMaster[].class));
+		if (cdfMasterDataJSON != null && cdfMasterDataJSON.length() > 0) {
+			List<CDFMaster> cdfMaster = Arrays.asList(new Gson().fromJson(cdfMasterDataJSON, CDFMaster[].class));
 
-		return cdfMaster;
+			return cdfMaster;
+		}
+		return null;
 	}
 
 	@Override
-	public Address getAddressDetail(String internalContractNumber) throws CCSExceptions{
-		
-		List<String> data = getContractInternalIDByGSI(gsamContractNum, ContractConstants.CONTRACT_SERVICE_SK_D410);
+	public Address getAddressDetail(String internalContractNumber) throws CCSExceptions {
 
-		Address address = new Gson().fromJson(data, Address.class);
+		String addressDataJSON = getDetailsByPartitionKey(internalContractNumber,
+				ContractConstants.CONTRACT_SERVICE_SK_D410 + "_" + internalContractNumber);
 
-		return address;
+		if (addressDataJSON != null && addressDataJSON.length() > 0) {
+			Address address = new Gson().fromJson(addressDataJSON, Address.class);
+
+			return address;
+		}
+		return null;
+
 	}
-	
-	
 
 }

@@ -183,7 +183,7 @@ public class ContractServiceImpl implements ContractService {
 
 			mapContractData(contractDetail, contractMaster);
 			
-			List<CDFMaster> cdfMasterList = contractServiceDAO.getBuyerDetails(inPOLines.getContractNum());
+			List<CDFMaster> cdfMasterList = contractServiceDAO.getBuyerDetails(contractDetail.getInternalContractNumber());
 
 			String filterReporting = (!"G".equals(inPOLines.getRequisitionRecords().get(0).getReportingOffice()))
 					? inPOLines.getRequisitionRecords().get(0).getReportingOffice()
@@ -197,12 +197,14 @@ public class ContractServiceImpl implements ContractService {
 					*/
 			
 			CDFMaster cdfMasterFiltered =null;
-			
-			for(CDFMaster cdfMaster : cdfMasterList) {
-				if(filterReporting.equals(cdfMaster.getD430_rpt_off()) && contractMaster.getD402_byr_cd().equals(cdfMaster.getD430_bm_cd())) {
-					cdfMasterFiltered = cdfMaster;
+			if(cdfMasterList!=null) {
+				for(CDFMaster cdfMaster : cdfMasterList) {
+					if(filterReporting.equals(cdfMaster.getD430_rpt_off()) && contractMaster.getD402_byr_cd().equals(cdfMaster.getD430_bm_cd())) {
+						cdfMasterFiltered = cdfMaster;
+					}
 				}
 			}
+			
 				
 			if(cdfMasterFiltered!=null) {
 				contractDetail.setBuyerEmailAddress(cdfMasterFiltered.getD430_email_adrs());
