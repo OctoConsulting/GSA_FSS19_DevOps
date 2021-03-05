@@ -1,399 +1,237 @@
 package gov.gsa.fas.contractservice.model;
 
-import java.util.Map;
+import java.io.Serializable;
 
-public class ContractDataMaster {
+public class ContractDataMaster implements Serializable {
 
-	 private String d402_ACO;
-	 private String d402_accept_dys;
-	 private String d402_BYR_CD;
-	 private String d402_CECC;
-	 private String d402_CECS;
-	 private String d402_CECM;
-	 private String d402_CONT_NO;
-	 private String d402_DISC_TERMS;
-	 private String d402_FOB_CD;
-	 private String d402_PCT_VAR_MI;
-	 private String d402_PCT_VAR_PL;
-	 private String d402_SHIP_DEL_CD;
-	 private String d402_ARN_ARO_CD;
-	 private String d402_ARN_ARO_DYS;
-	 private String d402_SCH_CONT_NO;
-	 private String d402_pr_mthd;
-	 private String d402_cont_ind;
-	 private String d402_NOTE_CD;
-	 private String d402_CONT_BEG_DT;
-	 private String d402_CONT_END_DT;
-	 
-	 
-	 public String getD402_ACO() {
-		return d402_ACO;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	private String d402_sch_cont_no;
+	private String d402_cont_beg_dt;
+	private String d402_dt_terminated;
+	private String d402_accept_dys;
+	private String d402_ship_del_cd;
+	private String d402_aco;
+	private String d421_f_cont_no_ows;
+	private String d402_arn_aro_cd;
+	private String d402_note;
+	private String d402_fssi_type;
+	private String d402_arn_aro_dys;
+	private String d402_pct_var_mi;
+	private String d402_fob_cd;
+	private String d402_byr_cd;
+	private String d402_pr_mthd;
+	private String d421_f_cont_no;
+	private String d402_cecc;
+	private String d402_cont_end_dt;
+	private String d402_disc_terms;
+	private String d402_bpa_service_chg;
+	private String d402_dval_min_ord;
+	private String d402_cont_no;
+	private String d402_gsam_cont_no;
+	private String d402_cecm;
+	private String d402_cont_ind;
+	private String d402_rpt_off;
+	private String d402_cecs;
+	private String d402_cec;
+	private String d402_pct_var_pl;
+	private String d402_insp_cd;
+	private String d402_dval_max_ord;
+	
+	public String getD402_sch_cont_no() {
+		return d402_sch_cont_no;
 	}
-
-	public void setD402_ACO(String d402_ACO) {
-		this.d402_ACO = d402_ACO;
+	public void setD402_sch_cont_no(String d402_sch_cont_no) {
+		this.d402_sch_cont_no = d402_sch_cont_no;
 	}
-
+	public String getD402_cont_beg_dt() {
+		return d402_cont_beg_dt;
+	}
+	public void setD402_cont_beg_dt(String d402_cont_beg_dt) {
+		this.d402_cont_beg_dt = d402_cont_beg_dt;
+	}
+	public String getD402_dt_terminated() {
+		return d402_dt_terminated;
+	}
+	public void setD402_dt_terminated(String d402_dt_terminated) {
+		this.d402_dt_terminated = d402_dt_terminated;
+	}
 	public String getD402_accept_dys() {
 		return d402_accept_dys;
 	}
-
 	public void setD402_accept_dys(String d402_accept_dys) {
 		this.d402_accept_dys = d402_accept_dys;
 	}
-
-	public String getD402_BYR_CD() {
-		return d402_BYR_CD;
+	public String getD402_ship_del_cd() {
+		return d402_ship_del_cd;
 	}
-
-	public void setD402_BYR_CD(String d402_BYR_CD) {
-		this.d402_BYR_CD = d402_BYR_CD;
+	public void setD402_ship_del_cd(String d402_ship_del_cd) {
+		this.d402_ship_del_cd = d402_ship_del_cd;
 	}
-
-	public String getD402_CECC() {
-		return d402_CECC;
+	public String getD402_aco() {
+		return d402_aco;
 	}
-
-	public void setD402_CECC(String d402_CECC) {
-		this.d402_CECC = d402_CECC;
+	public void setD402_aco(String d402_aco) {
+		this.d402_aco = d402_aco;
 	}
-
-	public String getD402_CECS() {
-		return d402_CECS;
-	}
-
-	public void setD402_CECS(String d402_CECS) {
-		this.d402_CECS = d402_CECS;
-	}
-
-	public String getD402_CECM() {
-		return d402_CECM;
-	}
-
-	public void setD402_CECM(String d402_CECM) {
-		this.d402_CECM = d402_CECM;
-	}
-
-	public String getD402_CONT_NO() {
-		return d402_CONT_NO;
-	}
-
-	public void setD402_CONT_NO(String d402_CONT_NO) {
-		this.d402_CONT_NO = d402_CONT_NO;
-	}
-
-	public String getD402_DISC_TERMS() {
-		return d402_DISC_TERMS;
-	}
-
-	public void setD402_DISC_TERMS(String d402_DISC_TERMS) {
-		this.d402_DISC_TERMS = d402_DISC_TERMS;
-	}
-
-	public String getD402_FOB_CD() {
-		return d402_FOB_CD;
-	}
-
-	public void setD402_FOB_CD(String d402_FOB_CD) {
-		this.d402_FOB_CD = d402_FOB_CD;
-	}
-
-	public String getD402_PCT_VAR_MI() {
-		return d402_PCT_VAR_MI;
-	}
-
-	public void setD402_PCT_VAR_MI(String d402_PCT_VAR_MI) {
-		this.d402_PCT_VAR_MI = d402_PCT_VAR_MI;
-	}
-
-	public String getD402_PCT_VAR_PL() {
-		return d402_PCT_VAR_PL;
-	}
-
-	public void setD402_PCT_VAR_PL(String d402_PCT_VAR_PL) {
-		this.d402_PCT_VAR_PL = d402_PCT_VAR_PL;
-	}
-
-	public String getD402_SHIP_DEL_CD() {
-		return d402_SHIP_DEL_CD;
-	}
-
-	public void setD402_SHIP_DEL_CD(String d402_SHIP_DEL_CD) {
-		this.d402_SHIP_DEL_CD = d402_SHIP_DEL_CD;
-	}
-
-	public String getD402_ARN_ARO_CD() {
-		return d402_ARN_ARO_CD;
-	}
-
-	public void setD402_ARN_ARO_CD(String d402_ARN_ARO_CD) {
-		this.d402_ARN_ARO_CD = d402_ARN_ARO_CD;
-	}
-
-	public String getD402_ARN_ARO_DYS() {
-		return d402_ARN_ARO_DYS;
-	}
-
-	public void setD402_ARN_ARO_DYS(String d402_ARN_ARO_DYS) {
-		this.d402_ARN_ARO_DYS = d402_ARN_ARO_DYS;
-	}
-
-	public String getD402_SCH_CONT_NO() {
-		return d402_SCH_CONT_NO;
-	}
-
-	public void setD402_SCH_CONT_NO(String d402_SCH_CONT_NO) {
-		this.d402_SCH_CONT_NO = d402_SCH_CONT_NO;
-	}
-
-	public String getD402_pr_mthd() {
-		return d402_pr_mthd;
-	}
-
-	public void setD402_pr_mthd(String d402_pr_mthd) {
-		this.d402_pr_mthd = d402_pr_mthd;
-	}
-
-	public String getD402_cont_ind() {
-		return d402_cont_ind;
-	}
-
-	public void setD402_cont_ind(String d402_cont_ind) {
-		this.d402_cont_ind = d402_cont_ind;
-	}
-
-	public String getD402_NOTE_CD() {
-		return d402_NOTE_CD;
-	}
-
-	public void setD402_NOTE_CD(String d402_NOTE_CD) {
-		this.d402_NOTE_CD = d402_NOTE_CD;
-	}
-
-	public String getD402_CONT_BEG_DT() {
-		return d402_CONT_BEG_DT;
-	}
-
-	public void setD402_CONT_BEG_DT(String d402_CONT_BEG_DT) {
-		this.d402_CONT_BEG_DT = d402_CONT_BEG_DT;
-	}
-
-	public String getD402_CONT_END_DT() {
-		return d402_CONT_END_DT;
-	}
-
-	public void setD402_CONT_END_DT(String d402_CONT_END_DT) {
-		this.d402_CONT_END_DT = d402_CONT_END_DT;
-	}
-
-	public String getD402_DT_TERMINATED() {
-		return d402_DT_TERMINATED;
-	}
-
-	public void setD402_DT_TERMINATED(String d402_DT_TERMINATED) {
-		this.d402_DT_TERMINATED = d402_DT_TERMINATED;
-	}
-
-	public String getD402_rpt_off() {
-		return d402_rpt_off;
-	}
-
-	public void setD402_rpt_off(String d402_rpt_off) {
-		this.d402_rpt_off = d402_rpt_off;
-	}
-
-	public String getD402_FSSI_TYPE() {
-		return d402_FSSI_TYPE;
-	}
-
-	public void setD402_FSSI_TYPE(String d402_FSSI_TYPE) {
-		this.d402_FSSI_TYPE = d402_FSSI_TYPE;
-	}
-
-	public String getD402_INSP_CD() {
-		return d402_INSP_CD;
-	}
-
-	public void setD402_INSP_CD(String d402_INSP_CD) {
-		this.d402_INSP_CD = d402_INSP_CD;
-	}
-
-	public String getD402_DVAL_MIN_ORD() {
-		return d402_DVAL_MIN_ORD;
-	}
-
-	public void setD402_DVAL_MIN_ORD(String d402_DVAL_MIN_ORD) {
-		this.d402_DVAL_MIN_ORD = d402_DVAL_MIN_ORD;
-	}
-
-	public String getD402_BPA_SERVICE_CHG() {
-		return d402_BPA_SERVICE_CHG;
-	}
-
-	public void setD402_BPA_SERVICE_CHG(String d402_BPA_SERVICE_CHG) {
-		this.d402_BPA_SERVICE_CHG = d402_BPA_SERVICE_CHG;
-	}
-
-	public String getD402_DVAL_MAX_ORD() {
-		return d402_DVAL_MAX_ORD;
-	}
-
-	public void setD402_DVAL_MAX_ORD(String d402_DVAL_MAX_ORD) {
-		this.d402_DVAL_MAX_ORD = d402_DVAL_MAX_ORD;
-	}
-
 	public String getD421_f_cont_no_ows() {
 		return d421_f_cont_no_ows;
 	}
-
 	public void setD421_f_cont_no_ows(String d421_f_cont_no_ows) {
 		this.d421_f_cont_no_ows = d421_f_cont_no_ows;
 	}
-
-	public String getD410_MAIL_ADRS_PC() {
-		return d410_MAIL_ADRS_PC;
+	
+	public String getD402_arn_aro_cd() {
+		return d402_arn_aro_cd;
 	}
-
-	public void setD410_MAIL_ADRS_PC(String d410_MAIL_ADRS_PC) {
-		this.d410_MAIL_ADRS_PC = d410_MAIL_ADRS_PC;
+	public void setD402_arn_aro_cd(String d402_arn_aro_cd) {
+		this.d402_arn_aro_cd = d402_arn_aro_cd;
 	}
-
-	public String getD410_MAIL_ADRS1() {
-		return d410_MAIL_ADRS1;
+	public String getD402_note() {
+		return d402_note;
 	}
-
-	public void setD410_MAIL_ADRS1(String d410_MAIL_ADRS1) {
-		this.d410_MAIL_ADRS1 = d410_MAIL_ADRS1;
+	public void setD402_note(String d402_note) {
+		this.d402_note = d402_note;
 	}
-
-	public String getD410_MAIL_ADRS2l() {
-		return d410_MAIL_ADRS2l;
+	public String getD402_fssi_type() {
+		return d402_fssi_type;
 	}
-
-	public void setD410_MAIL_ADRS2l(String d410_MAIL_ADRS2l) {
-		this.d410_MAIL_ADRS2l = d410_MAIL_ADRS2l;
+	public void setD402_fssi_type(String d402_fssi_type) {
+		this.d402_fssi_type = d402_fssi_type;
 	}
-
-	public String getD410_MAIL_CITY_NM() {
-		return d410_MAIL_CITY_NM;
+	public String getD402_arn_aro_dys() {
+		return d402_arn_aro_dys;
 	}
-
-	public void setD410_MAIL_CITY_NM(String d410_MAIL_CITY_NM) {
-		this.d410_MAIL_CITY_NM = d410_MAIL_CITY_NM;
+	public void setD402_arn_aro_dys(String d402_arn_aro_dys) {
+		this.d402_arn_aro_dys = d402_arn_aro_dys;
 	}
-
-	public String getD410_MAIL_ST() {
-		return d410_MAIL_ST;
+	public String getD402_pct_var_mi() {
+		return d402_pct_var_mi;
 	}
-
-	public void setD410_MAIL_ST(String d410_MAIL_ST) {
-		this.d410_MAIL_ST = d410_MAIL_ST;
+	public void setD402_pct_var_mi(String d402_pct_var_mi) {
+		this.d402_pct_var_mi = d402_pct_var_mi;
 	}
-
-	public String getD410_MAIL_ZIP() {
-		return d410_MAIL_ZIP;
+	public String getD402_fob_cd() {
+		return d402_fob_cd;
 	}
-
-	public void setD410_MAIL_ZIP(String d410_MAIL_ZIP) {
-		this.d410_MAIL_ZIP = d410_MAIL_ZIP;
+	public void setD402_fob_cd(String d402_fob_cd) {
+		this.d402_fob_cd = d402_fob_cd;
 	}
-
-	public String getD410_MAIL_COUNTRY() {
-		return d410_MAIL_COUNTRY;
+	public String getD402_byr_cd() {
+		return d402_byr_cd;
 	}
-
-	public void setD410_MAIL_COUNTRY(String d410_MAIL_COUNTRY) {
-		this.d410_MAIL_COUNTRY = d410_MAIL_COUNTRY;
+	public void setD402_byr_cd(String d402_byr_cd) {
+		this.d402_byr_cd = d402_byr_cd;
 	}
-
-	public String getD410_MAIL_FOR_ST() {
-		return d410_MAIL_FOR_ST;
+	public String getD402_pr_mthd() {
+		return d402_pr_mthd;
 	}
-
-	public void setD410_MAIL_FOR_ST(String d410_MAIL_FOR_ST) {
-		this.d410_MAIL_FOR_ST = d410_MAIL_FOR_ST;
+	public void setD402_pr_mthd(String d402_pr_mthd) {
+		this.d402_pr_mthd = d402_pr_mthd;
 	}
-
-	public String getD410_ADRS1() {
-		return d410_ADRS1;
+	public String getD421_f_cont_no() {
+		return d421_f_cont_no;
 	}
-
-	public void setD410_ADRS1(String d410_ADRS1) {
-		this.d410_ADRS1 = d410_ADRS1;
+	public void setD421_f_cont_no(String d421_f_cont_no) {
+		this.d421_f_cont_no = d421_f_cont_no;
 	}
-
-	public String getD410_ADRS2() {
-		return d410_ADRS2;
+	public String getD402_cecc() {
+		return d402_cecc;
 	}
-
-	public void setD410_ADRS2(String d410_ADRS2) {
-		this.d410_ADRS2 = d410_ADRS2;
+	public void setD402_cecc(String d402_cecc) {
+		this.d402_cecc = d402_cecc;
 	}
-
-	public String getD410_ADRS3() {
-		return d410_ADRS3;
+	public String getD402_cont_end_dt() {
+		return d402_cont_end_dt;
 	}
-
-	public void setD410_ADRS3(String d410_ADRS3) {
-		this.d410_ADRS3 = d410_ADRS3;
+	public void setD402_cont_end_dt(String d402_cont_end_dt) {
+		this.d402_cont_end_dt = d402_cont_end_dt;
 	}
-
-	public String getD410_CITY_NAME() {
-		return d410_CITY_NAME;
+	public String getD402_disc_terms() {
+		return d402_disc_terms;
 	}
-
-	public void setD410_CITY_NAME(String d410_CITY_NAME) {
-		this.d410_CITY_NAME = d410_CITY_NAME;
+	public void setD402_disc_terms(String d402_disc_terms) {
+		this.d402_disc_terms = d402_disc_terms;
 	}
-
-	public String getD410_ST() {
-		return d410_ST;
+	public String getD402_bpa_service_chg() {
+		return d402_bpa_service_chg;
 	}
-
-	public void setD410_ST(String d410_ST) {
-		this.d410_ST = d410_ST;
+	public void setD402_bpa_service_chg(String d402_bpa_service_chg) {
+		this.d402_bpa_service_chg = d402_bpa_service_chg;
 	}
-
-	public String getD410_ZIP() {
-		return d410_ZIP;
+	public String getD402_dval_min_ord() {
+		return d402_dval_min_ord;
 	}
-
-	public void setD410_ZIP(String d410_ZIP) {
-		this.d410_ZIP = d410_ZIP;
+	public void setD402_dval_min_ord(String d402_dval_min_ord) {
+		this.d402_dval_min_ord = d402_dval_min_ord;
 	}
-
-	public Map<String, Notes> getNotesList() {
-		return notesList;
+	public String getD402_cont_no() {
+		return d402_cont_no;
 	}
-
-	public void setNotesList(Map<String, Notes> notesList) {
-		this.notesList = notesList;
+	public void setD402_cont_no(String d402_cont_no) {
+		this.d402_cont_no = d402_cont_no;
 	}
+	public String getD402_gsam_cont_no() {
+		return d402_gsam_cont_no;
+	}
+	public void setD402_gsam_cont_no(String d402_gsam_cont_no) {
+		this.d402_gsam_cont_no = d402_gsam_cont_no;
+	}
+	public String getD402_cecm() {
+		return d402_cecm;
+	}
+	public void setD402_cecm(String d402_cecm) {
+		this.d402_cecm = d402_cecm;
+	}
+	public String getD402_cont_ind() {
+		return d402_cont_ind;
+	}
+	public void setD402_cont_ind(String d402_cont_ind) {
+		this.d402_cont_ind = d402_cont_ind;
+	}
+	public String getD402_rpt_off() {
+		return d402_rpt_off;
+	}
+	public void setD402_rpt_off(String d402_rpt_off) {
+		this.d402_rpt_off = d402_rpt_off;
+	}
+	public String getD402_cecs() {
+		return d402_cecs;
+	}
+	public void setD402_cecs(String d402_cecs) {
+		this.d402_cecs = d402_cecs;
+	}
+	public String getD402_cec() {
+		return d402_cec;
+	}
+	public void setD402_cec(String d402_cec) {
+		this.d402_cec = d402_cec;
+	}
+	public String getD402_pct_var_pl() {
+		return d402_pct_var_pl;
+	}
+	public void setD402_pct_var_pl(String d402_pct_var_pl) {
+		this.d402_pct_var_pl = d402_pct_var_pl;
+	}
+	public String getD402_insp_cd() {
+		return d402_insp_cd;
+	}
+	public void setD402_insp_cd(String d402_insp_cd) {
+		this.d402_insp_cd = d402_insp_cd;
+	}
+	public String getD402_dval_max_ord() {
+		return d402_dval_max_ord;
+	}
+	public void setD402_dval_max_ord(String d402_dval_max_ord) {
+		this.d402_dval_max_ord = d402_dval_max_ord;
+	}
+	
+	
+	
+	
+	
 
-	private String d402_DT_TERMINATED;
-	 private String d402_rpt_off;
-	 private String d402_FSSI_TYPE;
-	 private String d402_INSP_CD;
-	 private String d402_DVAL_MIN_ORD;
-	 private String d402_BPA_SERVICE_CHG;
-	 private String d402_DVAL_MAX_ORD;
-	 
-	 private String d421_f_cont_no_ows;
-	 private String d410_MAIL_ADRS_PC;
-	 private String d410_MAIL_ADRS1;
-	 private String d410_MAIL_ADRS2l;
-	 private String d410_MAIL_CITY_NM;
-	 private String d410_MAIL_ST;
-	 private String d410_MAIL_ZIP;
-	 private String d410_MAIL_COUNTRY;
-	 private String d410_MAIL_FOR_ST;
-
-	 private String d410_ADRS1;
-	 private String d410_ADRS2;
-	 private String d410_ADRS3;
-	 private String d410_CITY_NAME;
-	 private String d410_ST;
-	 private String d410_ZIP;
-	 
-	 private Map<String,Notes> notesList;
 }
