@@ -2,7 +2,7 @@
     "name": "nsn-get-routing",
     "version": "1.0.0",
     "description": "Nsn Get Routing Lambda",
-    "main": "index.js",
+    "main": "dist/nsn-get-routing/service/index.js",
     "scripts": {
         "build-dev": "set NODE_ENV=development& webpack",
         "build-prod": "set NODE_ENV=production& webpack",
@@ -10,7 +10,10 @@
     },
     "license": "ISC",
     "dependencies": {
-        "@middy/core": "^1.5.2"
+        "@middy/core": "^1.5.2",
+        "serverless-dynamodb-local": "^0.2.39",
+        "serverless-offline": "^6.8.0",
+        "serverless-webpack": "^5.3.5"
     },
     "devDependencies": {
         "@types/aws-lambda": "^8.10.72",
