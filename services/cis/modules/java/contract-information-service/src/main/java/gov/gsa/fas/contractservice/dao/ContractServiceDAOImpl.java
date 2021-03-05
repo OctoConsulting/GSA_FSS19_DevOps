@@ -46,13 +46,6 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	public ContractDataMaster getContractByGSAM(String gsamContractNum) throws CCSExceptions {
 		try {
 			
-			App2 app2 = new App2();
-			try {
-				app2.insertdata(dynamoDBDefault);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			gsamContractNum = "GSAM_".concat(gsamContractNum);
 			String internalContractNumber = "";
 			List<String> internalContractNumberList = getContractInternalIDByGSI(gsamContractNum,
