@@ -19,3 +19,7 @@ services/cis/modules/java/contract-information-service/.mvn
 services/cis/modules/java/contract-information-service/.mvn/*
 services/cis/modules/java/contract-information-service/mvnw
 services/cis/modules/java/contract-information-service/mvnw.cmd
+*.jar
+*.so
+*.dll
+services/nsn/modules/nodejs/nsn-get-routing/.dynamodb/*
