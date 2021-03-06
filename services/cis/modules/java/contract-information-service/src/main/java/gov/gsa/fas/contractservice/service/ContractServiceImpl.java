@@ -44,9 +44,11 @@ public class ContractServiceImpl implements ContractService {
 
 	public List<CSDetailPO> getContractData(List<PORecordsType> inPORequest) {
 
+		logger.info("Begin of the getContractData() :: ");
 		inPORequest.forEach(x -> {
 			pOsResponse.add(validateRequest(x));
 		});
+		logger.info("End of the getContractData() :: ");
 		return pOsResponse;
 	}
 
@@ -58,6 +60,8 @@ public class ContractServiceImpl implements ContractService {
 	 */
 	private CSDetailPO validateRequest(PORecordsType inPOLines) {
 
+		logger.info("Begin of the validateRequest() :: ");
+		
 		CSDetailPO contractDetail = new CSDetailPO();
 		if (StringUtils.isNullOrEmpty(inPOLines.getContractNum())) {
 			contractDetail.setResult(ContractConstants.MISSING_CONTRACT_NUMBER);
@@ -83,6 +87,7 @@ public class ContractServiceImpl implements ContractService {
 			contractDetail.setResult(ContractConstants.MISSING_REPORTING_OFFICE);
 			return contractDetail;
 		}
+		logger.info("End of the validateRequest() :: ");
 		
 		return validateGetContractData(contractDetail,inPOLines);
 	}
@@ -142,14 +147,16 @@ public class ContractServiceImpl implements ContractService {
 	 */
 	private CSDetailPO validateGetContractData(CSDetailPO contractDetail, PORecordsType inPOLines) {
 
-		// data base call
+		logger.info("Begin of the validateRequest() :: ");
 		String[] currentDate = DateUtil.getDateTime();
 		String errorMessage = "";
 		try {
+			logger.info("Invoking Dynamodb data access getContractByGSAM()  :: ");
 			ContractServiceDAO contractServiceDAO = new ContractServiceDAOImpl();
 			ContractDataMaster contractMaster = contractServiceDAO.getContractByGSAM(inPOLines.getContractNum());
-			if(contractMaster == null) {
-				contractDetail.setResult(String.format(ContractConstants.JS000_CONTRACT_DATA,inPOLines.getContractNum()));
+			if (contractMaster == null) {
+				contractDetail
+						.setResult(String.format(ContractConstants.JS000_CONTRACT_DATA, inPOLines.getContractNum()));
 				return contractDetail;
 			}
 			contractDetail.setPurchaseOrderNumber(inPOLines.getPurchaseOrderNum());
@@ -182,51 +189,57 @@ public class ContractServiceImpl implements ContractService {
 			}
 
 			mapContractData(contractDetail, contractMaster);
+
+			logger.info("Invoking the data access getBuyerDetails() :: ");
 			
-			List<CDFMaster> cdfMasterList = contractServiceDAO.getBuyerDetails(contractDetail.getInternalContractNumber());
+			List<CDFMaster> cdfMasterList = contractServiceDAO
+					.getBuyerDetails(contractDetail.getInternalContractNumber());
 
 			String filterReporting = (!"G".equals(inPOLines.getRequisitionRecords().get(0).getReportingOffice()))
 					? inPOLines.getRequisitionRecords().get(0).getReportingOffice()
 					: contractMaster.getD402_rpt_off();
 
 			/*
-					Optional<CDFMaster> cdfMaster = Optional.ofNullable( cdfMasterList.stream()
-					.filter((buyer) -> buyer.getD430_rpt_off().equals(filterReporting)
-							&& buyer.getD430_bm_cd().equals(contractMaster.getD402_byr_cd()))
-					.findFirst().get());
-					*/
-			
-			CDFMaster cdfMasterFiltered =null;
-			if(cdfMasterList!=null) {
-				for(CDFMaster cdfMaster : cdfMasterList) {
-					if(filterReporting.equals(cdfMaster.getD430_rpt_off()) && contractMaster.getD402_byr_cd().equals(cdfMaster.getD430_bm_cd())) {
+			 * Optional<CDFMaster> cdfMaster = Optional.ofNullable( cdfMasterList.stream()
+			 * .filter((buyer) -> buyer.getD430_rpt_off().equals(filterReporting) &&
+			 * buyer.getD430_bm_cd().equals(contractMaster.getD402_byr_cd()))
+			 * .findFirst().get());
+			 */
+			logger.info("Filtered reporting office {}::",filterReporting);		
+			CDFMaster cdfMasterFiltered = null;
+			if (cdfMasterList != null) {
+				for (CDFMaster cdfMaster : cdfMasterList) {
+					if (filterReporting.equals(cdfMaster.getD430_rpt_off())
+							&& contractMaster.getD402_byr_cd().equals(cdfMaster.getD430_bm_cd())) {
 						cdfMasterFiltered = cdfMaster;
 					}
 				}
 			}
-			
-				
-			if(cdfMasterFiltered!=null) {
+
+			if (cdfMasterFiltered != null) {
 				contractDetail.setBuyerEmailAddress(cdfMasterFiltered.getD430_email_adrs());
 				contractDetail.setBuyerName(cdfMasterFiltered.getD430_bm_name());
 				contractDetail.setBuyerPhoneNumber(cdfMasterFiltered.getD430_bm_phone_no());
 				contractDetail.setSignatureName(cdfMasterFiltered.getD430_bm_name());
-			}else {
+			} else {
 				contractDetail.setResult(String.format(ContractConstants.JS004_CONTRACT_DATA,
 						contractDetail.getBuyerCode(), inPOLines.getRequisitionRecords().get(0).getReportingOffice()));
 				return contractDetail;
 			}
-			
+
 			if (inPOLines.getTotalPOCost().compareTo(new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt())) == 1
-					&& (cdfMasterFiltered.getD430_bm_cd_alt() == null || cdfMasterFiltered.getD430_bm_cd_alt().trim().length() < 2)) {
+					&& (cdfMasterFiltered.getD430_bm_cd_alt() == null
+							|| cdfMasterFiltered.getD430_bm_cd_alt().trim().length() < 2)) {
 				
-				String dlrLmtMsg = String.format(ContractConstants.JS005_CONTRACT_DATA, 
-						!StringUtils.isNullOrEmpty(contractDetail.getBuyerName())?contractDetail.getBuyerName():"",  
-						new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt()).intValue(), 
+				logger.info("Buyer Dollar Limit exceeded");
+				
+				String dlrLmtMsg = String.format(ContractConstants.JS005_CONTRACT_DATA,
+						!StringUtils.isNullOrEmpty(contractDetail.getBuyerName()) ? contractDetail.getBuyerName() : "",
+						new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt()).intValue(),
 						inPOLines.getTotalPOCost().toBigInteger().intValue());
-				
+
 				contractDetail.setResult(dlrLmtMsg);
-				
+
 				return contractDetail;
 			}
 
@@ -250,6 +263,8 @@ public class ContractServiceImpl implements ContractService {
 	 */
 	private void mapContractData(CSDetailPO contractDetail,ContractDataMaster contractMaster) {
 		
+		logger.info("Begin of the mapContractData() :: ");
+		
 		contractDetail.setACO(contractMaster.getD402_aco());
 		contractDetail.setAcceptDays(contractMaster.getD402_accept_dys());
 		contractDetail.setARNCode(contractMaster.getD402_arn_aro_cd());
@@ -263,6 +278,7 @@ public class ContractServiceImpl implements ContractService {
 		contractDetail.setPercentVariationPlus(contractMaster.getD402_pct_var_pl());
 		contractDetail.setShipDeliveryCode(contractMaster.getD402_ship_del_cd());
 		contractDetail.setPurchaseOrderContractNumber(contractMaster.getD421_f_cont_no_ows());
+		logger.info("End of the mapContractData() :: ");
 	}
 
 }

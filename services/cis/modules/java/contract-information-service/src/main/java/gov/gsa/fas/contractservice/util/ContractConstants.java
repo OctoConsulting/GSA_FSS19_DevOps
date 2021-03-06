@@ -74,13 +74,13 @@ public class ContractConstants {
 	public static final String MISSING_REQUISITION_NUMBER = "FAIL JS999: Missing Requisition Number";
 	public static final String MISSING_REPORTING_OFFICE = "FAIL JS999: Missing or bad Reporting Office value; The value submitted was: \"\"";
 	public static final String JS004_CONTRACT_DATA = "FAIL JS004: Buyer Code not defined for the Reporting Office : The Buyer code %1$s not defined in Reporting Office %2$s";
-	public static final String JS005_CONTRACT_DATA = "FAIL JS005: Buyer Dollar Limit exceeded:The Buyer/Spervisor %1$s has only $ %2$s and the PO Total Cost was %3$";
+	public static final String JS005_CONTRACT_DATA = "FAIL JS005: Buyer Dollar Limit exceeded:The Buyer/Spervisor %1$s has only $ %2$s and the PO Total Cost was %3$s";
 	public static final String JS000_CONTRACT_DATA = "FAIL " + "JS000: Contract not found Contract %1$s is not a valid contract number";
 	
 	
 	public static final String INVALID_DATA_CONTRACT_NUMBER_JS007 = "JS007_Invalid Contract Number -";
 	
-	public static final String INVALID_DATA_DUNS_NUMBER_JS007 = "JS007_Invalid Duns Number ";
+	public static final String INVALID_DATA_DUNS_NUMBER_JS007 = "JS007_Invalid Data Request- Invalid Entity ID";
 	
 	public static final String FAULT_CODE = "soap:Server";
 	

@@ -61,6 +61,8 @@ module.exports = {
         domainName: '9fm5wo8et6.execute-api.us-east-1.amazonaws.com',
         apiId: '9fm5wo8et6',
     },
-    body: 'Good',
+
+    body: 'Good-test',
+
     isBase64Encoded: false,
 };

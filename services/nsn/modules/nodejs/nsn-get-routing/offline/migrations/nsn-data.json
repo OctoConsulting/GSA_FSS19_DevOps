@@ -1,0 +1,49 @@
+{
+    "Table": {
+        "TableName": "nsn_data",
+        "KeySchema":[
+            {
+                "AttributeName": "group_id",
+                "KeyType": "HASH"
+            },
+            {
+                "AttributeName": "routing_id",
+                "KeyType": "S"
+            }
+        ],
+        "AttributeDefinitions":[
+            {
+                "AttributeName": "group_id",
+                "AttributeType": "N"
+            },
+            {
+                "AttributeName": "routing_id",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "isCivMgr",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "isMilMgr",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "ric",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "createdBy",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "createDate",
+                "AttributeType": "S"
+            }
+        ],
+        "ProvisionedThroughput":{
+            "ReadCapacityUnits": 1,
+            "WriteCapacityUnits": 1
+        }
+    }
+}
