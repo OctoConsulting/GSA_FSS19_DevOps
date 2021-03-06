@@ -135,7 +135,7 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 
 		if (System.getenv(ContractConstants.SHORT_ENV) != null
 				&& System.getenv(ContractConstants.SHORT_ENV).trim().length() > 0) {
-			return ContractConstants.CONTRACT_SERVICE_TABLE_NAME_PREFIX + ContractConstants.SHORT_ENV;
+			return ContractConstants.CONTRACT_SERVICE_TABLE_NAME_PREFIX + System.getenv(ContractConstants.SHORT_ENV);
 		}
 		return ContractConstants.CONTRACT_SERVICE_TABLE_NAME;
 	}
