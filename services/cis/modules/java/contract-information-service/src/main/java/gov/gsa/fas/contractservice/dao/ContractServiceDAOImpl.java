@@ -24,7 +24,6 @@ import com.google.gson.Gson;
 
 import gov.gsa.fas.contractservice.exception.CCSExceptions;
 import gov.gsa.fas.contractservice.model.Address;
-import gov.gsa.fas.contractservice.model.App2;
 import gov.gsa.fas.contractservice.model.CDFMaster;
 import gov.gsa.fas.contractservice.model.ContractDataMaster;
 import gov.gsa.fas.contractservice.util.ContractConstants;
@@ -37,10 +36,6 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 					ContractConstants.DB_CONNECTION_END_POINT, ContractConstants.REGION))
 			.build();
 	DynamoDB dynamoDB = new DynamoDB(client);
-
-	AmazonDynamoDB clientDefault = AmazonDynamoDBClientBuilder.defaultClient();
-
-	DynamoDB dynamoDBDefault = new DynamoDB(clientDefault);
 
 	@Override
 	public ContractDataMaster getContractByGSAM(String gsamContractNum) throws CCSExceptions {
@@ -94,7 +89,7 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 		ItemCollection<QueryOutcome> items = index.query(spec);
 		Iterator<Item> iterator = items.iterator();
 		Item item1 = null;
-		while (iterator.hasNext()) {
+		while (iterator!=null && iterator.hasNext()) {
 			item1 = iterator.next();
 			internalContractList.add(item1.getString(ContractConstants.CONTRACT_SERVICE_PK));
 
@@ -128,6 +123,9 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 
 		if (System.getenv(ContractConstants.SHORT_ENV) != null
 				&& System.getenv(ContractConstants.SHORT_ENV).trim().length() > 0) {
+			AmazonDynamoDB clientDefault = AmazonDynamoDBClientBuilder.standard().build();
+
+			DynamoDB dynamoDBDefault = new DynamoDB(clientDefault);
 			return dynamoDBDefault;
 		}
 		return dynamoDB;
