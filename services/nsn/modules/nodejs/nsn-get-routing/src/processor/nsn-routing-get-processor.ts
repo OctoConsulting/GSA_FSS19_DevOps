@@ -2,11 +2,11 @@
 
 import { NsnData } from '../model/nsn-data';
 import { DynamoDB } from '../../node_modules/aws-sdk';
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+import { APIGatewayProxyEvent, APIGatewayProxyResult, Context} from 'aws-lambda'
 import {dynamoDocumentClient, getSettings} from "../config"
 import {apiResponses, response} from "../model/responseAPI"
 
-export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
 
     console.log('Getting the NSN data - '+event.pathParameters);
     if(event.pathParameters === null){
@@ -66,9 +66,4 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
       return apiResponses._500({message: "Error fetching record for NSN id - "+routingId});
     }
   
-}
-
-
-module.exports = {
-  getNsn: getNsn
 }

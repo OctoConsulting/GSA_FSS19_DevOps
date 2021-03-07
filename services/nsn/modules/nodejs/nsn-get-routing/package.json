@@ -2,24 +2,34 @@
     "name": "nsn-get-routing",
     "version": "1.0.0",
     "description": "Nsn Get Routing Lambda",
-    "main": "dist/nsn-get-routing/service/index.js",
+    "main": "index.js",
+    "directories": {
+        "test": "test"
+    },
     "scripts": {
         "build-dev": "set NODE_ENV=development& webpack",
         "build-prod": "set NODE_ENV=production& webpack",
-        "serve": "set NODE_ENV=development& webpack --mode development --watch"
+        "serve": "set NODE_ENV=development& webpack --mode development --watch",
+        "test": "mocha 'test/processor/nsn-routing-get-processor.test.ts"
     },
     "license": "ISC",
     "dependencies": {
         "@middy/core": "^1.5.2",
+        "chai": "^4.3.3",
         "serverless-dynamodb-local": "^0.2.39",
         "serverless-offline": "^6.8.0",
         "serverless-webpack": "^5.3.5"
     },
     "devDependencies": {
         "@types/aws-lambda": "^8.10.72",
+        "@types/chai": "^4.2.15",
+        "@types/mocha": "^8.2.1",
+        "@types/nock": "^11.1.0",
         "@types/node": "^14.14.31",
         "aws-sdk": "^2.853.0",
+        "nock": "^13.0.10",
         "ts-loader": "^8.0.17",
+        "ts-node": "^9.1.1",
         "typescript": "^4.2.2",
         "webpack": "^5.24.2",
         "webpack-cli": "^4.5.0",

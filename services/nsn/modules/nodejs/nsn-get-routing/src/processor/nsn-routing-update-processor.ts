@@ -1,12 +1,11 @@
 'use strict';
 
 import { NsnData } from '../model/nsn-data';
-import { DynamoDB } from 'aws-sdk';
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda'
 import {dynamoDocumentClient, getSettings} from "../config"
 import {apiResponses} from '../model/responseAPI'
 
-export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const putNsn = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
 
     console.log('Updating the NSN data - '+event);
     if(event.body === null){
@@ -55,9 +54,4 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         console.log("Error while updating - "+err);
         return apiResponses._500({message: 'Error updating NSN record for routing ID - '+routing_id});
     }
-}
-
-
-module.exports = {
-    putNsn: putNsn
 }
