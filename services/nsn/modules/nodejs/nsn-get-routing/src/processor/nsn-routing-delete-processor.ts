@@ -1,12 +1,10 @@
 'use strict';
 
-import { NsnData } from '../model/nsn-data';
-import { DynamoDB } from 'aws-sdk';
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda'
 import {dynamoDocumentClient, getSettings} from "../config"
 import {apiResponses} from '../model/responseAPI'
 
-export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const deleteNsn = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
 
     console.log('Getting the NSN data - '+event.pathParameters);
     if(event.pathParameters === null){
@@ -42,9 +40,4 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
       console.log("Error >>>>>> "+err)
       return apiResponses._500({message: 'Error deleting record for NSN id - '+routingId})
     }
-}
-
-
-module.exports = {
-  deleteNsn: deleteNsn
 }
