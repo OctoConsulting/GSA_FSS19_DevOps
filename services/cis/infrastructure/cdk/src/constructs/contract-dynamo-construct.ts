@@ -1,10 +1,13 @@
 import * as cdk from '@aws-cdk/core';
 import { ContractDynamoConstructParms } from '../models/contract/contract-dynamo-construct-parms';
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
+import { constants } from '../models/constants';
 export class ContractDynamoConstruct extends cdk.Construct {
     private contractTable: dynamodb.Table;
     private props: ContractDynamoConstructParms;
 
+    private pk_attr_name = 'internal_contract_number';
+    private sk_attr_name = 'contract_details_identity';
     constructor(parent: cdk.Construct, id: string, props: ContractDynamoConstructParms) {
         super(parent, id);
         this.props = props;
@@ -31,8 +34,8 @@ export class ContractDynamoConstruct extends cdk.Construct {
     private createMainTable() {
         this.contractTable = new dynamodb.Table(this, 'dynamodb-table', {
             tableName: `contract-${this.props.shortEnv}`,
-            partitionKey: { name: 'contractId', type: dynamodb.AttributeType.STRING },
-            sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
+            partitionKey: { name: this.pk_attr_name, type: dynamodb.AttributeType.STRING },
+            sortKey: { name: this.sk_attr_name, type: dynamodb.AttributeType.STRING },
             pointInTimeRecovery: true,
             billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
             encryption: this.props.enableEncryptionAtRest
@@ -44,9 +47,9 @@ export class ContractDynamoConstruct extends cdk.Construct {
 
     private addGSI() {
         this.contractTable.addGlobalSecondaryIndex({
-            indexName: 'by_sk',
+            indexName: constants.BY_CONTRACT_DETAILS_IDENTITY_GSI_NAME,
             partitionKey: {
-                name: 'sk',
+                name: this.sk_attr_name,
                 type: dynamodb.AttributeType.STRING,
             },
             projectionType: dynamodb.ProjectionType.KEYS_ONLY,

@@ -14,11 +14,13 @@
     },
     "license": "ISC",
     "dependencies": {
+
         "@middy/core": "^1.5.2",
         "chai": "^4.3.3",
         "serverless-dynamodb-local": "^0.2.39",
         "serverless-offline": "^6.8.0",
         "serverless-webpack": "^5.3.5"
+
     },
     "devDependencies": {
         "@types/aws-lambda": "^8.10.72",

@@ -20,10 +20,10 @@ export class ApiGatewayConstruct extends cdk.Construct {
         this.addRoute53Alias();
     }
     private addApiResourcesAndMethods() {
-        const baseResource = this.restApi.root.addResource('nsnclassgroup').addResource('v1').addResource('routing');
+        const baseResource = this.restApi.root.addResource('nsnrouting').addResource('v1').addResource('details');
         this.addPostRoutingIntegration(baseResource);
         this.addPutRoutingIntegration(baseResource);
-        this.addGetRoutingIntegration(baseResource);
+        this.addGetAndDeleteRoutingIntegration(baseResource);
     }
 
     private addPostRoutingIntegration(baseResource: apigw.Resource) {
@@ -38,23 +38,23 @@ export class ApiGatewayConstruct extends cdk.Construct {
     private addPutRoutingIntegration(baseResource: apigw.Resource) {
         baseResource.addMethod(
             'PUT',
-            new apigw.LambdaIntegration(this.props.lambdaFunctions.postRoutingLambda!, {
+            new apigw.LambdaIntegration(this.props.lambdaFunctions.putRoutingLambda!, {
                 credentialsRole: this.apiRole,
             })
         );
     }
 
-    private addGetRoutingIntegration(baseResource: apigw.Resource) {
-        baseResource.addResource('{queryString}').addMethod(
+    private addGetAndDeleteRoutingIntegration(baseResource: apigw.Resource) {
+        const routingMethod = baseResource.addResource('{routingId}');
+
+        routingMethod.addMethod(
             'GET',
             new apigw.LambdaIntegration(this.props.lambdaFunctions.getRoutingLambda!, {
                 credentialsRole: this.apiRole,
             })
         );
-    }
 
-    private addDeleteRoutingIntegration(baseResource: apigw.Resource) {
-        baseResource.addResource('{routingId}').addMethod(
+        routingMethod.addMethod(
             'DELETE',
             new apigw.LambdaIntegration(this.props.lambdaFunctions.deleteRoutingLambda!, {
                 credentialsRole: this.apiRole,
