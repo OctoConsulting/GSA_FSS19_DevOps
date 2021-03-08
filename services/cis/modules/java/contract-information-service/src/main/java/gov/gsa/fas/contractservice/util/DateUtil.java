@@ -10,6 +10,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,37 +95,36 @@ public class DateUtil {
 
 	}
 
-	public static String julianToGregf2(String julian) throws java.text.ParseException {
-		String greg = "";
-
-		try {
-			SimpleDateFormat sdf = new SimpleDateFormat(ContractConstants.JULIANDATE_FORMAT);
-			java.util.Date date = sdf.parse(julian);
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(date);
-			SimpleDateFormat sdf2 = new SimpleDateFormat(ContractConstants.YYYYMMDD_FORMAT);
-
-			greg = sdf2.format(date);
-		} catch (ParseException ex) {
-			LOGGER.error(DATE_ERROR_TEXT + ex.getLocalizedMessage(), ex);
+	public static String julianToGregf2(String julian) {
+		if(StringUtils.isNotBlank(julian)) {
+			try {
+				SimpleDateFormat sdf = new SimpleDateFormat(ContractConstants.JULIANDATE_FORMAT);
+				java.util.Date date = sdf.parse(julian);
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(date);
+				SimpleDateFormat sdf2 = new SimpleDateFormat(ContractConstants.YYYYMMDD_FORMAT);
+	
+				return sdf2.format(date);
+			} catch (ParseException ex) {
+				LOGGER.error(DATE_ERROR_TEXT + ex.getLocalizedMessage(), ex);
+			}
 		}
-		return greg;
-
+		return null;
 	}
 
-	public static XMLGregorianCalendar stringToXMLGregorianCalendar(String s)
-			throws ParseException, DatatypeConfigurationException, java.text.ParseException {
-		XMLGregorianCalendar result = null;
-		Date date;
-		SimpleDateFormat simpleDateFormat;
-		GregorianCalendar gregorianCalendar;
-		simpleDateFormat = new SimpleDateFormat(ContractConstants.YYYYMMDD_FORMAT);
-		date = simpleDateFormat.parse(s);
-		gregorianCalendar = (GregorianCalendar) GregorianCalendar.getInstance();
-		gregorianCalendar.setTime(date);
-		result = DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);
-		return result;
-
+	public static XMLGregorianCalendar stringToXMLGregorianCalendar(String s) {
+		if(StringUtils.isNotBlank(s)) {
+			try {
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(ContractConstants.YYYYMMDD_FORMAT);
+				Date date = simpleDateFormat.parse(s);
+				GregorianCalendar gregorianCalendar = (GregorianCalendar) GregorianCalendar.getInstance();
+				gregorianCalendar.setTime(date);
+				return DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);
+			} catch (ParseException | DatatypeConfigurationException ex) {
+				LOGGER.error(DATE_ERROR_TEXT + ex.getLocalizedMessage(), ex);
+			}
+		}
+		return null;
 	}
 
 	public static int dateCompare(String date1, String date2) throws java.text.ParseException {

@@ -22,7 +22,7 @@ public class ListContractsServiceHandler implements RequestHandler<RequestWrappe
 
 		RequestWrapper wrapper =new RequestWrapper();
 		PathParameters pathParams = new PathParameters();
-		pathParams.setEntityid("12345678");
+		pathParams.setEntityid("080970255");
 		wrapper.setPathParameters(pathParams);
 		wrapper.setBody(ContractConstants.TEST_MULTIPLE_PO_BODY);
 		RequestWrapper outputStream = s.handleRequest(wrapper, null);
