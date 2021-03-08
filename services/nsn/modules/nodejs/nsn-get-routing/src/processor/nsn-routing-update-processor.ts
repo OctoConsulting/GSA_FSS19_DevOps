@@ -41,6 +41,8 @@ export const putNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
         isCivMgr,
         isMilMgr,
         ric,
+        createDate: updateNsnData.Item.createDate,
+        createdBy: updateNsnData.Item.createdBy,
     };
 
     try {
