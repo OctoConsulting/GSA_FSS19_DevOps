@@ -428,9 +428,9 @@ public class ContractServiceImpl implements ContractService {
 						String wstate = address.getD410_mail_st();
 						String wzip = address.getD410_mail_zip();
 	
-						wadrs1 = StringUtils.right(StringUtils.defaultString(wadrs1, ""), 32);
-						wadrs2 = StringUtils.right(StringUtils.defaultString(wadrs2, "-"), 32);
-						wadrs3 = StringUtils.right(StringUtils.defaultString(wadrs3, ""), 32);
+						wadrs1 = StringUtils.rightPad(StringUtils.defaultString(wadrs1, ""), 32);
+						wadrs2 = StringUtils.rightPad(StringUtils.defaultString(wadrs2, "-"), 32);
+						wadrs3 = StringUtils.rightPad(StringUtils.defaultString(wadrs3, ""), 32);
 						
 						if (wadrs3 != null && wadrs3.trim().length() > 0) {
 							contractorAddress.append(wadrs1.substring(0, 32) + wadrs2.substring(0, 32) + wadrs3.substring(0, 32)
@@ -449,9 +449,9 @@ public class ContractServiceImpl implements ContractService {
 						String wstate = address.getD410_st();
 						String wzip = address.getD410_zip();
 	
-						wadrs1 = StringUtils.right(StringUtils.defaultString(wadrs1, ""), 32);
-						wadrs2 = StringUtils.right(StringUtils.defaultString(wadrs2, "-"), 32);
-						wadrs3 = StringUtils.right(StringUtils.defaultString(wadrs3, ""), 32);
+						wadrs1 = StringUtils.rightPad(StringUtils.defaultString(wadrs1, ""), 32);
+						wadrs2 = StringUtils.rightPad(StringUtils.defaultString(wadrs2, "-"), 32);
+						wadrs3 = StringUtils.rightPad(StringUtils.defaultString(wadrs3, ""), 32);
 	
 						if (wadrs3 != null && wadrs3.trim().length() > 0) {
 							contractorAddress.append(wadrs1.substring(0, 32) + wadrs2.substring(0, 32) + wadrs3.substring(0, 32)
