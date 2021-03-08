@@ -18,6 +18,9 @@ export const postNsn = async (event: APIGatewayProxyEvent, context: Context): Pr
     if (!group_id) {
         return apiResponses._400({ message: 'Group id is mandetory to create NSN record' });
     }
+    if (isNaN(group_id)) {
+        return apiResponses._400({ message: 'Group id should be numeric' });
+    }
     console.log('3 ' + routing_id);
     const params = {
         TableName: getSettings().TABLE_NAME,
