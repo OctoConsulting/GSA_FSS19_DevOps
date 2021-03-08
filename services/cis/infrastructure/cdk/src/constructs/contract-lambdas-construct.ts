@@ -3,6 +3,7 @@ import { ContractLambdasConstructParms } from '../models/contract/contract-lambd
 import { LambdaConstruct } from './shared/lambda-construct';
 import { LambdaConstructProps } from '../models/lambda-construct-props';
 import { ContractLambdaFunctions } from '../models/contract/contract-lambda-functions';
+import { constants } from '../models/constants';
 
 export class ContractLambdasConstruct extends cdk.Construct {
     private jarPathInsideModules =
@@ -24,6 +25,8 @@ export class ContractLambdasConstruct extends cdk.Construct {
             assetLocation: `../../modules/${this.jarPathInsideModules}`,
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
+                TABLE_NAME: this.props.contractTable.tableName,
+                GSI_BY_CONTRACT_DETAILS_INDEITTY: constants.BY_CONTRACT_DETAILS_IDENTITY_GSI_NAME,
             },
             handler: 'gov.gsa.fas.contractservice.handler.ContractDetailsServiceHandler::handleRequest',
             type: LambdaConstructProps.LambdaTypeEnum.JAVA,
@@ -42,6 +45,8 @@ export class ContractLambdasConstruct extends cdk.Construct {
             assetLocation: `../../modules/${this.jarPathInsideModules}`,
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
+                TABLE_NAME: this.props.contractTable.tableName,
+                GSI_BY_CONTRACT_DETAILS_INDEITTY: constants.BY_CONTRACT_DETAILS_IDENTITY_GSI_NAME,
             },
             handler: 'gov.gsa.fas.contractservice.handler.ListContractsServiceHandler::handleRequest',
             type: LambdaConstructProps.LambdaTypeEnum.JAVA,
@@ -60,6 +65,8 @@ export class ContractLambdasConstruct extends cdk.Construct {
             assetLocation: `../../modules/${this.jarPathInsideModules}`,
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
+                TABLE_NAME: this.props.contractTable.tableName,
+                GSI_BY_CONTRACT_DETAILS_INDEITTY: constants.BY_CONTRACT_DETAILS_IDENTITY_GSI_NAME,
             },
             handler: 'gov.gsa.fas.contractservice.handler.ServiceHandler::handleRequest',
             type: LambdaConstructProps.LambdaTypeEnum.JAVA,
