@@ -18,6 +18,7 @@ import gov.gsa.fas.contractservice.contract.CSDetailPO;
 import gov.gsa.fas.contractservice.contract.GetContractDataResponse;
 import gov.gsa.fas.contractservice.contract.PORecordsType;
 import gov.gsa.fas.contractservice.contract.PORequestType;
+import gov.gsa.fas.contractservice.exception.ApplicationException;
 
 public class ServiceHandler implements RequestHandler<RequestWrapper, RequestWrapper> {
 	
@@ -71,8 +72,10 @@ public class ServiceHandler implements RequestHandler<RequestWrapper, RequestWra
 			List<CSDetailPO> csDetails = contractService.getContractData(inPORecords);
 			finalPORes.setCSDetails(csDetails);
 			inputStream.setBody(ContractServiceUtil.marshall(finalPORes));
-		} catch (Exception e) {
+		} catch (ApplicationException e) {
 			logger.error("Exception in ServiceHandler.handleRequest ", e);
+			inputStream.setBody(ContractServiceUtil.marshallException(ContractConstants.FAULT_CODE, ContractConstants.J020_CS_EXCEPTION));
+			return inputStream;
 		}
 		return inputStream;
 
