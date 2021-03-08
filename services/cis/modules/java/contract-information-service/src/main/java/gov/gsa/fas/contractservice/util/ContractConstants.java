@@ -80,7 +80,10 @@ public class ContractConstants {
 	
 	public static final String INVALID_DATA_CONTRACT_NUMBER_JS007 = "JS007_Invalid Contract Number -";
 	
-	public static final String INVALID_DATA_DUNS_NUMBER_JS007 = "JS007_Invalid Data Request- Invalid Entity ID";
+	public static final String JS007_INVALID_ENTITY_ID = "JS007_Invalid Data Request- Invalid Entity ID";
+	public static final String JS007_NO_CONTRACTS_ENTITY_ID = "JS007_No contracts for the Entity ID";
+	
+	public static final String J020_CS_EXCEPTION = "J020_CSException";
 	
 	public static final String FAULT_CODE = "soap:Server";
 	
