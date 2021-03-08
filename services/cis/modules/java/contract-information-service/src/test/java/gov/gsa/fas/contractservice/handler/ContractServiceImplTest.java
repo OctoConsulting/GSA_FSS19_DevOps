@@ -171,7 +171,7 @@ public class ContractServiceImplTest {
 	public void testGetContractDetailsResponse() {	
 		RequestWrapper inputStream = new RequestWrapper();
 		RequestWrapper responseStream = contractService.getContractDetailsResponse(inputStream);
-		assertTrue(responseStream.getBody().contains(ContractConstants.INVALID_DATA_CONTRACT_NUMBER_JS007));
+		assertTrue(responseStream.getBody().contains(ContractConstants.JS007_INVALID_DATA_CONTRACT_NUMBER));
 	}
 	
 	@Test
@@ -181,14 +181,14 @@ public class ContractServiceImplTest {
 		pathParams.setContractid("123456789");
 		inputStream.setPathParameters(pathParams);
 		RequestWrapper responseStream = contractService.getContractDetailsResponse(inputStream);
-		assertTrue(!responseStream.getBody().contains(ContractConstants.INVALID_DATA_CONTRACT_NUMBER_JS007));
+		assertTrue(!responseStream.getBody().contains(ContractConstants.JS007_INVALID_DATA_CONTRACT_NUMBER));
 	}
 	
 	@Test
 	public void testListContractsResponseNull() {	
 		RequestWrapper inputStream = new RequestWrapper();
 		RequestWrapper responseStream = contractService.getListContractResponse(inputStream);
-		assertTrue(responseStream.getBody().contains(ContractConstants.INVALID_DATA_DUNS_NUMBER_JS007));
+		assertTrue(responseStream.getBody().contains(ContractConstants.JS007_INVALID_ENTITY_ID));
 	}
 	
 	@Test
@@ -198,7 +198,7 @@ public class ContractServiceImplTest {
 		pathParams.setEntityid("123456789");
 		inputStream.setPathParameters(pathParams);
 		RequestWrapper responseStream = contractService.getListContractResponse(inputStream);
-		assertTrue(!responseStream.getBody().contains(ContractConstants.INVALID_DATA_DUNS_NUMBER_JS007));
+		assertTrue(!responseStream.getBody().contains(ContractConstants.JS007_INVALID_ENTITY_ID));
 	}
 
 }
