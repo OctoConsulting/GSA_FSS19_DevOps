@@ -43,8 +43,7 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 			
 			gsamContractNum = "GSAM_".concat(gsamContractNum);
 			String internalContractNumber = "";
-			List<String> internalContractNumberList = getContractInternalIDByGSI(gsamContractNum,
-					ContractConstants.CONTRACT_SERVICE_SK_D402); // refactor to pass the sortKey
+			List<String> internalContractNumberList = getInternalContractNumber(gsamContractNum);
 			if (internalContractNumberList != null && internalContractNumberList.size() > 0) {
 				internalContractNumber = internalContractNumberList.get(0);
 			}
@@ -58,8 +57,8 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 		} catch (AmazonDynamoDBException ex) {
 			throw new CCSExceptions(ex.getErrorMessage(), ex);
 		}
-
 	}
+		
 
 	/***
 	 * get any detail by passing gsi and sort key value this method returns the
@@ -70,9 +69,7 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	 * @param dynamoDB
 	 * @return
 	 */
-	private List<String> getContractInternalIDByGSI(String gsiValue, String sortKeyValue)
-			throws AmazonDynamoDBException {
-
+	public List<String> getInternalContractNumber(String gsiValue) throws AmazonDynamoDBException {
 		List<String> internalContractList = new ArrayList<String>();
 
 		DynamoDB db = getDynamoDB();
@@ -82,7 +79,6 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 		Index index = table.getIndex(ContractConstants.CONTRACT_SERVICE_GSI_IDX);
 
 		QuerySpec spec = new QuerySpec()
-
 				.withKeyConditionExpression(ContractConstants.CONTRACT_SERVICE_GSI + " = :gsam_cont_no")
 				.withValueMap(new ValueMap().withString(":gsam_cont_no", gsiValue));
 
@@ -92,12 +88,11 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 		while (iterator!=null && iterator.hasNext()) {
 			item1 = iterator.next();
 			internalContractList.add(item1.getString(ContractConstants.CONTRACT_SERVICE_PK));
-
 		}
 		return internalContractList;
 	}
 
-	private String getDetailsByPartitionKey(String partitionKey, String sortKey) {
+	public String getDetailsByPartitionKey(String partitionKey, String sortKey) {
 
 		DynamoDB db = getDynamoDB();
 		Table table = db.getTable(getDynamoDBTable());
@@ -156,7 +151,6 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 
 	@Override
 	public Address getAddressDetail(String internalContractNumber) throws CCSExceptions {
-
 		String addressDataJSON = getDetailsByPartitionKey(internalContractNumber,
 				ContractConstants.CONTRACT_SERVICE_SK_D410 + "_" + internalContractNumber);
 
@@ -166,7 +160,6 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 			return address;
 		}
 		return null;
-
 	}
 
 }
