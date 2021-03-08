@@ -1,3 +1,9 @@
+export const response = function(statusCode: number, body: { [key: string]: any }) {
+    return {
+      statusCode: statusCode,
+      body: JSON.stringify(body, null, 2),
+  };
+}
 
 export const apiResponses = {
     _200: (body: { [key: string]: any }) => {
