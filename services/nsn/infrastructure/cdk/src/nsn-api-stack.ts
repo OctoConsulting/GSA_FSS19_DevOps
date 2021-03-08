@@ -30,7 +30,7 @@ export class NsnApiStack extends cdk.Stack {
         new ApiGatewayConstruct(this, 'api', {
             envParameters: envParameters,
             lambdaFunctions: {
-                deleteRoutingLambda: lambdas.getLambdaFunctions().postRoutingLambda,
+                deleteRoutingLambda: lambdas.getLambdaFunctions().deleteRoutingLambda,
                 getRoutingLambda: lambdas.getLambdaFunctions().getRoutingLambda,
                 postRoutingLambda: lambdas.getLambdaFunctions().postRoutingLambda,
                 putRoutingLambda: lambdas.getLambdaFunctions().putRoutingLambda,
