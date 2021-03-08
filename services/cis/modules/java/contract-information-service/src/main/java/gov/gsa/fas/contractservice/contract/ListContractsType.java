@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ListContractsType", propOrder = {
+@XmlType(name = "listContractsResponse", propOrder = {
     "contracts"
 })
 public class ListContractsType {

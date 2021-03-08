@@ -85,7 +85,7 @@ public class ContractConstants {
 	
 	public static final String J020_CS_EXCEPTION = "J020_CSException";
 	
-	public static final String FAULT_CODE = "soap:Server";
+	public static final String FAULT_CODE = "Server";
 	
 	// Error Codes ContractDetails
 	
