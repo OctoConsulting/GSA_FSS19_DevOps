@@ -81,7 +81,8 @@ public class ContractConstants {
 	public static final String JS007_INVALID_DATA_CONTRACT_NUMBER = "JS007_Invalid Contract Number -";
 	
 	public static final String JS007_INVALID_ENTITY_ID = "JS007_Invalid Data Request- Invalid Entity ID";
-	public static final String JS007_NO_CONTRACTS_ENTITY_ID = "JS007_No contracts for the Entity ID";
+	public static final String JS007_NO_CONTRACTS_ENTITY_ID = "Data Unavailable – Resend the request";
+	public static final String J090_INVALID_DATA = "Invalid Data Request";
 	
 	public static final String J020_CS_EXCEPTION = "J020_CSException";
 	
