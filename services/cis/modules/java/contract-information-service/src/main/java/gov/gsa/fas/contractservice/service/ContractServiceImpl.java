@@ -25,6 +25,7 @@ import gov.gsa.fas.contractservice.util.ContractConstants;
 import gov.gsa.fas.contractservice.util.ContractServiceUtil;
 import gov.gsa.fas.contractservice.util.DateUtil;
 
+
 public class ContractServiceImpl implements ContractService {
 
 	Logger logger = LoggerFactory.getLogger(ContractServiceImpl.class);
@@ -166,13 +167,13 @@ public class ContractServiceImpl implements ContractService {
 					DateUtil.julianToGregf2(contractMaster.getD402_cont_beg_dt())) == 2) {
 				// invalid contract, beg date in future
 				errorMessage = java.lang.String.format(ContractConstants.JS001_BEGIN_DATE,
-						contractDetail.getFormalContractNumber(), contractMaster.getD402_cont_beg_dt());
+						contractDetail.getFormalContractNumber(), DateUtil.julianToGregf2(contractMaster.getD402_cont_beg_dt()));
 			}
 			if (!StringUtils.isNullOrEmpty(contractMaster.getD402_cont_end_dt()) && DateUtil.dateCompare(currentDate[0],
 					DateUtil.julianToGregf2(contractMaster.getD402_cont_end_dt())) == 1) {
 				// invalid contract, end date in the past
 				errorMessage = java.lang.String.format(ContractConstants.JS002_END_DATE,
-						contractDetail.getFormalContractNumber(), contractMaster.getD402_cont_end_dt());
+						contractDetail.getFormalContractNumber(), DateUtil.julianToGregf2(contractMaster.getD402_cont_end_dt()));
 			}
 			if (!StringUtils.isNullOrEmpty(contractMaster.getD402_dt_terminated())
 					&& DateUtil.dateCompare(currentDate[0],
@@ -180,7 +181,7 @@ public class ContractServiceImpl implements ContractService {
 
 				// invalid contract, terminated
 				errorMessage = String.format(ContractConstants.JS003_TERMINATION_DATE,
-						contractDetail.getFormalContractNumber(), contractMaster.getD402_dt_terminated());
+						contractDetail.getFormalContractNumber(), DateUtil.julianToGregf2(contractMaster.getD402_dt_terminated()));
 
 			}
 			if (!StringUtils.isNullOrEmpty(errorMessage)) {
