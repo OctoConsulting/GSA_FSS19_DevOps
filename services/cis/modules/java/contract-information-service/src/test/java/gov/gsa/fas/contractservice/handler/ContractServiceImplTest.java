@@ -171,7 +171,7 @@ public class ContractServiceImplTest {
 	public void testGetContractDetailsResponse() {	
 		RequestWrapper inputStream = new RequestWrapper();
 		RequestWrapper responseStream = contractService.getContractDetailsResponse(inputStream);
-		assertTrue(responseStream.getBody().contains(ContractConstants.INVALID_DATA_CONTRACT_NUMBER_JS007));
+		assertTrue(responseStream.getBody().contains(ContractConstants.JS007_INVALID_DATA_CONTRACT_NUMBER));
 	}
 	
 	@Test
@@ -181,7 +181,7 @@ public class ContractServiceImplTest {
 		pathParams.setContractid("123456789");
 		inputStream.setPathParameters(pathParams);
 		RequestWrapper responseStream = contractService.getContractDetailsResponse(inputStream);
-		assertTrue(!responseStream.getBody().contains(ContractConstants.INVALID_DATA_CONTRACT_NUMBER_JS007));
+		assertTrue(!responseStream.getBody().contains(ContractConstants.JS007_INVALID_DATA_CONTRACT_NUMBER));
 	}
 	
 	@Test
