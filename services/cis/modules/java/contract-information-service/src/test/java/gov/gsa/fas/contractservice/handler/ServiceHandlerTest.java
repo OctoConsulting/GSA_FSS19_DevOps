@@ -33,6 +33,7 @@ public class ServiceHandlerTest {
 	public void tearDown() throws Exception {
 	}
 	
+	/*
 	@Test
 	public void testGetContractDataSinglePOSuccess() throws SOAPException, IOException {	
 		final String TEST_BODY = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:con=\"http://contract/\"><soapenv:Header/><soapenv:Body>"
@@ -148,5 +149,5 @@ public class ServiceHandlerTest {
 		
 		assertEquals(outPut, outputStream.getBody());
 	}
-
+	*/
 }

@@ -31,10 +31,13 @@ import gov.gsa.fas.contractservice.util.ContractInternalIDType;
 import gov.gsa.fas.contractservice.util.ContractServiceUtil;
 import gov.gsa.fas.contractservice.util.DateUtil;
 
+
 public class ContractServiceImpl implements ContractService {
 
 	Logger logger = LoggerFactory.getLogger(ContractServiceImpl.class);
 
+	private ContractServiceDAO contractServiceDAO;
+	
 	List<CSDetailPO> pOsResponse = new ArrayList<>();
 
 	public RequestWrapper getListContractResponse(RequestWrapper inputStream) {
@@ -164,13 +167,9 @@ public class ContractServiceImpl implements ContractService {
 			}
 
 			if (internals != null && internals.size() > 0) {
-
 				int counter = 1;
-				Optional<ContractsType> contract;
 				for (String internal : internals) {
-
-					contract = getContractsType(internal);
-
+					Optional<ContractsType> contract = getContractsType(internal);
 					if (contract.isPresent()) {
 						ContractsType contractsType = contract.get();
 						contractsType.setLineNumber(counter++);
@@ -183,7 +182,7 @@ public class ContractServiceImpl implements ContractService {
 				throw new ApplicationException(ContractConstants.JS007_NO_CONTRACTS_ENTITY_ID);
 			}
 		} catch (AmazonDynamoDBException ex) {
-			throw new ApplicationException(ContractConstants.J020_CS_EXCEPTION);
+			throw new ApplicationException(ContractConstants.J090_INVALID_DATA);
 		}
 	}
 
@@ -244,20 +243,20 @@ public class ContractServiceImpl implements ContractService {
 					DateUtil.julianToGregf2(contractMaster.getD402_cont_beg_dt())) == 2) {
 				// invalid contract, beg date in future
 				errorMessage = java.lang.String.format(ContractConstants.JS001_BEGIN_DATE,
-						contractDetail.getFormalContractNumber(), contractMaster.getD402_cont_beg_dt());
+						contractDetail.getFormalContractNumber(), DateUtil.julianToGregf2(contractMaster.getD402_cont_beg_dt()));
 			}
 			if (!StringUtils.isBlank(contractMaster.getD402_cont_end_dt()) && DateUtil.dateCompare(currentDate[0],
 					DateUtil.julianToGregf2(contractMaster.getD402_cont_end_dt())) == 1) {
 				// invalid contract, end date in the past
 				errorMessage = java.lang.String.format(ContractConstants.JS002_END_DATE,
-						contractDetail.getFormalContractNumber(), contractMaster.getD402_cont_end_dt());
+						contractDetail.getFormalContractNumber(), DateUtil.julianToGregf2(contractMaster.getD402_cont_end_dt()));
 			}
 			if (!StringUtils.isBlank(contractMaster.getD402_dt_terminated()) && DateUtil.dateCompare(currentDate[0],
 					DateUtil.julianToGregf2(contractMaster.getD402_dt_terminated())) == 1) {
 
 				// invalid contract, terminated
 				errorMessage = String.format(ContractConstants.JS003_TERMINATION_DATE,
-						contractDetail.getFormalContractNumber(), contractMaster.getD402_dt_terminated());
+						contractDetail.getFormalContractNumber(), DateUtil.julianToGregf2(contractMaster.getD402_dt_terminated()));
 
 			}
 			if (!StringUtils.isBlank(errorMessage)) {
@@ -361,7 +360,9 @@ public class ContractServiceImpl implements ContractService {
 	private Optional<ContractsType> getContractsType(String internal) {
 		Gson gson = new Gson();
 		String[] currentDate = DateUtil.getDateTime();
-		ContractServiceDAO contractServiceDAO = new ContractServiceDAOImpl();
+		
+		ContractServiceDAO contractServiceDAO = getContractServiceDAO();
+		
 		ContractsType contractsType = new ContractsType();
 
 		String masterDetails = contractServiceDAO.getDetailsByPartitionKey(internal,
@@ -371,9 +372,10 @@ public class ContractServiceImpl implements ContractService {
 					
 			ContractDataMaster master = gson.fromJson(masterDetails, ContractDataMaster.class);
 					
+			contractsType.setContractNumber(internal);
 			contractsType.setAcoRegion(master.getD402_aco());
-			contractsType.setFormalContractNumber(master.getD402_gsam_cont_no());
 			contractsType.setContractType(master.getD402_cont_ind());
+			contractsType.setFormalContractNumber(master.getD402_gsam_cont_no());
 
 			if (!StringUtils.isBlank(master.getD402_note())) {
 				contractsType.setContractNotesList(master.getD402_note());
@@ -420,22 +422,10 @@ public class ContractServiceImpl implements ContractService {
 						String wstate = address.getD410_mail_st();
 						String wzip = address.getD410_mail_zip();
 	
-						if (wadrs2 == null || "".equals(wadrs2)) {
-							wadrs2 = "-";
-						}
-	
-						while (wadrs1.length() <= 32) {
-							wadrs1 = wadrs1 + " ";
-						}
-	
-						while (wadrs2.length() <= 32) {
-							wadrs2 = wadrs2 + " ";
-						}
-	
-						while (wadrs3 != null && wadrs3.length() <= 32) {
-							wadrs3 = wadrs3 + " ";
-						}
-	
+						wadrs1 = StringUtils.right(StringUtils.defaultString(wadrs1, ""), 32);
+						wadrs2 = StringUtils.right(StringUtils.defaultString(wadrs2, "-"), 32);
+						wadrs3 = StringUtils.right(StringUtils.defaultString(wadrs3, ""), 32);
+						
 						if (wadrs3 != null && wadrs3.trim().length() > 0) {
 							contractorAddress.append(wadrs1.substring(0, 32) + wadrs2.substring(0, 32) + wadrs3.substring(0, 32)
 							+ wcity + " " + wstate + " " + wzip);
@@ -453,21 +443,9 @@ public class ContractServiceImpl implements ContractService {
 						String wstate = address.getD410_st();
 						String wzip = address.getD410_zip();
 	
-						if (wadrs2 == null || "".equals(wadrs2)) {
-							wadrs2 = "-";
-						}
-	
-						while (wadrs1.length() <= 32) {
-							wadrs1 = wadrs1 + " ";
-						}
-	
-						while (wadrs2.length() <= 32) {
-							wadrs2 = wadrs2 + " ";
-						}
-	
-						while (wadrs3 != null && wadrs3.length() <= 32) {
-							wadrs3 = wadrs3 + " ";
-						}
+						wadrs1 = StringUtils.right(StringUtils.defaultString(wadrs1, ""), 32);
+						wadrs2 = StringUtils.right(StringUtils.defaultString(wadrs2, "-"), 32);
+						wadrs3 = StringUtils.right(StringUtils.defaultString(wadrs3, ""), 32);
 	
 						if (wadrs3 != null && wadrs3.trim().length() > 0) {
 							contractorAddress.append(wadrs1.substring(0, 32) + wadrs2.substring(0, 32) + wadrs3.substring(0, 32)
@@ -492,6 +470,13 @@ public class ContractServiceImpl implements ContractService {
 			}
 		}
 		return Optional.empty();
+	}
+
+	private ContractServiceDAO getContractServiceDAO() {
+		if (contractServiceDAO == null) {
+			contractServiceDAO = new ContractServiceDAOImpl();
+		}
+		return contractServiceDAO;
 	}
 
 }
