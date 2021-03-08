@@ -26,7 +26,7 @@ export class DynamoConstruct extends cdk.Construct {
     private createMainTable() {
         this.nsnTable = new dynamodb.Table(this, 'dynamodb-table', {
             tableName: `nsn-routing-${this.props.shortEnv}`,
-            partitionKey: { name: 'group_id', type: dynamodb.AttributeType.STRING },
+            partitionKey: { name: 'group_id', type: dynamodb.AttributeType.NUMBER },
             sortKey: { name: 'routing_id', type: dynamodb.AttributeType.STRING },
             pointInTimeRecovery: true,
             billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
