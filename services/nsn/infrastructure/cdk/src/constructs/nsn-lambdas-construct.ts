@@ -11,13 +11,13 @@ export class NsnLambdasConstruct extends cdk.Construct {
     constructor(parent: cdk.Construct, id: string, props: NsnLambdasConstructParms) {
         super(parent, id);
         this.props = props;
-        this.lambdaFunctions.postRoutingLambda = this.nsnLambda('post-nsn-routing-lambda', 'postNsn');
-        this.lambdaFunctions.getRoutingLambda = this.nsnLambda('get-nsn-routing-lambda', 'getNsn');
-        this.lambdaFunctions.putRoutingLambda = this.nsnLambda('put-nsn-routing-lambda', 'putNsn');
-        this.lambdaFunctions.deleteRoutingLambda = this.nsnLambda('delete-nsn-routing-lambda', 'deleteNsn');
+        this.lambdaFunctions.postRoutingLambda = this.nsnLambda('post-nsn-routing-lambda', 'index.postNsn');
+        this.lambdaFunctions.getRoutingLambda = this.nsnLambda('get-nsn-routing-lambda', 'index.getNsn', false);
+        this.lambdaFunctions.putRoutingLambda = this.nsnLambda('put-nsn-routing-lambda', 'index.putNsn');
+        this.lambdaFunctions.deleteRoutingLambda = this.nsnLambda('delete-nsn-routing-lambda', 'index.deleteNsn');
     }
 
-    private nsnLambda(name: string, handler: string) {
+    private nsnLambda(name: string, handler: string, writeAccessToDynamo = true) {
         const lambdaFun = new LambdaConstruct(this, `${name}`, {
             functionName: `${name}-${this.props.shortEnv}`,
             vpcId: this.props.vpc,
@@ -33,7 +33,9 @@ export class NsnLambdasConstruct extends cdk.Construct {
             xRayTracing: this.props.xRayTracing,
         });
 
-        this.props.nsnTable.grantReadData(lambdaFun.lambdaFunction);
+        writeAccessToDynamo
+            ? this.props.nsnTable.grantReadWriteData(lambdaFun.lambdaFunction)
+            : this.props.nsnTable.grantReadData(lambdaFun.lambdaFunction);
         return lambdaFun.lambdaFunction;
     }
 

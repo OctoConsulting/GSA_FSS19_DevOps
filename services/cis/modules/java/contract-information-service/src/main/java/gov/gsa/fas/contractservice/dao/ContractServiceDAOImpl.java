@@ -5,7 +5,13 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+
 import com.amazonaws.AmazonClientException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
@@ -28,15 +34,12 @@ import gov.gsa.fas.contractservice.util.ContractConstants;
 
 public class ContractServiceDAOImpl implements ContractServiceDAO {
 
+	Logger logger = LoggerFactory.getLogger(ContractServiceDAOImpl.class);
 	AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
 			.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
 					ContractConstants.DB_CONNECTION_END_POINT, ContractConstants.REGION))
 			.build();
 	DynamoDB dynamoDB = new DynamoDB(client);
-
-	AmazonDynamoDB clientDefault = AmazonDynamoDBClientBuilder.defaultClient();
-
-	DynamoDB dynamoDBDefault = new DynamoDB(clientDefault);
 
 	@Override
 	public ContractDataMaster getContractByGSAM(String gsamContractNum) throws AmazonDynamoDBException,AmazonClientException {
@@ -46,7 +49,7 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 		String internalContractNumber = "";
 		List<String> internalContractNumberList = getInternalContractNumber(gsamContractNum);
 		if (internalContractNumberList != null && internalContractNumberList.size() > 0) {
-			internalContractNumber = internalContractNumberList.get(0);
+			internalContractNumber = internalContractNumberList.get(0)
 
 			String cmfMasterDataJSON = getDetailsByPartitionKey(internalContractNumber,
 					ContractConstants.CONTRACT_SERVICE_SK_D402 + "_" + internalContractNumber);
@@ -118,6 +121,9 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 
 		if (System.getenv(ContractConstants.SHORT_ENV) != null
 				&& System.getenv(ContractConstants.SHORT_ENV).trim().length() > 0) {
+			AmazonDynamoDB clientDefault = AmazonDynamoDBClientBuilder.standard().build();
+
+			DynamoDB dynamoDBDefault = new DynamoDB(clientDefault);
 			return dynamoDBDefault;
 		}
 		return dynamoDB;
@@ -127,7 +133,7 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 
 		if (System.getenv(ContractConstants.SHORT_ENV) != null
 				&& System.getenv(ContractConstants.SHORT_ENV).trim().length() > 0) {
-			return ContractConstants.CONTRACT_SERVICE_TABLE_NAME_PREFIX + ContractConstants.SHORT_ENV;
+			return ContractConstants.CONTRACT_SERVICE_TABLE_NAME_PREFIX + System.getenv(ContractConstants.SHORT_ENV);
 		}
 		return ContractConstants.CONTRACT_SERVICE_TABLE_NAME;
 	}
