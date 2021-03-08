@@ -78,7 +78,7 @@ public class ContractConstants {
 	public static final String JS000_CONTRACT_DATA = "FAIL " + "JS000: Contract not found Contract %1$s is not a valid contract number";
 	
 	
-	public static final String INVALID_DATA_CONTRACT_NUMBER_JS007 = "JS007_Invalid Contract Number -";
+	public static final String JS007_INVALID_DATA_CONTRACT_NUMBER = "JS007_Invalid Contract Number -";
 	
 	public static final String JS007_INVALID_ENTITY_ID = "JS007_Invalid Data Request- Invalid Entity ID";
 	public static final String JS007_NO_CONTRACTS_ENTITY_ID = "JS007_No contracts for the Entity ID";
