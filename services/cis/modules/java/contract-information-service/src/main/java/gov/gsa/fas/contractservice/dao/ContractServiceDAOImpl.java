@@ -49,7 +49,7 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 		String internalContractNumber = "";
 		List<String> internalContractNumberList = getInternalContractNumber(gsamContractNum);
 		if (internalContractNumberList != null && internalContractNumberList.size() > 0) {
-			internalContractNumber = internalContractNumberList.get(0)
+			internalContractNumber = internalContractNumberList.get(0);
 
 			String cmfMasterDataJSON = getDetailsByPartitionKey(internalContractNumber,
 					ContractConstants.CONTRACT_SERVICE_SK_D402 + "_" + internalContractNumber);
