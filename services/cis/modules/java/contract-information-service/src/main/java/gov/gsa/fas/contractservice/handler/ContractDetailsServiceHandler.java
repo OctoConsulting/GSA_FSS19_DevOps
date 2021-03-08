@@ -22,7 +22,7 @@ public class ContractDetailsServiceHandler implements RequestHandler<RequestWrap
 
 		RequestWrapper wrapper =new RequestWrapper();
 		PathParameters pathParams = new PathParameters();
-		pathParams.setContractid("123456789");
+		pathParams.setContractid("47QSEA20T00012E");
 		wrapper.setPathParameters(pathParams);
 		wrapper.setBody(ContractConstants.TEST_MULTIPLE_PO_BODY);
 		RequestWrapper outputStream = s.handleRequest(wrapper, null);
