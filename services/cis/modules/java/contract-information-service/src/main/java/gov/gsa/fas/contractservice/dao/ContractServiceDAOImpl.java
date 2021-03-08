@@ -5,8 +5,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+
+import com.amazonaws.AmazonClientException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -38,25 +42,24 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	DynamoDB dynamoDB = new DynamoDB(client);
 
 	@Override
-	public ContractDataMaster getContractByGSAM(String gsamContractNum) throws CCSExceptions {
-		try {
-			
-			gsamContractNum = "GSAM_".concat(gsamContractNum);
-			String internalContractNumber = "";
-			List<String> internalContractNumberList = getInternalContractNumber(gsamContractNum);
-			if (internalContractNumberList != null && internalContractNumberList.size() > 0) {
-				internalContractNumber = internalContractNumberList.get(0);
-			}
+	public ContractDataMaster getContractByGSAM(String gsamContractNum) throws AmazonDynamoDBException,AmazonClientException {
+
+		ContractDataMaster contractMaster = null;
+		gsamContractNum = "GSAM_".concat(gsamContractNum);
+		String internalContractNumber = "";
+		List<String> internalContractNumberList = getInternalContractNumber(gsamContractNum);
+		if (internalContractNumberList != null && internalContractNumberList.size() > 0) {
+			internalContractNumber = internalContractNumberList.get(0)
 
 			String cmfMasterDataJSON = getDetailsByPartitionKey(internalContractNumber,
 					ContractConstants.CONTRACT_SERVICE_SK_D402 + "_" + internalContractNumber);
 			Gson gson = new Gson();
 
-			ContractDataMaster contractMaster = gson.fromJson(cmfMasterDataJSON, ContractDataMaster.class);
-			return contractMaster;
-		} catch (AmazonDynamoDBException ex) {
-			throw new CCSExceptions(ex.getErrorMessage(), ex);
+			contractMaster = gson.fromJson(cmfMasterDataJSON, ContractDataMaster.class);
 		}
+
+		return contractMaster;
+
 	}
 		
 
@@ -69,7 +72,7 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	 * @param dynamoDB
 	 * @return
 	 */
-	public List<String> getInternalContractNumber(String gsiValue) throws AmazonDynamoDBException {
+	public List<String> getInternalContractNumber(String gsiValue) throws AmazonDynamoDBException,AmazonClientException {
 		List<String> internalContractList = new ArrayList<String>();
 
 		DynamoDB db = getDynamoDB();
@@ -136,7 +139,7 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	}
 
 	@Override
-	public List<CDFMaster> getBuyerDetails(String internalContractNumber) throws CCSExceptions {
+	public List<CDFMaster> getBuyerDetails(String internalContractNumber) throws AmazonDynamoDBException {
 
 		String cdfMasterDataJSON = getDetailsByPartitionKey(internalContractNumber,
 				ContractConstants.CONTRACT_SERVICE_SK_D430 + "_" + internalContractNumber);
@@ -150,7 +153,7 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	}
 
 	@Override
-	public Address getAddressDetail(String internalContractNumber) throws CCSExceptions {
+	public Address getAddressDetail(String internalContractNumber) throws AmazonDynamoDBException {
 		String addressDataJSON = getDetailsByPartitionKey(internalContractNumber,
 				ContractConstants.CONTRACT_SERVICE_SK_D410 + "_" + internalContractNumber);
 

@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException;
 import com.google.gson.Gson;
 
@@ -17,6 +18,7 @@ import gov.gsa.fas.contractservice.contract.CSDetailPO;
 import gov.gsa.fas.contractservice.contract.ContractsType;
 import gov.gsa.fas.contractservice.contract.ListContractsType;
 import gov.gsa.fas.contractservice.contract.PORecordsType;
+import gov.gsa.fas.contractservice.contract.PORequestType;
 import gov.gsa.fas.contractservice.dao.ContractServiceDAO;
 import gov.gsa.fas.contractservice.dao.ContractServiceDAOImpl;
 import gov.gsa.fas.contractservice.exception.ApplicationException;
@@ -52,12 +54,13 @@ public class ContractServiceImpl implements ContractService {
 		}
 	}
 
-	public List<CSDetailPO> getContractData(List<PORecordsType> inPORequest) {
+	public List<CSDetailPO> getContractData(List<PORecordsType> inPORequest) throws ApplicationException {
 
 		logger.info("Begin of the getContractData() :: ");
-		inPORequest.forEach(x -> {
-			pOsResponse.add(validateRequest(x));
-		});
+		for(PORecordsType poRequest : inPORequest) {
+			pOsResponse.add(validateRequest(poRequest));
+		}
+		
 		logger.info("End of the getContractData() :: ");
 		return pOsResponse;
 	}
@@ -67,8 +70,9 @@ public class ContractServiceImpl implements ContractService {
 	 * 
 	 * @param inPOLines
 	 * @return
+	 * @throws ApplicationException 
 	 */
-	private CSDetailPO validateRequest(PORecordsType inPOLines) {
+	private CSDetailPO validateRequest(PORecordsType inPOLines) throws ApplicationException {
 
 		logger.info("Begin of the validateRequest() :: ");
 
@@ -221,8 +225,9 @@ public class ContractServiceImpl implements ContractService {
 	 * 
 	 * @param contractDetail
 	 * @return
+	 * @throws ApplicationException 
 	 */
-	private CSDetailPO validateGetContractData(CSDetailPO contractDetail, PORecordsType inPOLines) {
+	private CSDetailPO validateGetContractData(CSDetailPO contractDetail, PORecordsType inPOLines) throws ApplicationException, AmazonDynamoDBException {
 
 		logger.info("Begin of the validateRequest() :: ");
 		String[] currentDate = DateUtil.getDateTime();
@@ -320,8 +325,9 @@ public class ContractServiceImpl implements ContractService {
 			}
 
 			contractDetail.setResult(ContractConstants.SUCCESS);
-		} catch (CCSExceptions ex) {
+		} catch (AmazonClientException ex) {
 			logger.error("Error in the ContractServiceDAO::{}", ex);
+			throw new ApplicationException(ContractConstants.J020_CS_EXCEPTION);
 		} catch (ParseException ex) {
 			logger.error("Error in the validateGetContractData::{}", ex);
 
