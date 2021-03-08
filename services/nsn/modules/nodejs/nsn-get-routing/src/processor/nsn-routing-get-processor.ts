@@ -12,7 +12,7 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
         return apiResponses._400({ message: 'outing id is needed to retrieve NSN data' });
     }
 
-    let routingId = event.pathParameters['id'];
+    let routingId = event.pathParameters['routingId'];
     console.log('routingId in GET - ' + routingId);
     if (!routingId || routingId.trim().length < 2 || routingId.trim().length == 3) {
         return apiResponses._400({

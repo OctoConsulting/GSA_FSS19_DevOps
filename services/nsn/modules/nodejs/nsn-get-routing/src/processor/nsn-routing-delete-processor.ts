@@ -9,7 +9,7 @@ export const deleteNsn = async (event: APIGatewayProxyEvent, context: Context): 
     if (event.pathParameters === null) {
         return apiResponses._400({ message: 'Routing id is needed to delete NSN data' });
     }
-    let routingId = event.pathParameters['id'];
+    let routingId = event.pathParameters['routingId'];
     if (!routingId) {
         return apiResponses._400({ message: 'Routing id is needed to delete NSN data' });
     }
