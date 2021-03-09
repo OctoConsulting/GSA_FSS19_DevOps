@@ -1,37 +1,50 @@
 import { PolicyStatement } from '@aws-cdk/aws-iam';
 import { BaseBuilder } from './common/BaseBulider';
+import * as cdk from '@aws-cdk/core';
+import * as kms from '@aws-cdk/aws-kms';
+import { BuilderProps } from '../../models/builder-props';
 export class KmsBuilder extends BaseBuilder {
-    private permission: string;
-
-    constructor(permission: string, arnPrefix: string) {
-        super();
-        this.permission = permission;
-        this.arnPrefix = arnPrefix;
+    constructor(parent: cdk.Construct, id: string, props: BuilderProps) {
+        super(parent, id, props);
     }
 
-    public getPolicyStatements(): PolicyStatement[] {
-        if (this.permission === 'kms-encrypt') {
-            return this.encrypt();
+    public buildPolicyStatements(): PolicyStatement[] {
+        if (this.props.permission === 'kms-encrypt') {
+            return this.encrypt(this.props.resources!);
         }
-        if (this.permission === 'kms-decrypt') {
-            return this.decrypt();
+        if (this.props.permission === 'kms-decrypt') {
+            return this.decrypt(this.props.resources!);
         }
-        return this.unimplimented(this.permission);
+        return this.unimplimented(this.props.permission);
     }
 
-    private encrypt(): PolicyStatement[] {
-        const encrypt = new PolicyStatement({
-            actions: ['kms:Encrypt', 'kms:ReEncrypt*', 'kms:GenerateDataKey*'],
-            resources: [`${this.getServicePrefix()}`],
+    private encrypt(resources: string[]): PolicyStatement[] {
+        console.log('resources array', resources);
+        var policies: PolicyStatement[] = [];
+        resources.forEach((resource) => {
+            const kmsKey = kms.Alias.fromAliasName(this, `${resource}`, resource);
+            policies.push(
+                new PolicyStatement({
+                    actions: ['kms:Encrypt', 'kms:ReEncrypt*', 'kms:GenerateDataKey*'],
+                    resources: [`${this.getServicePrefix()}`],
+                })
+            );
         });
-        return [encrypt];
+
+        return policies;
     }
 
-    private decrypt(): PolicyStatement[] {
-        const decrypt = new PolicyStatement({
-            actions: ['kms:Decrypt', 'kms:DescribeKey'],
-            resources: [`${this.getServicePrefix()}`],
+    private decrypt(resources: string[]): PolicyStatement[] {
+        var policies: PolicyStatement[] = [];
+        resources.forEach((resource) => {
+            policies.push(
+                new PolicyStatement({
+                    actions: ['kms:Decrypt', 'kms:DescribeKey'],
+                    resources: [`${this.getServicePrefix()}`],
+                })
+            );
         });
-        return [decrypt];
+
+        return policies;
     }
 }

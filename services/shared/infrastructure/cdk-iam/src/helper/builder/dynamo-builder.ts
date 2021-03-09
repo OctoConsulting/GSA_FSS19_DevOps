@@ -1,30 +1,28 @@
 import { PolicyStatement } from '@aws-cdk/aws-iam';
 import { BaseBuilder } from './common/BaseBulider';
-import { KmsBuilder } from './kms-builder';
-
+import * as cdk from '@aws-cdk/core';
+import { BuilderProps } from '../../models/builder-props';
 export class DynamoBuilder extends BaseBuilder {
     private permission: string;
 
-    constructor(permission: string, arnPrefix: string) {
-        super();
-        this.permission = permission;
-        this.arnPrefix = arnPrefix;
+    constructor(parent: cdk.Construct, id: string, props: BuilderProps) {
+        super(parent, id, props);
     }
 
-    public getPolicyStatements(): PolicyStatement[] {
-        if (this.permission === 'dynamodb-read') {
+    public buildPolicyStatements(): PolicyStatement[] {
+        if (this.props.permission === 'dynamodb-read') {
             return this.read();
         }
-        if (this.permission === 'dynamodb-crudItem') {
+        if (this.props.permission === 'dynamodb-crudItem') {
             return this.crudItem();
         }
-        return this.unimplimented(this.permission);
+        return this.unimplimented(this.props.permission);
     }
 
     private read(): PolicyStatement[] {
         const getIndex = new PolicyStatement({
             actions: ['dynamodb:Query', 'dynamodb:GetRecords'],
-            resources: [`${this.getServicePrefix()}table/*/index/*`],
+            resources: [`${this.getServicePrefix('')}table/*/index/*`],
         });
         const list = new PolicyStatement({
             actions: ['dynamodb:List*', 'dynamodb:BatchGet*', 'dynamodb:Describe*', 'dynamodb:Get*'],
@@ -33,7 +31,7 @@ export class DynamoBuilder extends BaseBuilder {
 
         const getTable = new PolicyStatement({
             actions: ['dynamodb:Query', 'dynamodb:Scan'],
-            resources: [`${this.getServicePrefix()}table/*`],
+            resources: [`${this.getServicePrefix('')}table/*`],
         });
         return [getIndex, list, getTable];
     }
@@ -49,10 +47,11 @@ export class DynamoBuilder extends BaseBuilder {
                 'dynamodb:GetItem',
                 'dynamodb:UpdateItem',
             ],
-            resources: [`${this.getServicePrefix()}table/*`],
+            resources: [`${this.getServicePrefix('')}table/*`],
         });
-        const kmsEncrypt = new KmsBuilder('kms-encrypt', '*').getPolicyStatements();
-        const kmsDecrypt = new KmsBuilder('kms-decrypt', '*').getPolicyStatements();
-        return [crudItem, ...kmsEncrypt, ...kmsDecrypt];
+        // const kmsEncrypt = new KmsBuilder('kms-encrypt', '*').getPolicyStatements();
+        // const kmsDecrypt = new KmsBuilder('kms-decrypt', '*').getPolicyStatements();
+        // return [crudItem, ...kmsEncrypt, ...kmsDecrypt];
+        return [crudItem];
     }
 }

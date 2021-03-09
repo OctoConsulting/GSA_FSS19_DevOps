@@ -1,30 +1,27 @@
 import { PolicyStatement } from '@aws-cdk/aws-iam';
 import { BaseBuilder } from './common/BaseBulider';
-
+import * as cdk from '@aws-cdk/core';
+import { BuilderProps } from '../../models/builder-props';
 export class ApiGatewayBuilder extends BaseBuilder {
-    private permission: string;
-
-    constructor(permission: string, arnPrefix: string) {
-        super();
-        this.permission = permission;
-        this.arnPrefix = arnPrefix;
+    constructor(parent: cdk.Construct, id: string, props: BuilderProps) {
+        super(parent, id, props);
     }
 
-    public getPolicyStatements(): PolicyStatement[] {
-        if (this.permission === 'apigateway-read') {
+    public buildPolicyStatements(): PolicyStatement[] {
+        if (this.props.permission === 'apigateway-read') {
             return this.read();
         }
-        if (this.permission === 'apigateway-runapi') {
+        if (this.props.permission === 'apigateway-runapi') {
             return this.runapi();
         }
 
-        return this.unimplimented(this.permission);
+        return this.unimplimented(this.props.permission);
     }
 
     private read(): PolicyStatement[] {
         const read = new PolicyStatement({
             actions: ['apigateway:GET'],
-            resources: [`${this.getServicePrefix()}*`],
+            resources: [`${this.getServicePrefix('*', '')}`],
         });
         return [read];
     }
@@ -32,7 +29,7 @@ export class ApiGatewayBuilder extends BaseBuilder {
     private runapi(): PolicyStatement[] {
         const runapi = new PolicyStatement({
             actions: ['apigateway:PUT', 'apigateway:POST'],
-            resources: [`${this.getServicePrefix()}*`],
+            resources: [`${this.getServicePrefix('*', '')}`],
         });
         return [runapi];
     }

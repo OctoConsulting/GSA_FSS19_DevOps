@@ -23,13 +23,22 @@ export class PolicyConstruct extends cdk.Construct {
         });
 
         const policy = new iam.Policy(this, 'policy', {
-            policyName: 'fss-developers',
+            policyName: this.props.iamSet.groupName,
             groups: [group],
         });
 
-        this.props.iamSet.permissions.forEach((permission: string) => {
+        this.props.iamSet.permissions.forEach((aRecord: any) => {
+            var permission;
+            var resources;
+            if (typeof aRecord === 'string') {
+                permission = aRecord;
+            } else {
+                permission = Object.keys(aRecord)[0];
+                resources = aRecord[Object.keys(aRecord)[0]];
+            }
+            console.log('Buildling Policies for permission:', permission, 'resource', resources);
             builderFactory
-                .getPolicyBuilder(permission, this.getArnPrefix(permission))
+                .getPolicyBuilder(this, permission, permission, this.getArnPrefix(permission), resources)
                 .getPolicyStatements()
                 .forEach((x) => {
                     policy.addStatements(x);
@@ -40,7 +49,7 @@ export class PolicyConstruct extends cdk.Construct {
     getArnPrefix(permission: string): string {
         var accountNo = undefined;
         var region = undefined;
-        var resource = '*';
+        var resource = undefined;
         if (permission.startsWith('apigateway')) {
             accountNo = '';
         }
@@ -51,10 +60,11 @@ export class PolicyConstruct extends cdk.Construct {
 
         const arnPrefix = this.stack.formatArn({
             service: permission.substr(0, permission.indexOf('-')),
-            resource: resource,
+            resource: '*',
             account: accountNo,
             region: region,
         });
+        console.log(`arnPrefix for ${permission} is ${arnPrefix}`);
         return arnPrefix;
     }
 }
