@@ -23,7 +23,13 @@
                         "apigateway-runapi",
                         "xray-read",
                         "cloudwatch-read",
-                        "lambda-read"
+                        "lambda-read",
+                        {
+                            "kms-encrypt": ["fss19/dynamodb/atrest/nsnrouting", "fss19/dynamodb/atrest/contract"]
+                        },
+                        {
+                            "kms-decrypt": ["fss19/dynamodb/atrest/nsnrouting", "fss19/dynamodb/atrest/contract"]
+                        }
                     ]
                 },
                 {
