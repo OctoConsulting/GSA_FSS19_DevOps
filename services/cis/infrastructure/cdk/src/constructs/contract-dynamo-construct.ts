@@ -1,6 +1,7 @@
 import * as cdk from '@aws-cdk/core';
 import { ContractDynamoConstructParms } from '../models/contract/contract-dynamo-construct-parms';
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
+import * as kms from '@aws-cdk/aws-kms';
 import { constants } from '../models/constants';
 export class ContractDynamoConstruct extends cdk.Construct {
     private contractTable: dynamodb.Table;
@@ -43,6 +44,14 @@ export class ContractDynamoConstruct extends cdk.Construct {
                 : dynamodb.TableEncryption.DEFAULT,
             stream: dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,
         });
+
+        if (this.props.enableEncryptionAtRest) {
+            new kms.Alias(this, 'contract-kms-key-alias', {
+                aliasName: 'fss19/dynamodb/atrest/contract',
+                targetKey: this.contractTable.encryptionKey!,
+                removalPolicy: cdk.RemovalPolicy.DESTROY,
+            });
+        }
     }
 
     private addGSI() {
