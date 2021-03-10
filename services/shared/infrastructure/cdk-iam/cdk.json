@@ -25,10 +25,16 @@
                         "cloudwatch-read",
                         "lambda-read",
                         {
-                            "kms-encrypt": ["fss19/dynamodb/atrest/nsnrouting", "fss19/dynamodb/atrest/contract"]
+                            "kms-encrypt": [
+                                "865d3adc-973f-45f1-87d6-0deebd072a05",
+                                "ae4d28f0-1a8e-474f-ad77-337582a37a15"
+                            ]
                         },
                         {
-                            "kms-decrypt": ["fss19/dynamodb/atrest/nsnrouting", "fss19/dynamodb/atrest/contract"]
+                            "kms-decrypt": [
+                                "865d3adc-973f-45f1-87d6-0deebd072a05",
+                                "ae4d28f0-1a8e-474f-ad77-337582a37a15"
+                            ]
                         }
                     ]
                 },
@@ -44,7 +50,19 @@
                         "apigateway-runapi",
                         "xray-read",
                         "cloudwatch-read",
-                        "lambda-read"
+                        "lambda-read",
+                        {
+                            "kms-encrypt": [
+                                "865d3adc-973f-45f1-87d6-0deebd072a05",
+                                "ae4d28f0-1a8e-474f-ad77-337582a37a15"
+                            ]
+                        },
+                        {
+                            "kms-decrypt": [
+                                "865d3adc-973f-45f1-87d6-0deebd072a05",
+                                "ae4d28f0-1a8e-474f-ad77-337582a37a15"
+                            ]
+                        }
                     ]
                 },
                 {
@@ -59,7 +77,19 @@
                         "apigateway-runapi",
                         "xray-read",
                         "cloudwatch-read",
-                        "lambda-read"
+                        "lambda-read",
+                        {
+                            "kms-encrypt": [
+                                "865d3adc-973f-45f1-87d6-0deebd072a05",
+                                "ae4d28f0-1a8e-474f-ad77-337582a37a15"
+                            ]
+                        },
+                        {
+                            "kms-decrypt": [
+                                "865d3adc-973f-45f1-87d6-0deebd072a05",
+                                "ae4d28f0-1a8e-474f-ad77-337582a37a15"
+                            ]
+                        }
                     ]
                 }
             ]
