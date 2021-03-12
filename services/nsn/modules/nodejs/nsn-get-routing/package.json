@@ -10,17 +10,15 @@
         "build-dev": "set NODE_ENV=development& webpack",
         "build-prod": "set NODE_ENV=production& webpack",
         "serve": "set NODE_ENV=development& webpack --mode development --watch",
-        "test": "mocha 'test/processor/nsn-routing-get-processor.test.ts"
+        "test": "mocha --require ts-node/register 'test/processor/nsn-routing-get-processor.test.ts'"
     },
     "license": "ISC",
     "dependencies": {
-
         "@middy/core": "^1.5.2",
         "chai": "^4.3.3",
         "serverless-dynamodb-local": "^0.2.39",
         "serverless-offline": "^6.8.0",
         "serverless-webpack": "^5.3.5"
-
     },
     "devDependencies": {
         "@types/aws-lambda": "^8.10.72",
