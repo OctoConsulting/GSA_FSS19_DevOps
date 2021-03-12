@@ -4,6 +4,7 @@ export interface EnvParameters {
     domainSuffix?: string;
     certArn?: string;
     enableEncryptionAtRest: boolean;
+    artifactsBucket: string;
     logRetentionInDays: number;
     apiKeySecruity: boolean;
     minCapacityForLambda: number;

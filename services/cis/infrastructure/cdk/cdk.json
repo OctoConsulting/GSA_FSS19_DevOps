@@ -9,6 +9,7 @@
         "@aws-cdk/aws-kms:defaultKeyPolicies": true,
         "@aws-cdk/aws-s3:grantWriteWithoutAcl": true,
         "contract-api-dev": {
+            "artifactsBucket": "artifacts-902479997164-us-east-1-dev",
             "vpc": "vpc-02130393994755be9",
             "logRetentionInDays": 7,
             "apiKeySecruity": false,
@@ -18,6 +19,7 @@
         },
         "contract-api-qa": {
             "vpc": "vpc-02130393994755be9",
+            "artifactsBucket": "artifacts-902479997164-us-east-1-qa",
             "logRetentionInDays": 30,
             "apiKeySecruity": false,
             "enableEncryptionAtRest": false,

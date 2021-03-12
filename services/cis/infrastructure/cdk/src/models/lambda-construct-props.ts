@@ -1,11 +1,16 @@
+import * as ec2 from '@aws-cdk/aws-ec2';
+
 export interface LambdaConstructProps {
     functionName: string;
     lambdaEnvParameters?: any;
-    vpcId?: string;
-    assetLocation: string;
+    vpc: ec2.IVpc;
+    securityGroup: ec2.ISecurityGroup;
+    assetLocation?: string;
     timeout?: number;
     memorySize?: number;
     exportResource?: boolean;
+    artifactBucket?: string;
+    artifactKey?: string;
     handler?: string;
     logRetentionInDays?: number;
     minCapacity?: number;

@@ -5,6 +5,7 @@ import { ContractLambdasConstruct } from './constructs/contract-lambdas-construc
 import { S3Construct } from './constructs/shared/s3-construct';
 import { CrossStackImporter } from './helper/CrossStackImporter';
 import { EnvHelper } from './helper/env-helper';
+import { constants } from './models/constants';
 import { ContractLambdaFunctions } from './models/contract/contract-lambda-functions';
 import { EnvParameters } from './models/env-parms';
 
@@ -20,11 +21,14 @@ export class ContractApiStack extends cdk.Stack {
             enableEncryptionAtRest: envParameters.enableEncryptionAtRest,
             shortEnv: envParameters.shortEnv,
         });
+
         const crossStackImporter = new CrossStackImporter(this, 'corss-stack-imports', envParameters);
 
         const contractLambas = new ContractLambdasConstruct(this, 'contract-lambdas', {
             shortEnv: envParameters.shortEnv,
             vpc: envParameters.vpc,
+            artifactBucket: envParameters.artifactsBucket,
+            artifactKey: constants.CIS_CONTRACT_SERVICE_JAR_PATH,
             logRetentionInDays: envParameters.logRetentionInDays,
             contractTable: dynamoDbConstruct.getContractTable(),
             xRayTracing: envParameters.xRayTracing,
