@@ -74,7 +74,6 @@ describe('errorTests', () => {
 
         let response = await getNsn(proxyEvent);
         expect(response.statusCode).to.equal(200);
-        console.log('Response - ' + response.body);
         AWSMock.restore('DynamoDB.DocumentClient');
     });
 });
