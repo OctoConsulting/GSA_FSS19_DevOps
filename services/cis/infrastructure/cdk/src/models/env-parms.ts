@@ -6,5 +6,6 @@ export interface EnvParameters {
     enableEncryptionAtRest: boolean;
     logRetentionInDays: number;
     apiKeySecruity: boolean;
+    minCapacityForLambda: number;
     xRayTracing: boolean;
 }

@@ -32,9 +32,10 @@ export class ContractLambdasConstruct extends cdk.Construct {
             type: LambdaConstructProps.LambdaTypeEnum.JAVA,
             logRetentionInDays: this.props.logRetentionInDays,
             timeout: 15,
+            minCapacity: this.props.minCapacity,
             xRayTracing: this.props.xRayTracing,
         });
-        this.contractLambdaFunctions.getContractDetailsByContractIdLambda = lambdaFun.lambdaFunction;
+        this.contractLambdaFunctions.getContractDetailsByContractIdLambda = lambdaFun.alias;
         this.props.contractTable.grantReadData(lambdaFun.lambdaFunction);
     }
 
@@ -51,10 +52,11 @@ export class ContractLambdasConstruct extends cdk.Construct {
             handler: 'gov.gsa.fas.contractservice.handler.ListContractsServiceHandler::handleRequest',
             type: LambdaConstructProps.LambdaTypeEnum.JAVA,
             logRetentionInDays: this.props.logRetentionInDays,
+            minCapacity: this.props.minCapacity,
             timeout: 15,
             xRayTracing: this.props.xRayTracing,
         });
-        this.contractLambdaFunctions.getContractDetailsByEntityIdLambda = lambdaFun.lambdaFunction;
+        this.contractLambdaFunctions.getContractDetailsByEntityIdLambda = lambdaFun.alias;
         this.props.contractTable.grantReadData(lambdaFun.lambdaFunction);
     }
 
@@ -68,13 +70,14 @@ export class ContractLambdasConstruct extends cdk.Construct {
                 TABLE_NAME: this.props.contractTable.tableName,
                 GSI_BY_CONTRACT_DETAILS_INDEITTY: constants.BY_CONTRACT_DETAILS_IDENTITY_GSI_NAME,
             },
+            minCapacity: this.props.minCapacity,
             handler: 'gov.gsa.fas.contractservice.handler.ServiceHandler::handleRequest',
             type: LambdaConstructProps.LambdaTypeEnum.JAVA,
             logRetentionInDays: this.props.logRetentionInDays,
             timeout: 15,
             xRayTracing: this.props.xRayTracing,
         });
-        this.contractLambdaFunctions.getContractsLambda = lambdaFun.lambdaFunction;
+        this.contractLambdaFunctions.getContractsLambda = lambdaFun.alias;
         this.props.contractTable.grantReadData(lambdaFun.lambdaFunction);
     }
 

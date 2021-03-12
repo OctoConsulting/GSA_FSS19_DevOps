@@ -8,6 +8,7 @@ export interface LambdaConstructProps {
     exportResource?: boolean;
     handler?: string;
     logRetentionInDays?: number;
+    minCapacity?: number;
     type: LambdaConstructProps.LambdaTypeEnum;
     xRayTracing?: boolean;
 }

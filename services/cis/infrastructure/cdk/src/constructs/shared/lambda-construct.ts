@@ -3,10 +3,12 @@ import * as lambda from '@aws-cdk/aws-lambda';
 import * as awsLogs from '@aws-cdk/aws-logs';
 import * as ec2 from '@aws-cdk/aws-ec2';
 import { LambdaConstructProps } from '../../models/lambda-construct-props';
+import { constants } from '../../models/constants';
 
 export class LambdaConstruct extends cdk.Construct {
     private props: LambdaConstructProps;
     public lambdaFunction: lambda.Function;
+    public alias: lambda.Alias;
     constructor(parent: cdk.Construct, id: string, props: LambdaConstructProps) {
         super(parent, id);
         this.props = props;
@@ -35,6 +37,15 @@ export class LambdaConstruct extends cdk.Construct {
             code: lambda.Code.fromAsset(props.assetLocation),
             timeout: cdk.Duration.seconds(props.timeout ? props.timeout : 30),
             environment: props.lambdaEnvParameters ? props.lambdaEnvParameters : {},
+        });
+
+        this.alias = new lambda.Alias(this, 'alias', {
+            aliasName: constants.LIVE_ALIAS_NAME,
+            version: this.lambdaFunction.currentVersion,
+        });
+        this.alias.addAutoScaling({
+            minCapacity: this.props.minCapacity,
+            maxCapacity: constants.MAX_PROVISIONED_CAPACITY_FOR_LAMBDA,
         });
 
         lambdaLogGroup.grantWrite(this.lambdaFunction);

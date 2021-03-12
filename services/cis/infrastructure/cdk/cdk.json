@@ -13,6 +13,7 @@
             "logRetentionInDays": 7,
             "apiKeySecruity": false,
             "enableEncryptionAtRest": true,
+            "minCapacityForLambda": 1,
             "xRayTracing": true
         },
         "contract-api-qa": {
