@@ -4,6 +4,7 @@ import { VpcConstructParms } from '../models/vpc-construct-parms';
 import { NetworkBuilder } from '../lib/network-util';
 
 export class VpcConstruct extends cdk.Construct {
+    private publicSubnets: ec2.PublicSubnet[];
     private privateSubnets: ec2.PrivateSubnet[];
     private isolatedSubnets: ec2.Subnet[];
     private props: VpcConstructParms;
@@ -22,7 +23,7 @@ export class VpcConstruct extends cdk.Construct {
          */
         const vpcRange = this.props.vpc.vpcCidrBlock;
         this.networkBuilder = new NetworkBuilder(vpcRange);
-        for (const config of this.props.envParameters.subnetConfiguration) {
+        for (const config of this.props.stackContext.subnetConfiguration) {
             this.subnetConfiguration.push({
                 name: config.name,
                 subnetType: getSubnetType(config.subnetType)!,
@@ -30,11 +31,12 @@ export class VpcConstruct extends cdk.Construct {
                 reserved: (config.reserved === true)
             });
         }
-        this.maxAzs = this.props.envParameters.maxAzs ?? 3;
+        this.maxAzs = this.props.stackContext.maxAzs ?? 3;
         this.addInternetGateway(); 
         this.ngws = [];
         this.privateSubnets = [];
         this.isolatedSubnets = [];
+        this.publicSubnets = [];
         this.addSubnets();
         this.addNatRoutes();
         this.addInternalRoutes(this.privateSubnets);
@@ -81,6 +83,7 @@ export class VpcConstruct extends cdk.Construct {
             switch (subnetConfig.subnetType) {
               case ec2.SubnetType.PUBLIC:
                 const publicSubnet = new ec2.PublicSubnet(this, name, subnetProps);
+                this.publicSubnets.push(publicSubnet);
                 publicSubnet.addDefaultInternetRoute(this.igw.ref, this.att);
                 subnet = publicSubnet;
                 this.ngws.push(publicSubnet.addNatGateway());
@@ -114,9 +117,9 @@ export class VpcConstruct extends cdk.Construct {
     private addInternalRoutes(subnets: ec2.Subnet[]) {
         for (const sub of subnets) {
             let j = 1;
-            for (const cidr of this.props.envParameters.addonRoutesCidrs!)
+            for (const cidr of this.props.stackContext.addonRoutesCidrs!)
                 sub.addRoute(`InternalRoute${j++}`, {
-                    routerId: this.props.envParameters.addonRoutesVgw!,
+                    routerId: this.props.stackContext.addonRoutesVgw!,
                     routerType: ec2.RouterType.GATEWAY,
                     destinationCidrBlock: cidr,
                 })
@@ -125,6 +128,30 @@ export class VpcConstruct extends cdk.Construct {
     public getIsolatedSubnets() {
         return this.isolatedSubnets;
     }
+
+    public getPrivateSubnets() {
+        return this.privateSubnets;
+    }
+
+    public getPrivateCICDSubnets() {
+        return this.selectSubnetObjectsByName('PrivateCICD');
+    }
+
+    public getIsolatedLambdaSubnets() {
+        return this.selectSubnetObjectsByName('Isolated'); 
+    }
+    
+    private selectSubnetObjectsByName(groupName: string) {
+        const allSubnets = [...this.publicSubnets, ...this.privateSubnets, ...this.isolatedSubnets];
+        const subnets = allSubnets.filter(s => subnetGroupNameFromConstructId(s) === groupName);
+    
+        if (subnets.length === 0) {
+          const names = Array.from(new Set(allSubnets.map(subnetGroupNameFromConstructId)));
+          throw new Error(`There are no subnet groups with name '${groupName}' in this VPC. Available names: ${names}`);
+        }
+        return subnets;
+    }
+
 }
 const SUBNETTYPE_TAG = 'aws-cdk:subnet-type';
 const SUBNETNAME_TAG = 'aws-cdk:subnet-name';
@@ -144,4 +171,8 @@ function getSubnetType(type: string) {
         case "ISOLATED": return ec2.SubnetType.ISOLATED;
     }
     return ec2.SubnetType.ISOLATED;
+}
+
+function subnetGroupNameFromConstructId(subnet: ec2.ISubnet) {
+    return subnet.node.id.replace(/Subnet\d+$/, '');
 }
