@@ -17,3 +17,7 @@ export let getSettings = () => {
         IS_OFFLINE: process.env.IS_OFFLINE,
     };
 };
+
+export const getDocumentClient = () => {
+    return dynamoDocumentClient;
+};

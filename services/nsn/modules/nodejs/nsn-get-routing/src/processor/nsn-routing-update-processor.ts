@@ -11,7 +11,7 @@ export const putNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
         return apiResponses._400({ message: 'No routing data provided to update NSN routing record.' });
     }
 
-    const { group_id, routing_id, owa, isCivMgr, isMilMgr, ric } = JSON.parse(event.body);
+    const { group_id, routing_id, owa, is_civ_mgr, is_mil_mgr, ric } = JSON.parse(event.body);
 
     if (!routing_id) {
         return apiResponses._400({ message: 'Routing NSN number is mandetory to update NSN record' });
@@ -38,11 +38,13 @@ export const putNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
         group_id,
         routing_id,
         owa,
-        isCivMgr,
-        isMilMgr,
+        is_civ_mgr,
+        is_mil_mgr,
         ric,
-        createDate: updateNsnData.Item.createDate,
-        createdBy: updateNsnData.Item.createdBy,
+        type: updateNsnData.Item.type,
+        create_date: updateNsnData.Item.createDate,
+        created_by: updateNsnData.Item.createdBy,
+        update_date: new Date().getTime().toString(),
     };
 
     try {
