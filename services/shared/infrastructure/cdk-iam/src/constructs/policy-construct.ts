@@ -22,9 +22,21 @@ export class PolicyConstruct extends cdk.Construct {
             groupName: groupName,
         });
 
+        const roleName = this.props.iamSet.roleName;
+        const role = new iam.Role(this, `role-${roleName}`, {
+            description: roleName,
+            roleName: roleName,
+            assumedBy: new iam.FederatedPrincipal(this.props.samlProvider, {
+                StringEquals: {
+                    'SAML:aud': 'https://signin.aws.amazon.com/saml',
+                },
+            }),
+        });
+
         const policy = new iam.Policy(this, 'policy', {
             policyName: this.props.iamSet.groupName,
             groups: [group],
+            roles: [role],
         });
 
         this.props.iamSet.permissions.forEach((aRecord: any) => {

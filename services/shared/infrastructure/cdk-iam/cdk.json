@@ -10,6 +10,7 @@
         "@aws-cdk/aws-s3:grantWriteWithoutAcl": true,
         "fss-iam-dev": {
             "vpc": "vpc-0d1b73fc53abfcae7",
+            "samlProvider": "arn:aws:iam::902479997164:saml-provider/SecureAuth",
             "iamSets": [
                 {
                     "groupName": "FSS-Developers",

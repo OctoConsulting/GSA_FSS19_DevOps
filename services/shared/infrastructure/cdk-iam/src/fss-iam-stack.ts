@@ -2,7 +2,6 @@ import * as cdk from '@aws-cdk/core';
 import { EnvHelper } from './helper/env-helper';
 import { EnvParameters } from './models/env-parms';
 import { PolicyConstruct } from './constructs/policy-construct';
-import * as kms from '@aws-cdk/aws-kms';
 export class FssIamStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
@@ -12,6 +11,7 @@ export class FssIamStack extends cdk.Stack {
         envParameters.iamSets.forEach((iamSet) => {
             new PolicyConstruct(this, `${iamSet.groupName}`, {
                 iamSet,
+                samlProvider: envParameters.samlProvider,
                 shortEnv: envParameters.shortEnv,
             });
         });
