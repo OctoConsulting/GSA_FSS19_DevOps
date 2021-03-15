@@ -13,6 +13,7 @@
             "iamSets": [
                 {
                     "groupName": "FSS-Developers",
+                    "roleName": "FSS-Developers",
                     "users": [],
                     "permissions": [
                         "iam-mfa",
@@ -40,6 +41,7 @@
                 },
                 {
                     "groupName": "FSS-BusinessAnalysts",
+                    "roleName": "FSS-BusinessAnalysts",
                     "users": [],
                     "permissions": [
                         "iam-mfa",
@@ -67,6 +69,7 @@
                 },
                 {
                     "groupName": "FSS-Testers",
+                    "roleName": "FSS-Testers",
                     "users": [],
                     "permissions": [
                         "iam-mfa",
