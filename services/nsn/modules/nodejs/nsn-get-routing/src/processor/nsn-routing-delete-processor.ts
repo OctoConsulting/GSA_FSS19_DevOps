@@ -33,7 +33,7 @@ export const deleteNsn = async (event: APIGatewayProxyEvent, context: Context): 
         console.log('About to delete NSN record for routing id - ' + routingId);
         await dynamoDocumentClient.delete(params).promise();
         console.log('NSN record for routing id - ' + routingId);
-        return apiResponses._204({ message: 'NSN record for routing id ' + routingId + ' is deleted successfully.' });
+        return apiResponses._204({ message: 'NSN record for routing id ' + routingId + ' is deleted successfully!' });
     } catch (err) {
         console.log('Error >>>>>> ' + err);
         return apiResponses._500({ message: 'Error deleting record for NSN id - ' + routingId });
