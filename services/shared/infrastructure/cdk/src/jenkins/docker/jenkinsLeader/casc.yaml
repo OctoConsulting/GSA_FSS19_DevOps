@@ -71,7 +71,7 @@ jenkins:
     - ecs:
         credentialsId: false
         cluster: ${JENKINS_LINUX_WORKER_ECS_CLUSTER_ARN}
-        jenkinsUrl: "https://${JENKINS_DOMAIN_NAME}"
+        jenkinsUrl: "http://leader.jenkins.dev:8080"
         name: "ecs"
         regionName: "us-east-1"
         templates:
@@ -79,6 +79,7 @@ jenkins:
             memoryReservation: 1024
             image: "jenkins/inbound-agent"
             label: "linux"
+            taskDefinitionOverride: "ecsJenkinsStaticLinuxWorker"
             launchType: "FARGATE"
             platformVersion: "LATEST"
             remoteFSRoot: "/home/jenkins"
