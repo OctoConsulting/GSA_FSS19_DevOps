@@ -11,6 +11,7 @@ import {
   LifecyclePolicy,
   PerformanceMode,
   ThroughputMode,
+  CfnFileSystem
 } from '@aws-cdk/aws-efs';
 import {
   Port,
@@ -61,6 +62,7 @@ import {
   CertificateValidation,
   Certificate
 } from '@aws-cdk/aws-certificatemanager';
+import { Key } from '@aws-cdk/aws-kms';
 
 export class JenkinsConstruct extends Construct {
   private props: JenkinsConstructParms;
@@ -361,6 +363,11 @@ export class JenkinsConstruct extends Construct {
         subnets: this.props.ciCdSubnets
       })
     });
+
+    // Create a custom KMS key to encrypt the EFS Volume
+    const kmsKey = new Key(this, 'EfsKmsKey');
+    const cfnFileSystem = fileSystem.node.defaultChild as CfnFileSystem;
+    cfnFileSystem.kmsKeyId = kmsKey.keyId;
 
     this.accessPoint = fileSystem.addAccessPoint("efsAccessPoint", {
       path: '/data',
