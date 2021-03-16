@@ -1,4 +1,3 @@
-import { LoadBalancerTarget } from '@aws-cdk/aws-route53-targets';
 import { CfnLoadBalancer } from '@aws-cdk/aws-elasticloadbalancingv2';
 import {
   JenkinsConstructParms,
@@ -23,6 +22,11 @@ import {
   LogDriver,
   Secret as EcsSecret,
   FargatePlatformVersion,
+  TaskDefinition,
+  Compatibility,
+  IpcMode,
+  NetworkMode,
+  CfnService
 } from '@aws-cdk/aws-ecs';
 import {
   ApplicationLoadBalancedFargateService
@@ -57,7 +61,6 @@ import {
   CertificateValidation,
   Certificate
 } from '@aws-cdk/aws-certificatemanager';
-import { DomainName } from '@aws-cdk/aws-apigateway';
 
 export class JenkinsConstruct extends Construct {
   private props: JenkinsConstructParms;
@@ -99,7 +102,7 @@ export class JenkinsConstruct extends Construct {
 
     const cluster = this.createCluster({
       vpc: vpc,
-      defaultNamespace: `jenkins.${props.envParameters.shortEnv}`,
+      defaultNamespace: `jenkins.${props.envParameters.shortEnv}`
     });
     
     // need the public zone to create public SSL certs
@@ -165,7 +168,11 @@ export class JenkinsConstruct extends Construct {
           dnsRecordType: DnsRecordType.A
         },
     });
-
+    // TODO: Make communication between jenkins leader and workers SSL (via ALB)
+    // need to use ApplicationMultipleTargetGroupsServiceBaseProps or escape hatches
+    // steps are to add a target group to point at container exposed service 50000 (HTTP)
+    // and also add a listener on HTTPS 50000
+    // and lastly change jenkins config to point at the ssl endpoint in ecs cloud config
     const cfnLoadBalancer = fargateService.loadBalancer.node.defaultChild as CfnLoadBalancer;
     cfnLoadBalancer.subnets = vpc.selectSubnets({ subnets: this.props.ciCdSubnets }).subnetIds
 
@@ -201,6 +208,19 @@ export class JenkinsConstruct extends Construct {
 
     fargateService.service.connections.allowFrom(this.fileSystem, Port.tcp(2049));
     fargateService.service.connections.allowTo(this.fileSystem, Port.tcp(2049));
+
+    // Static task definition to be used by jenkins ecs workers
+    new TaskDefinition(this, "JenkinsWorkerTaskDef", {
+      compatibility: Compatibility.FARGATE,
+      cpu: '2048',
+      memoryMiB: '4096',
+      executionRole: executionRole,
+      taskRole: jenkinsWorkerTaskRole,
+      family: 'ecsJenkinsStaticLinuxWorker',
+      networkMode: NetworkMode.AWS_VPC,
+    }).addContainer("jenkinsWokerContainer", {
+      image: ContainerImage.fromRegistry('jenkins/inbound-agent')
+    });
   }
 
   private createSecrets({
@@ -326,7 +346,7 @@ export class JenkinsConstruct extends Construct {
       vpc,
       defaultCloudMapNamespace: {
         name: defaultNamespace,
-      },
+      }
     });
   }
 
