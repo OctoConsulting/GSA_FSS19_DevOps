@@ -13,14 +13,16 @@ export const postNsn = async (event: APIGatewayProxyEvent, context: Context): Pr
     }
     console.log('1 body - ' + event.body);
 
-    const { group_id, routing_id, owa, is_civ_mgr, is_mil_mgr, ric, created_by } = JSON.parse(event.body);
-    console.log('2 - ' + group_id);
-    if (!group_id) {
-        return apiResponses._400({ message: 'Group id is mandetory to create NSN record' });
+    const { routing_id, owa, is_civ_mgr, is_mil_mgr, ric, created_by } = JSON.parse(event.body);
+
+    if (!routing_id) {
+        return apiResponses._400({ message: 'Routing is mandetory to create NSN record' });
     }
-    if (isNaN(group_id)) {
-        return apiResponses._400({ message: 'Group id should be numeric' });
+    if (isNaN(routing_id.substring(0, 4))) {
+        return apiResponses._400({ message: 'Routing id should be numeric' });
     }
+    let group_id = Number(routing_id.substring(0, 2));
+
     console.log('3 ' + routing_id);
     const params = {
         TableName: getSettings().TABLE_NAME,
@@ -29,6 +31,7 @@ export const postNsn = async (event: APIGatewayProxyEvent, context: Context): Pr
             routing_id: routing_id,
         },
     };
+    debugger;
     console.log('4 - params - ' + params);
     let existingNsnData = await dynamoDocumentClient.get(params).promise();
     console.log('5 existingNsnData - ' + existingNsnData);
@@ -38,7 +41,7 @@ export const postNsn = async (event: APIGatewayProxyEvent, context: Context): Pr
     console.log('6');
 
     const nsnData: NsnData = {
-        group_id,
+        group_id: group_id,
         routing_id,
         owa,
         is_civ_mgr,

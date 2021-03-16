@@ -66,14 +66,53 @@ describe('errorTests', () => {
             'DynamoDB.DocumentClient',
             'query',
             (params: DynamoDB.DocumentClient.QueryInput, callback: Function) => {
-                callback(null, { Items: [{ group_id: 12, routing_id: 123411111111 }] });
+                callback(null, {
+                    Items: [
+                        { group_id: 12, routing_id: '123411111111', type: 'nsn' },
+                        { group_id: 12, routing_id: '1234', type: 'class' },
+                        { group_id: 12, routing_id: '12', type: 'group' },
+                    ],
+                });
             }
         );
 
-        when(mockEvent.pathParameters).thenReturn({ routingId: '123411111111' });
+        let searchStr: string;
 
+        searchStr = '12';
+        when(mockEvent.pathParameters).thenReturn({ routingId: searchStr });
         let response = await getNsn(proxyEvent);
-        expect(response.statusCode).to.equal(200);
+        validate200Response(response, searchStr);
+
+        searchStr = '1234';
+        when(mockEvent.pathParameters).thenReturn({ routingId: searchStr });
+        response = await getNsn(proxyEvent);
+        validate200Response(response, searchStr);
+
+        searchStr = '12341';
+        when(mockEvent.pathParameters).thenReturn({ routingId: searchStr });
+        response = await getNsn(proxyEvent);
+        validate200Response(response, searchStr);
         AWSMock.restore('DynamoDB.DocumentClient');
     });
 });
+
+function validate200Response(response: any, searchStr: string) {
+    expect(response.statusCode).to.equal(200);
+
+    let resObj: any = JSON.parse(response.body);
+    if (searchStr.length == 2) {
+        expect(resObj.length).to.equal(2);
+        expect(resObj[0][0]).to.equal('class');
+        expect(resObj[1][0]).to.equal('group');
+        expect(resObj[0][1][0].routing_id).to.contains(searchStr);
+        expect(resObj[1][1][0].routing_id).to.equal(searchStr);
+    } else {
+        expect(resObj.length).to.equal(3);
+        expect(resObj[0][0]).to.equal('nsn');
+        expect(resObj[1][0]).to.equal('class');
+        expect(resObj[2][0]).to.equal('group');
+        expect(resObj[0][1][0].routing_id).to.contains(searchStr);
+        expect(resObj[1][1][0].routing_id).to.equal(searchStr.substring(0, 4));
+        expect(resObj[2][1][0].routing_id).to.equal(searchStr.substring(0, 2));
+    }
+}

@@ -11,12 +11,12 @@ export const putNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
         return apiResponses._400({ message: 'No routing data provided to update NSN routing record.' });
     }
 
-    const { group_id, routing_id, owa, is_civ_mgr, is_mil_mgr, ric } = JSON.parse(event.body);
+    const { routing_id, owa, is_civ_mgr, is_mil_mgr, ric } = JSON.parse(event.body);
 
     if (!routing_id) {
         return apiResponses._400({ message: 'Routing NSN number is mandetory to update NSN record' });
     }
-
+    let group_id = routing_id.substring(0, 2);
     console.log('Routing ID - ' + routing_id);
     var params = {
         TableName: getSettings().TABLE_NAME,
