@@ -83,6 +83,7 @@ function groupBy(list: any, keyGetter: any, searchStr: string) {
         ) {
             const key = keyGetter(item);
             const collection = map.get(key);
+            delete item.group_id;
             if (!collection) {
                 map.set(key, [item]);
             } else {
