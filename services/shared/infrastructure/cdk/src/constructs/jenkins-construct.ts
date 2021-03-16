@@ -11,6 +11,7 @@ import {
   LifecyclePolicy,
   PerformanceMode,
   ThroughputMode,
+  CfnFileSystem
 } from '@aws-cdk/aws-efs';
 import {
   Port,
@@ -24,9 +25,9 @@ import {
   FargatePlatformVersion,
   TaskDefinition,
   Compatibility,
-  IpcMode,
   NetworkMode,
-  CfnService
+  ContainerDefinition,
+  AwsLogDriver
 } from '@aws-cdk/aws-ecs';
 import {
   ApplicationLoadBalancedFargateService
@@ -61,6 +62,7 @@ import {
   CertificateValidation,
   Certificate
 } from '@aws-cdk/aws-certificatemanager';
+import { Key } from '@aws-cdk/aws-kms';
 
 export class JenkinsConstruct extends Construct {
   private props: JenkinsConstructParms;
@@ -210,7 +212,7 @@ export class JenkinsConstruct extends Construct {
     fargateService.service.connections.allowTo(this.fileSystem, Port.tcp(2049));
 
     // Static task definition to be used by jenkins ecs workers
-    new TaskDefinition(this, "JenkinsWorkerTaskDef", {
+    const jenkinsWorkerTaskDef = new TaskDefinition(this, "JenkinsWorkerTaskDef", {
       compatibility: Compatibility.FARGATE,
       cpu: '2048',
       memoryMiB: '4096',
@@ -218,8 +220,13 @@ export class JenkinsConstruct extends Construct {
       taskRole: jenkinsWorkerTaskRole,
       family: 'ecsJenkinsStaticLinuxWorker',
       networkMode: NetworkMode.AWS_VPC,
-    }).addContainer("jenkinsWokerContainer", {
-      image: ContainerImage.fromRegistry('jenkins/inbound-agent')
+    });
+    new ContainerDefinition(this, "JenkinsWorkerContainerDef", {
+      image: ContainerImage.fromRegistry('jenkins/inbound-agent'),
+      taskDefinition: jenkinsWorkerTaskDef,
+      logging: new AwsLogDriver({
+        streamPrefix: 'jenkins-worker'
+      })
     });
   }
 
@@ -361,6 +368,11 @@ export class JenkinsConstruct extends Construct {
         subnets: this.props.ciCdSubnets
       })
     });
+
+    // Create a custom KMS key to encrypt the EFS Volume
+    const kmsKey = new Key(this, 'EfsKmsKey');
+    const cfnFileSystem = fileSystem.node.defaultChild as CfnFileSystem;
+    cfnFileSystem.kmsKeyId = kmsKey.keyId;
 
     this.accessPoint = fileSystem.addAccessPoint("efsAccessPoint", {
       path: '/data',
