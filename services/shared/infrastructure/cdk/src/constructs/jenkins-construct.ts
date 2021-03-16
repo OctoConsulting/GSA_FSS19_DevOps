@@ -25,9 +25,9 @@ import {
   FargatePlatformVersion,
   TaskDefinition,
   Compatibility,
-  IpcMode,
   NetworkMode,
-  CfnService
+  ContainerDefinition,
+  AwsLogDriver
 } from '@aws-cdk/aws-ecs';
 import {
   ApplicationLoadBalancedFargateService
@@ -212,7 +212,7 @@ export class JenkinsConstruct extends Construct {
     fargateService.service.connections.allowTo(this.fileSystem, Port.tcp(2049));
 
     // Static task definition to be used by jenkins ecs workers
-    new TaskDefinition(this, "JenkinsWorkerTaskDef", {
+    const jenkinsWorkerTaskDef = new TaskDefinition(this, "JenkinsWorkerTaskDef", {
       compatibility: Compatibility.FARGATE,
       cpu: '2048',
       memoryMiB: '4096',
@@ -220,8 +220,13 @@ export class JenkinsConstruct extends Construct {
       taskRole: jenkinsWorkerTaskRole,
       family: 'ecsJenkinsStaticLinuxWorker',
       networkMode: NetworkMode.AWS_VPC,
-    }).addContainer("jenkinsWokerContainer", {
-      image: ContainerImage.fromRegistry('jenkins/inbound-agent')
+    });
+    new ContainerDefinition(this, "JenkinsWorkerContainerDef", {
+      image: ContainerImage.fromRegistry('jenkins/inbound-agent'),
+      taskDefinition: jenkinsWorkerTaskDef,
+      logging: new AwsLogDriver({
+        streamPrefix: 'jenkins-worker'
+      })
     });
   }
 
