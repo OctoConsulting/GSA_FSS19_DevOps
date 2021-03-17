@@ -14,7 +14,6 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     console.log('1 body - ' + event.body);
 
     let { routing_id, owa, is_civ_mgr, is_mil_mgr, ric, created_by } = JSON.parse(event.body);
-
     if (!routing_id) {
         return apiResponses._400({ message: 'Routing is mandatory to create NSN record.' });
     }
