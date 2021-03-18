@@ -29,7 +29,9 @@ import com.google.gson.Gson;
 import gov.gsa.fas.contractservice.exception.CCSExceptions;
 import gov.gsa.fas.contractservice.model.Address;
 import gov.gsa.fas.contractservice.model.CDFMaster;
+import gov.gsa.fas.contractservice.model.CFFContractFinder;
 import gov.gsa.fas.contractservice.model.ContractDataMaster;
+import gov.gsa.fas.contractservice.model.NIFData;
 import gov.gsa.fas.contractservice.util.ContractConstants;
 
 public class ContractServiceDAOImpl implements ContractServiceDAO {
@@ -161,6 +163,37 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 			Address address = new Gson().fromJson(addressDataJSON, Address.class);
 
 			return address;
+		}
+		return null;
+	}
+
+
+	@Override
+	public List<CFFContractFinder> getCFFDetail(String internalContractNumber)
+			throws AmazonDynamoDBException, AmazonClientException {
+		
+		String cffContractFinderDataJSON = getDetailsByPartitionKey(internalContractNumber,
+				ContractConstants.CONTRACT_SERVICE_SK_D407 + "_" + internalContractNumber);
+
+		if (cffContractFinderDataJSON != null && cffContractFinderDataJSON.length() > 0) {
+			List<CFFContractFinder> cdfMaster = Arrays.asList(new Gson().fromJson(cffContractFinderDataJSON, CFFContractFinder[].class));
+
+			return cdfMaster;
+		}
+		return null;
+	}
+
+
+	@Override
+	public NIFData getNIFDetails(String internalContractNumber) throws AmazonDynamoDBException, AmazonClientException {
+		
+		String nifDataJSON = getDetailsByPartitionKey(internalContractNumber,
+				ContractConstants.CONTRACT_SERVICE_SK_D403 + "_" + internalContractNumber);
+
+		if (nifDataJSON != null && nifDataJSON.length() > 0) {
+			NIFData nifData = new Gson().fromJson(nifDataJSON, NIFData.class);
+
+			return nifData;
 		}
 		return null;
 	}

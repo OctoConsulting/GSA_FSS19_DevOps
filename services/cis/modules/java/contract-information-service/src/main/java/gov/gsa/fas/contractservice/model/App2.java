@@ -60,14 +60,22 @@ public class App2 {
 		Item item8 = new Item().withPrimaryKey("internal_contract_number", "NFKA271")
 				.withString("contract_details_identity", "DUNS_080970255");
 
-		table.putItem(item);
+		System.out.println(getContractMaster());
+		
+		System.out.println(getContractMaster());
+		System.out.println(getAddress());
+		System.out.println(getNSN());
+		System.out.println(getCDFMaster());
+		
+		
+		/*table.putItem(item);
 		table.putItem(item2);
 		table.putItem(item3);
 		table.putItem(item4);
 		table.putItem(item5);
 		table.putItem(item6);
 		table.putItem(item7);
-		table.putItem(item8);
+		table.putItem(item8);*/
 		table.waitForActive();
 	}
 

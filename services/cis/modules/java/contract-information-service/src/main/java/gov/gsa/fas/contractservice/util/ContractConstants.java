@@ -1,5 +1,6 @@
 package gov.gsa.fas.contractservice.util;
 
+
 public class ContractConstants {
 	
 	public static final String SHORT_ENV = "SHORT_ENV";
@@ -94,4 +95,16 @@ public class ContractConstants {
 	public static final String YYYYMMDD_FORMAT = "yyyyMMdd";
 	public static final String JULIANDATE_FORMAT = "yyyyDDD";
 	public static final String MMDDYYYY = "MMddyyyy";
+	
+	public static final String POP_C_M_LIT_1 = "REGULATED ITEMS SHALL BE PACKAGED, MARKED";
+	public static final String POP_C_M_LIT_2 = "AND LABELED TO COMPLY WITH THE IMDG CODE OR 49 CFR (SEE D-FSS-440)";
+	public static final String DAC_LIT_1 = "CAUTION: THE ABOVE NAMED MATERIAL MUST COMPLY WITH THE";
+	public static final String DAC_LIT_2 = "TRANSPORTATION ACT (49 CFR PARTS 170-177)";
+	public static final String FEMA_LIT_1 ="Please do not physically ship,  this PO is for billing purposes only.";
+	public static final String OS3_LIT_1 ="Delivery Times required for this purchase order are as shown in the original";
+	public static final String OS3_LIT_2 ="contract according to the size of the order. Days after receipt of order ";
+	public static final String OS3_LIT_3 ="are for information only as typical of the most common size customer order.";
+	public static final String CF_LIT_1 ="ORDER VALUES LESS THAN $";//$250.00 
+	public static final String CF_LIT_2 =" SUBJECT TO $";//$20.00 
+	public static final String CF_LIT_3 =" CONVENIENCE FEE. CONTRACTOR WILL BILL.";
 }
