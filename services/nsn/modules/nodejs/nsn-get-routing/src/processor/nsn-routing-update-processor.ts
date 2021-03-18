@@ -2,12 +2,13 @@
 
 import { NsnData } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { dynamoDocumentClient, getSettings } from '../config';
+import { getSettings } from '../config';
 import { apiResponses } from '../model/responseAPI';
+import { DynamoDB } from 'aws-sdk';
 
-export const putNsn = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
+export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     console.log('Updating the NSN data - ' + event);
-    if (event.body === null) {
+    if (event.body == null) {
         return apiResponses._400({ message: 'No routing data provided to update NSN routing record.' });
     }
 
@@ -27,7 +28,7 @@ export const putNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
     };
 
     console.log('Fetching data from dynamoDB for update...');
-    const updateNsnData = await dynamoDocumentClient.get(params).promise();
+    const updateNsnData = await getDocumentDbClient().get(params).promise();
     console.log('Data fetched from DB  to update - ' + updateNsnData.Item);
 
     if (updateNsnData.Item == null) {
@@ -49,10 +50,22 @@ export const putNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
 
     try {
         const model = { TableName: getSettings().TABLE_NAME, Item: nsnData };
-        await dynamoDocumentClient.put(model).promise();
+        await getDocumentDbClient().put(model).promise();
         return apiResponses._200(model);
     } catch (err) {
         console.log('Error while updating - ' + err);
         return apiResponses._500({ message: 'Error updating NSN record for routing ID - ' + routing_id });
     }
+};
+
+const getDocumentDbClient = (): DynamoDB.DocumentClient => {
+    let options = {};
+
+    if (process.env.IS_OFFLINE) {
+        options = {
+            region: 'localhost',
+            endpoint: 'http://localhost:8000',
+        };
+    }
+    return new DynamoDB.DocumentClient(options);
 };

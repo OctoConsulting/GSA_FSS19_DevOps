@@ -10,7 +10,7 @@ import * as AWSMock from 'aws-sdk-mock';
 import * as LambdaTester from 'lambda-tester';
 import { GetItemInput } from 'aws-sdk/clients/dynamodb';
 
-describe('errorTests', () => {
+describe('Retrieve NSN test suit', () => {
     let mockEvent: APIGatewayProxyEvent = mock(<APIGatewayProxyEvent>{});
     const proxyEvent: APIGatewayProxyEvent = instance(mockEvent);
 

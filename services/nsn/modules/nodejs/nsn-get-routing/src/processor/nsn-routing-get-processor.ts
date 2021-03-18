@@ -98,3 +98,7 @@ function groupBy(list: any, keyGetter: any, searchStr: string) {
     }
     return map;
 }
+
+module.exports = {
+    getNsn,
+};

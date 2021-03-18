@@ -27,6 +27,12 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     if (routing_id.length > 15) {
         return apiResponses._400({ message: 'Routing id can not be more than 15 characters.' });
     }
+    let smallCaseRegex = /[a-z]/;
+    if (!owa || owa.length > 1 || smallCaseRegex.test(owa) || owa === 'Y') {
+        return apiResponses._400({
+            message: 'Invalid owa value. Allowed values are  A through W, X, Z and 0 through 9.',
+        });
+    }
     // Setting valid values for Civ and Mil Manager
     is_civ_mgr = is_civ_mgr == 'Y' ? is_civ_mgr : 'N';
     is_mil_mgr = is_mil_mgr == 'Y' ? is_mil_mgr : 'N';
@@ -88,4 +94,8 @@ const getDocumentDbClient = (): DynamoDB.DocumentClient => {
         };
     }
     return new DynamoDB.DocumentClient(options);
+};
+
+module.exports = {
+    postNsn,
 };
