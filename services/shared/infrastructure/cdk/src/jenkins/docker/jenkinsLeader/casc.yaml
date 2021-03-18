@@ -144,3 +144,20 @@ jobs:
           }
         }
       }
+tool:
+  maven:
+    installations:
+    - name: "maven3"
+      properties:
+      - installSource:
+          installers:
+          - maven:
+              id: "3.6.3"
+  nodejs:
+    installations:
+    - name: "node15"
+      properties:
+      - installSource:
+          installers:
+          - nodeJSInstaller:
+              id: "15.11.0"

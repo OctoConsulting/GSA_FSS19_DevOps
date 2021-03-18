@@ -24,3 +24,5 @@ timestamper:latest
 workflow-aggregator:latest
 ws-cleanup:latest
 oic-auth:latest
+pipeline-maven:latest
+nodejs:latest
