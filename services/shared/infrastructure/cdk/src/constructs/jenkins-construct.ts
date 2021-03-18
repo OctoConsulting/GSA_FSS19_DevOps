@@ -1,3 +1,4 @@
+import { Bucket, BucketEncryption, IBucket} from '@aws-cdk/aws-s3';
 import { CfnLoadBalancer } from '@aws-cdk/aws-elasticloadbalancingv2';
 import {
   JenkinsConstructParms,
@@ -54,9 +55,7 @@ import {
   Duration
 } from '@aws-cdk/core';
 import {
-  ARecord,
   HostedZone,
-  RecordTarget
 } from '@aws-cdk/aws-route53';
 import {
   CertificateValidation,
@@ -68,6 +67,7 @@ export class JenkinsConstruct extends Construct {
   private props: JenkinsConstructParms;
   private fileSystem: IFileSystem;
   private accessPoint: IAccessPoint;
+  private artifactsBucket: IBucket;
   constructor(parent: Construct, id: string, props: JenkinsConstructParms) {
     super(parent, id);
     this.props = props;
@@ -228,6 +228,8 @@ export class JenkinsConstruct extends Construct {
         streamPrefix: 'jenkins-worker'
       })
     });
+    this.artifactsBucket = this.createAritfactsS3Bucket();
+    this.artifactsBucket.grantReadWrite(jenkinsWorkerTaskRole);
   }
 
   private createSecrets({
@@ -387,5 +389,19 @@ export class JenkinsConstruct extends Construct {
       }
     });
     return fileSystem;
+  }
+  private createAritfactsS3Bucket() {
+    const kmsKey = new Key(this, 'ArtifactsBucketKmsKey', {
+      enableKeyRotation: true
+    });
+    return new Bucket(this, "ArtifactsBucket", {
+      bucketName: `artifacts-${this.props.envParameters.account}-${this.props.envParameters.region}-${this.props.envParameters.shortEnv}`,
+      encryption: BucketEncryption.KMS,
+      encryptionKey: kmsKey,
+      versioned: true,
+      lifecycleRules: [{
+        noncurrentVersionExpiration: Duration.days(30),
+      }]
+    });
   }
 }
