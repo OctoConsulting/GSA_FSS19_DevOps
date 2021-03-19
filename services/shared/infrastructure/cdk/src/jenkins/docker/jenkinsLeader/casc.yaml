@@ -37,6 +37,13 @@ jenkins:
         - "View/Create:authenticated"
         - "View/Delete:authenticated"
         - "View/Read:authenticated"
+  globalNodeProperties:
+  - envVars:
+      env:
+      - key: "ARTIFACTS_BUCKET"
+        value: "${ARTIFACTS_BUCKET}"
+      - key: "SHORT_ENV"
+        value: "${SHORT_ENV}"
   clouds:
     - amazonEC2:
         cloudName: "ec2"

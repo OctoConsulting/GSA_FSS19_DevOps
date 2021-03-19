@@ -1,0 +1,56 @@
+pipeline {
+    environment {
+        SHORT_ENV = "${env.SHORT_ENV}"
+        ARTIFACTS_BUCKET = "${env.ARTIFACTS_BUCKET}"
+    }
+    agent {
+        label "linux"
+    }
+
+    tools {
+        maven "maven3"
+    }
+
+    stages {
+        stage('Install') {
+            steps {
+                sh '''
+                    curl https://s3.amazonaws.com/aws-cli/awscli-bundle.zip -o awscli-bundle.zip
+                    unzip awscli-bundle.zip
+                    ./awscli-bundle/install
+                '''
+            }
+        }
+        stage('Build') {
+            steps {
+                git 'https://github.com/OctoConsulting/GSA_FSS19_DevOps'
+                sh '''
+                    cd services/cis/modules/java/contract-information-service
+                    mvn clean install -DskipTests
+                '''
+            }
+
+            post {
+                // If Maven was able to run the tests, even if some of the test
+                // failed, record the test results and archive the jar file.
+                success {
+                    //junit '**/target/surefire-reports/TEST-*.xml'
+                    archiveArtifacts 'services/cis/modules/java/contract-information-service/target/*.jar'
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh '''
+                    cd services/cis/modules/java/contract-information-service
+                    export PATH=${PATH}:/home/jenkins/.local/lib/aws/bin/
+                    S3_PREFIX="services/cis/contract-information-service/contract-information-service.jar"
+                    FUNCTION_NAME=get-contracts-lambda-${SHORT_ENV}
+                    aws s3 cp target/contract-information-service-0.0.1-SNAPSHOT.jar s3://${ARTIFACTS_BUCKET}/${S3_PREFIX}
+                    LATEST_VERSION=$(aws s3api list-object-versions --bucket "${ARTIFACTS_BUCKET}" --prefix "${S3_PREFIX}" --query 'Versions[*].VersionId' --output text | cut -f1)
+                    aws lambda update-function-code --function-name ${FUNCTION_NAME} --s3-bucket "${ARTIFACTS_BUCKET}" --s3-key "${S3_PREFIX}" --s3-object-version "${LATEST_VERSION}"
+                '''
+            }
+        }
+    }
+}

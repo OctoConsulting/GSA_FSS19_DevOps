@@ -1,0 +1,29 @@
+pipeline {
+    agent {
+        label "linux"
+    }
+
+    stages {
+        stage('Install') {
+            steps {
+                sh '''
+                    #curl https://s3.amazonaws.com/aws-cli/awscli-bundle.zip -o awscli-bundle.zip
+                    #unzip awscli-bundle.zip
+                    #./awscli-bundle/install
+                    #install cdk
+                    
+                '''
+            }
+        }
+        stage('Deploy') {
+            steps {
+                git 'https://github.com/OctoConsulting/GSA_FSS19_DevOps'
+                sh '''
+                    cd services/cis/infrastructure/cdk/
+                    #cdk deploy
+                '''
+            }
+
+        }
+    }
+}
