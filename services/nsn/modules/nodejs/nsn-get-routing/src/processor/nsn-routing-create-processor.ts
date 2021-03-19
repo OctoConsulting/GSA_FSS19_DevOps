@@ -27,8 +27,8 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     if (routing_id.length > 15) {
         return apiResponses._400({ message: 'Routing id can not be more than 15 characters.' });
     }
-    let smallCaseRegex = /[a-z]/;
-    if (!owa || owa.length > 1 || smallCaseRegex.test(owa) || owa === 'Y') {
+    let owaRegex = /^[A-X,Z,0-9]$/;
+    if (!owa || !owaRegex.test(owa)) {
         return apiResponses._400({
             message: 'Invalid owa value. Allowed values are  A through W, X, Z and 0 through 9.',
         });
