@@ -117,6 +117,8 @@ export class JenkinsConstruct extends Construct {
       hostedZoneId: this.props.stackContext.privateHostedZoneId,
       zoneName: this.props.stackContext.domainName
     });
+    this.artifactsBucket = this.createAritfactsS3Bucket();
+    this.artifactsBucket.grantReadWrite(jenkinsWorkerTaskRole);
 
     const fargateService = new ApplicationLoadBalancedFargateService(
       this,
@@ -160,7 +162,9 @@ export class JenkinsConstruct extends Construct {
             JENKINS_LINUX_WORKER_TASK_ROLE: jenkinsWorkerTaskRole.roleArn,
             JENKINS_LINUX_WORKER_EXECUTION_ROLE: executionRole.roleArn,
             JENKINS_LINUX_WORKER_LOGS_GROUP: logGroup.logGroupName,
-            COGNITO_ADMIN_GROUP: cognitoAdminGroup
+            COGNITO_ADMIN_GROUP: cognitoAdminGroup,
+            SHORT_ENV: props.envParameters.shortEnv,
+            ARTIFACTS_BUCKET: this.artifactsBucket.bucketName
           },
           secrets,
         },
@@ -228,8 +232,6 @@ export class JenkinsConstruct extends Construct {
         streamPrefix: 'jenkins-worker'
       })
     });
-    this.artifactsBucket = this.createAritfactsS3Bucket();
-    this.artifactsBucket.grantReadWrite(jenkinsWorkerTaskRole);
   }
 
   private createSecrets({
@@ -260,9 +262,26 @@ export class JenkinsConstruct extends Construct {
   }
 
   private createJenkinsWorkerTaskRole(): Role {
-    return new Role(this, "JenkinsWorkerTaskRole", {
+    const workerRole = new Role(this, "JenkinsWorkerTaskRole", {
       assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com'),
     });
+    // TODO: This need to be replaced with Lambda execute access 
+    // for each lambda separately for more granular security.
+    workerRole.addManagedPolicy(
+      new ManagedPolicy(this, "JenkinsWorkerPolicy", {
+        managedPolicyName: "JenkinsWorkerPolicy",
+        statements: [
+          new PolicyStatement({
+            effect: Effect.ALLOW,
+            actions: [
+              "lambda:UpdateFunctionCode"
+            ],
+            resources: ['*']
+          })
+        ]
+      }
+    ));
+    return workerRole;
   }
 
   private createJenkinsLeaderTaskRole(): Role {
