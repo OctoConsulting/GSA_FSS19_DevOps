@@ -28,7 +28,9 @@ import {
   Compatibility,
   NetworkMode,
   ContainerDefinition,
-  AwsLogDriver
+  AwsLogDriver,
+  CfnService,
+  CfnCluster
 } from '@aws-cdk/aws-ecs';
 import {
   ApplicationLoadBalancedFargateService
@@ -174,6 +176,27 @@ export class JenkinsConstruct extends Construct {
           dnsRecordType: DnsRecordType.A
         },
     });
+    // Allow support for ECS exec troubleshooting feature
+    const execKmsKey = new Key(this, "ExecKmsKey");
+    const execLogGroup = new LogGroup(this, "ExecLogGroup");
+    const execBucket = new Bucket(this, "ExecBucket");
+    execKmsKey.grantDecrypt(jenkinsLeaderTaskRole);
+    execLogGroup.grantWrite(jenkinsLeaderTaskRole);
+    execBucket.grantPut(jenkinsLeaderTaskRole);
+
+    const CfnCluster = cluster.node.defaultChild as CfnCluster;
+    CfnCluster.addPropertyOverride('Configuration.executeCommandConfiguration', {
+      KmsKeyId: execKmsKey.keyId,
+      LogConfiguration: {
+        CloudWatchLogGroupName: execLogGroup.logGroupName,
+        S3BucketName: execBucket.bucketName,
+        S3KeyPrefix: 'exec-output'
+      },
+      Logging: 'OVERRIDE'
+    });
+    const CfnService = fargateService.service.node.findChild('Service') as CfnService;
+    CfnService.addPropertyOverride('EnableExecuteCommand', true);
+
     // TODO: Make communication between jenkins leader and workers SSL (via ALB)
     // need to use ApplicationMultipleTargetGroupsServiceBaseProps or escape hatches
     // steps are to add a target group to point at container exposed service 50000 (HTTP)
@@ -315,7 +338,7 @@ export class JenkinsConstruct extends Construct {
               'ec2:DescribeSubnets',
               'ec2:GetPasswordData',
               'iam:ListInstanceProfilesForRole',
-              'iam:PassRole',
+              'iam:PassRole'
             ],
             resources: ['*'],
           }),
@@ -341,6 +364,10 @@ export class JenkinsConstruct extends Construct {
               'ecs:RunTask',
               'ecs:StopTask',
               'ecs:DescribeTasks',
+              "ssmmessages:CreateControlChannel",
+              "ssmmessages:CreateDataChannel",
+              "ssmmessages:OpenControlChannel",
+              "ssmmessages:OpenDataChannel"
             ],
             resources: ['*'],
           }),
