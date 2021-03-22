@@ -127,7 +127,7 @@ public class ContractServiceImpl implements ContractService {
 			ContractsType contractsType = getContractDetails(inputStream.getPathParameters().getContractid());
 			if (contractsType == null){
 				return new RequestWrapper(
-						ContractServiceUtil.marshallException(ContractConstants.FAULT_CODE, ContractConstants.JS007_INVALID_DATA_CONTRACT_NUMBER));
+						ContractServiceUtil.marshallException(ContractConstants.FAULT_CODE, ContractConstants.JS007_INVALID_DATA_CONTRACT_NUMBER+inputStream.getPathParameters().getContractid()));
 			}
 			return new RequestWrapper(ContractServiceUtil.marshall(contractsType));
 		} catch (ApplicationException ex) {
@@ -147,7 +147,7 @@ public class ContractServiceImpl implements ContractService {
 		if (null == inputStream.getPathParameters() || null == inputStream.getPathParameters().getContractid()
 				|| 1 > inputStream.getPathParameters().getContractid().length()) {
 			inputStream.setBody(ContractServiceUtil.marshallException(ContractConstants.FAULT_CODE,
-					ContractConstants.JS007_INVALID_DATA_CONTRACT_NUMBER));
+					ContractConstants.JS007_INVALID_DATA_CONTRACT_NUMBER+inputStream.getPathParameters().getContractid()));
 			return inputStream;
 		}
 		return null;
@@ -189,7 +189,7 @@ public class ContractServiceImpl implements ContractService {
 				return null;
 			} else {
 				logger.info("No ContractDetails found for  : {} " , contractId);
-				throw new ApplicationException(ContractConstants.JS007_NO_CONTRACTS_ENTITY_ID);
+				throw new ApplicationException(ContractConstants.JS007_INVALID_DATA_CONTRACT_NUMBER + contractId);
 			}
 		} catch (AmazonDynamoDBException ex) {
 			throw new ApplicationException(ContractConstants.J090_INVALID_DATA);
