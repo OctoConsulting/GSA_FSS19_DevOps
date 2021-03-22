@@ -1156,7 +1156,7 @@ public class ContractServiceImpl implements ContractService {
 					contractDetail.setVolumeDiscountPercentage(range.getDiscount().doubleValue());
 				}
 			}
-			contractDetail.setVolumeDiscount(volumeDis);
+		
 		}
 
 	}
