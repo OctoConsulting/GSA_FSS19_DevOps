@@ -50,6 +50,13 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
 
         var nsnResponseMap = groupBy(nsnData.Items, (item: NsnData) => item.type, routingId);
 
+        if (
+            (routingId.length > 4 && !nsnResponseMap.get('nsn')) ||
+            (routingId.length == 4 && !nsnResponseMap.get('class'))
+        ) {
+            return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
+        }
+
         console.log('nsnResponseMap - ' + JSON.stringify(Array.from(nsnResponseMap.entries())));
 
         return apiResponses._200(Array.from(nsnResponseMap.entries()));
