@@ -12,12 +12,15 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         return apiResponses._400({ message: 'No routing data provided to update NSN routing record.' });
     }
 
-    const { routing_id, owa, is_civ_mgr, is_mil_mgr, ric } = JSON.parse(event.body);
+    let { routing_id, owa, is_civ_mgr, is_mil_mgr, ric } = JSON.parse(event.body);
 
     if (!routing_id) {
-        return apiResponses._400({ message: 'Routing NSN number is mandetory to update NSN record' });
+        return apiResponses._400({ message: 'Routing NSN number is mandatory to update NSN record' });
     }
+    routing_id = routing_id.trim();
+
     let group_id = routing_id.substring(0, 2);
+
     console.log('Routing ID - ' + routing_id);
     var params = {
         TableName: getSettings().TABLE_NAME,
@@ -26,6 +29,26 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             routing_id: routing_id,
         },
     };
+    let existingNsnData = await getDocumentDbClient().get(params).promise();
+    console.log("putNsn flow existingNsnData :: " + existingNsnData);
+
+    if (existingNsnData.Item == null) {
+        return apiResponses._422({ message: 'NSN routing record not found for - ' + routing_id });
+    }
+
+    let owaRegex = /^[A-X,Z,0-9]$/;
+    if (!owa || !owaRegex.test(owa)) {
+        return apiResponses._400({
+            message: 'Invalid owa value. Allowed values are  A through W, X, Z and 0 through 9.',
+        });
+    }
+    // Setting valid values for Civ and Mil Manager
+    is_civ_mgr = is_civ_mgr == 'Y' ? is_civ_mgr : 'N';
+    is_mil_mgr = is_mil_mgr == 'Y' ? is_mil_mgr : 'N';
+
+    if ((is_civ_mgr == 'Y' || is_mil_mgr == 'Y') && !ric) {
+        return apiResponses._400({ message: 'Routing identifier code is mandatory.' });
+    }
 
     console.log('Fetching data from dynamoDB for update...');
     const updateNsnData = await getDocumentDbClient().get(params).promise();
@@ -36,15 +59,15 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     }
 
     const nsnData: NsnData = {
-        group_id,
+        group_id: group_id,
         routing_id,
         owa,
         is_civ_mgr,
         is_mil_mgr,
         ric,
-        type: updateNsnData.Item.type,
-        create_date: updateNsnData.Item.createDate,
-        created_by: updateNsnData.Item.createdBy,
+        type: routing_id.length == 2 ? 'group' : routing_id.length == 4 ? 'class' : 'nsn',
+        create_date: existingNsnData.Item.createDate,
+        created_by: existingNsnData.Item.createdBy,
         update_date: new Date().getTime().toString(),
     };
 
@@ -68,4 +91,8 @@ const getDocumentDbClient = (): DynamoDB.DocumentClient => {
         };
     }
     return new DynamoDB.DocumentClient(options);
+};
+
+module.exports = {
+    putNsn,
 };

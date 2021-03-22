@@ -28,7 +28,8 @@ custom:
     start:
       port: 8000
       inMemory: false
-      migrate: true
+      sharedDb: true
+      migrate: false
     migration:
         dir: offline/migrations
 
@@ -56,7 +57,7 @@ functions:
     events:
       - http:
           path: /nsnrouting/v1/details/
-          method: post
+          method: POST
           cors: true
   retrieveNSNData:
     handler: getNsn

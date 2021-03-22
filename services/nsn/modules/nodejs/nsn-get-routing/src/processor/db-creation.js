@@ -40,4 +40,6 @@ dynamodb.createTable(params, function(err, data) {
     } else {
         console.log("Created table.", JSON.stringify(data, null, 2));
     }
-});
+}
+
+);
