@@ -12,7 +12,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         return apiResponses._400({ message: 'No routing data provided to update NSN routing record.' });
     }
 
-    const { routing_id, owa, is_civ_mgr, is_mil_mgr, ric } = JSON.parse(event.body);
+    let { routing_id, owa, is_civ_mgr, is_mil_mgr, ric } = JSON.parse(event.body);
 
     if (!routing_id) {
         return apiResponses._400({ message: 'Routing NSN number is mandetory to update NSN record' });
@@ -31,17 +31,20 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     const updateNsnData = await getDocumentDbClient().get(params).promise();
     console.log('Data fetched from DB  to update - ' + updateNsnData.Item);
 
+    is_civ_mgr = is_civ_mgr.toUpperCase() == 'Y' ? is_civ_mgr.toUpperCase() : 'N';
+    is_mil_mgr = is_mil_mgr.toUpperCase() == 'Y' ? is_mil_mgr.toUpperCase() : 'N';
+
     if (updateNsnData.Item == null) {
         return apiResponses._404({ message: 'No NSN Data found for update for routing_id - ' + routing_id });
     }
 
     const nsnData: NsnData = {
         group_id,
-        routing_id,
-        owa,
+        routing_id: routing_id.toUpperCase(),
+        owa: owa.toUpperCase(),
         is_civ_mgr,
         is_mil_mgr,
-        ric,
+        ric: ric.toUpperCase(),
         type: updateNsnData.Item.type,
         create_date: updateNsnData.Item.createDate,
         created_by: updateNsnData.Item.createdBy,

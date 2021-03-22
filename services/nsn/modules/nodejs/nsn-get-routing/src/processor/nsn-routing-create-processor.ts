@@ -34,8 +34,8 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         });
     }
     // Setting valid values for Civ and Mil Manager
-    is_civ_mgr = is_civ_mgr == 'Y' ? is_civ_mgr : 'N';
-    is_mil_mgr = is_mil_mgr == 'Y' ? is_mil_mgr : 'N';
+    is_civ_mgr = is_civ_mgr.toUpperCase() == 'Y' ? is_civ_mgr.toUpperCase() : 'N';
+    is_mil_mgr = is_mil_mgr.toUpperCase() == 'Y' ? is_mil_mgr.toUpperCase() : 'N';
 
     if ((is_civ_mgr == 'Y' || is_mil_mgr == 'Y') && !ric) {
         return apiResponses._400({ message: 'Routing identifier code is mandatory.' });
@@ -61,13 +61,13 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     const nsnData: NsnData = {
         group_id: group_id,
-        routing_id,
-        owa,
+        routing_id: routing_id.toUpperCase(),
+        owa: owa.toUpperCase(),
         is_civ_mgr,
         is_mil_mgr,
-        ric,
+        ric: ric.toUpperCase(),
         type: routing_id.length == 2 ? 'group' : routing_id.length == 4 ? 'class' : 'nsn',
-        created_by,
+        created_by: created_by.toUpperCase(),
         create_date: new Date().getTime().toString(),
     };
     console.log('7');
