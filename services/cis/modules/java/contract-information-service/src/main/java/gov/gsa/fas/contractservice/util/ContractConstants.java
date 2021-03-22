@@ -15,6 +15,7 @@ public class ContractConstants {
 	public static final String CONTRACT_SERVICE_SK_D403 = "detail_d403";
 	public static final String CONTRACT_SERVICE_SK_D407 = "detail_d407";
 	public static final String CONTRACT_SERVICE_SK_D410 = "detail_d410";
+	public static final String CONTRACT_SERVICE_SK_D411 = "detail_d411";
 	public static final String CONTRACT_SERVICE_SK_D430 = "detail_d430";
 	
 	public static final String TEST_BODY = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:con=\"http://contract/\"><soapenv:Header/><soapenv:Body><con:PORequest><NumOfRecord>1</NumOfRecord><PurchaseOrders POLineNumber=\"01\"><PurchaseOrderNum>NMNJH753C8</PurchaseOrderNum>"
@@ -107,4 +108,7 @@ public class ContractConstants {
 	public static final String CF_LIT_1 ="ORDER VALUES LESS THAN $";//$250.00 
 	public static final String CF_LIT_2 =" SUBJECT TO $";//$20.00 
 	public static final String CF_LIT_3 =" CONVENIENCE FEE. CONTRACTOR WILL BILL.";
+	
+	public static final String FLOW_TYPE_LISTCONTRACTS = "LIST_CONTRACTS";
+	public static final String FLOW_TYPE_CONTRACTDETAILS = "CONTRACT_DETAILS";
 }

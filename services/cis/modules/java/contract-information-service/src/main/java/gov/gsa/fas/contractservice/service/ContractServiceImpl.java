@@ -27,6 +27,7 @@ import gov.gsa.fas.contractservice.model.Address;
 import gov.gsa.fas.contractservice.model.CDFMaster;
 import gov.gsa.fas.contractservice.model.CFFContractFinder;
 import gov.gsa.fas.contractservice.model.ContractDataMaster;
+import gov.gsa.fas.contractservice.model.EDIFax;
 import gov.gsa.fas.contractservice.model.NIFData;
 import gov.gsa.fas.contractservice.model.PathParameters;
 import gov.gsa.fas.contractservice.model.RequestWrapper;
@@ -178,7 +179,7 @@ public class ContractServiceImpl implements ContractService {
 			if (internals != null && internals.size() > 0) {
 				int counter = 1;
 				for (String internal : internals) {
-					Optional<ContractsType> contract = getContractsType(internal);
+					Optional<ContractsType> contract = getContractsType(internal, ContractConstants.FLOW_TYPE_CONTRACTDETAILS);
 					if (contract.isPresent()) {
 						ContractsType contractsType = contract.get();
 						contractsType.setLineNumber(counter++);
@@ -208,7 +209,7 @@ public class ContractServiceImpl implements ContractService {
 				int counter = 1;
 				for (String internal : internals) {
 
-					Optional<ContractsType> contract = getContractsType(internal);
+					Optional<ContractsType> contract = getContractsType(internal, ContractConstants.FLOW_TYPE_LISTCONTRACTS);
 
 					if (contract.isPresent()) {
 						ContractsType contractsType = contract.get();
@@ -611,7 +612,7 @@ public class ContractServiceImpl implements ContractService {
 		logger.info("End of the mapContractData() :: ");
 	}
 
-	private Optional<ContractsType> getContractsType(String internal) {
+	private Optional<ContractsType> getContractsType(String internal, String flowTypeListcontracts) {
 		Gson gson = new Gson();
 		String[] currentDate = DateUtil.getDateTime();
 		
@@ -663,9 +664,32 @@ public class ContractServiceImpl implements ContractService {
 				contractsType.setContractEndDate(
 						DateUtil.stringToXMLGregorianCalendar(DateUtil.julianToGregf2(contractTermDate)));
 
+				if (ContractConstants.FLOW_TYPE_LISTCONTRACTS.equalsIgnoreCase(flowTypeListcontracts)){
+					if (contractsType.getContractRemarks() == null || contractsType.getContractRemarks().trim().length() < 1){
+						contractsType.setContractRemarks("Contract is active");
+						contractsType.setContractorDUNS(master.getD402_cecc());
+					}
+				}
+				else {
+					contractsType.setContractRemarks(null);
+					contractsType.setContractorDUNS(null);
+				}
+				
 				String contractAddress = extractAddress(internal, contractServiceDAO);
 				
 				contractsType.setContractorAddress(contractAddress);
+				
+				List<CDFMaster> cdfMasterList = contractServiceDAO
+						.getBuyerDetails(internal);
+			//	Notes Detail pending
+				String contractNotes = contractNotes(master,cdfMasterList);
+				contractsType.setContractNotesDetails(contractNotes);
+				
+				EDIFax edifaxDetails = extractEdifax(internal, contractServiceDAO);
+				contractsType.setEfptIndicator(edifaxDetails.getD411_efpt_ind());
+				contractsType.setEdiMessageSetVersion(StringUtils.isNotBlank(edifaxDetails.getD411_x12_version())?edifaxDetails.getD411_x12_version():null);
+				
+				
 
 				if (includeContract) {
 					return Optional.of(contractsType);
@@ -678,6 +702,16 @@ public class ContractServiceImpl implements ContractService {
 		return Optional.empty();
 	}
 
+	private EDIFax extractEdifax(String internal, ContractServiceDAO contractServiceDAO) {
+		String ediFaXDetails = contractServiceDAO.getDetailsByPartitionKey(internal,
+				ContractConstants.CONTRACT_SERVICE_SK_D411 + "_" + internal);
+		EDIFax edifaxDetail = new EDIFax();
+		if (StringUtils.isNotBlank(ediFaXDetails)) {
+			Gson gson = new Gson();
+			edifaxDetail = gson.fromJson(ediFaXDetails, EDIFax.class);
+		}
+		return edifaxDetail;
+	}
 	/***
 	 * this method used to set the address for get contract data /list 
 	 * @param internal
@@ -699,9 +733,9 @@ public class ContractServiceImpl implements ContractService {
 				String wstate = address.getD410_mail_st();
 				String wzip = address.getD410_mail_zip();
 
-				wadrs1 = StringUtils.right(StringUtils.defaultString(wadrs1, ""), 32);
-				wadrs2 = StringUtils.right(StringUtils.defaultString(wadrs2, "-"), 32);
-				wadrs3 = StringUtils.right(StringUtils.defaultString(wadrs3, ""), 32);
+				wadrs1 = StringUtils.rightPad(StringUtils.defaultString(wadrs1, ""), 32);
+				wadrs2 = StringUtils.rightPad(StringUtils.defaultString(wadrs2, "-"), 32);
+				wadrs3 = StringUtils.rightPad(StringUtils.defaultString(wadrs3, ""), 32);
 
 				if (wadrs3 != null && wadrs3.trim().length() > 0) {
 					contractorAddress.append(wadrs1.substring(0, 32) + wadrs2.substring(0, 32) + wadrs3.substring(0, 32)
@@ -722,9 +756,9 @@ public class ContractServiceImpl implements ContractService {
 				String wstate = address.getD410_st();
 				String wzip = address.getD410_zip();
 
-				wadrs1 = StringUtils.right(StringUtils.defaultString(wadrs1, ""), 32);
-				wadrs2 = StringUtils.right(StringUtils.defaultString(wadrs2, "-"), 32);
-				wadrs3 = StringUtils.right(StringUtils.defaultString(wadrs3, ""), 32);
+				wadrs1 = StringUtils.rightPad(StringUtils.defaultString(wadrs1, ""), 32);
+				wadrs2 = StringUtils.rightPad(StringUtils.defaultString(wadrs2, "-"), 32);
+				wadrs3 = StringUtils.rightPad(StringUtils.defaultString(wadrs3, ""), 32);
 
 				if (wadrs3 != null && wadrs3.trim().length() > 0) {
 					contractorAddress.append(wadrs1.substring(0, 32) + wadrs2.substring(0, 32) + wadrs3.substring(0, 32)
