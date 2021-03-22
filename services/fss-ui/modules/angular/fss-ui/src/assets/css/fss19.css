@@ -1,0 +1,15 @@
+h1 {
+    font-size: 1.5em;
+}
+
+.usa-logo {
+	font-size:1.8rem
+}
+.usa-section {
+    padding-bottom: 2rem;
+    padding-top: 2rem;
+}
+.usa-footer__secondary-section{
+  padding-bottom:0.5rem;
+  padding-top:1rem;
+}
