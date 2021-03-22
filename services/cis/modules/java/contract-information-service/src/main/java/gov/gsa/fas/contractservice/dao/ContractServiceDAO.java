@@ -7,7 +7,9 @@ import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException;
 
 import gov.gsa.fas.contractservice.model.Address;
 import gov.gsa.fas.contractservice.model.CDFMaster;
+import gov.gsa.fas.contractservice.model.CFFContractFinder;
 import gov.gsa.fas.contractservice.model.ContractDataMaster;
+import gov.gsa.fas.contractservice.model.NIFData;
 
 public interface ContractServiceDAO {
 	
@@ -20,4 +22,8 @@ public interface ContractServiceDAO {
 	List<CDFMaster> getBuyerDetails(String gsamContractNum) throws AmazonDynamoDBException,AmazonClientException;
 	
 	Address getAddressDetail(String gsamContractNum) throws AmazonDynamoDBException,AmazonClientException;
+	
+	List<CFFContractFinder> getCFFDetail(String internalContractNumber) throws AmazonDynamoDBException,AmazonClientException;
+	
+	NIFData getNIFDetails(String internalContractNumber) throws AmazonDynamoDBException,AmazonClientException;
 }

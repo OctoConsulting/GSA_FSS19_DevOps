@@ -17,7 +17,7 @@ public class ContractDataMaster implements Serializable {
 	private String d402_aco;
 	private String d421_f_cont_no_ows;
 	private String d402_arn_aro_cd;
-	private String d402_note;
+	private String d402_note_cd;
 	private String d402_fssi_type;
 	private String d402_arn_aro_dys;
 	private String d402_pct_var_mi;
@@ -90,11 +90,11 @@ public class ContractDataMaster implements Serializable {
 	public void setD402_arn_aro_cd(String d402_arn_aro_cd) {
 		this.d402_arn_aro_cd = d402_arn_aro_cd;
 	}
-	public String getD402_note() {
-		return d402_note;
+	public String getD402_note_cd() {
+		return d402_note_cd;
 	}
-	public void setD402_note(String d402_note) {
-		this.d402_note = d402_note;
+	public void setD402_note_cd(String d402_note_cd) {
+		this.d402_note_cd = d402_note_cd;
 	}
 	public String getD402_fssi_type() {
 		return d402_fssi_type;

@@ -18,6 +18,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
+
 /**
  * <p>Java class for CSDetailPO complex type.
  * 
@@ -1207,5 +1208,10 @@ public class CSDetailPO {
     public void setPOLineNumber(Integer value) {
         this.poLineNumber = value;
     }
+
+	public void setRequisitionLinesRes(List<RequisitionRes> reqResList) {
+		this.requisitionLinesRes = reqResList;
+		
+	}
 
 }

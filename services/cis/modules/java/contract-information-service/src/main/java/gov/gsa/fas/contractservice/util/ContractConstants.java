@@ -1,5 +1,6 @@
 package gov.gsa.fas.contractservice.util;
 
+
 public class ContractConstants {
 	
 	public static final String SHORT_ENV = "SHORT_ENV";
@@ -14,6 +15,7 @@ public class ContractConstants {
 	public static final String CONTRACT_SERVICE_SK_D403 = "detail_d403";
 	public static final String CONTRACT_SERVICE_SK_D407 = "detail_d407";
 	public static final String CONTRACT_SERVICE_SK_D410 = "detail_d410";
+	public static final String CONTRACT_SERVICE_SK_D411 = "detail_d411";
 	public static final String CONTRACT_SERVICE_SK_D430 = "detail_d430";
 	
 	public static final String TEST_BODY = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:con=\"http://contract/\"><soapenv:Header/><soapenv:Body><con:PORequest><NumOfRecord>1</NumOfRecord><PurchaseOrders POLineNumber=\"01\"><PurchaseOrderNum>NMNJH753C8</PurchaseOrderNum>"
@@ -70,12 +72,12 @@ public class ContractConstants {
 	public static final String INVALID_DATA ="J090_Invalid Data Request";
 	public static final String JS001_BEGIN_DATE = "JS001: Contract has not begun yet. Contract %1$s begin date is %2$s";
 	public static final String JS002_END_DATE = "JS002: Contract has ended. Contract %1$s end date was %2$s";
-	public static final String JS003_TERMINATION_DATE = "JS003: JS003: Contract has been terminated. Contract %1$s was terminated on %2$s";
+	public static final String JS003_TERMINATION_DATE = "JS003: Contract has been terminated. Contract %1$s was terminated on %2$s";
 	public static final String MISSING_REQUISITION_NUMBER = "FAIL JS999: Missing Requisition Number";
 	public static final String MISSING_REPORTING_OFFICE = "FAIL JS999: Missing or bad Reporting Office value; The value submitted was: \"\"";
 	public static final String JS004_CONTRACT_DATA = "FAIL JS004: Buyer Code not defined for the Reporting Office : The Buyer code %1$s not defined in Reporting Office %2$s";
 	public static final String JS005_CONTRACT_DATA = "FAIL JS005: Buyer Dollar Limit exceeded:The Buyer/Spervisor %1$s has only $ %2$s and the PO Total Cost was %3$s";
-	public static final String JS000_CONTRACT_DATA = "FAIL " + "JS000: Contract not found Contract %1$s is not a valid contract number";
+	public static final String JS000_CONTRACT_DATA = "FAIL JS000: Contract not found Contract %1$s is not a valid contract number";
 	
 	
 	public static final String JS007_INVALID_DATA_CONTRACT_NUMBER = "JS007_Invalid Contract Number -";
@@ -94,4 +96,19 @@ public class ContractConstants {
 	public static final String YYYYMMDD_FORMAT = "yyyyMMdd";
 	public static final String JULIANDATE_FORMAT = "yyyyDDD";
 	public static final String MMDDYYYY = "MMddyyyy";
+	
+	public static final String POP_C_M_LIT_1 = "REGULATED ITEMS SHALL BE PACKAGED, MARKED";
+	public static final String POP_C_M_LIT_2 = "AND LABELED TO COMPLY WITH THE IMDG CODE OR 49 CFR (SEE D-FSS-440)";
+	public static final String DAC_LIT_1 = "CAUTION: THE ABOVE NAMED MATERIAL MUST COMPLY WITH THE";
+	public static final String DAC_LIT_2 = "TRANSPORTATION ACT (49 CFR PARTS 170-177)";
+	public static final String FEMA_LIT_1 ="Please do not physically ship,  this PO is for billing purposes only.";
+	public static final String OS3_LIT_1 ="Delivery Times required for this purchase order are as shown in the original";
+	public static final String OS3_LIT_2 ="contract according to the size of the order. Days after receipt of order ";
+	public static final String OS3_LIT_3 ="are for information only as typical of the most common size customer order.";
+	public static final String CF_LIT_1 ="ORDER VALUES LESS THAN $";//$250.00 
+	public static final String CF_LIT_2 =" SUBJECT TO $";//$20.00 
+	public static final String CF_LIT_3 =" CONVENIENCE FEE. CONTRACTOR WILL BILL.";
+	
+	public static final String FLOW_TYPE_LISTCONTRACTS = "LIST_CONTRACTS";
+	public static final String FLOW_TYPE_CONTRACTDETAILS = "CONTRACT_DETAILS";
 }
