@@ -232,7 +232,7 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	public List<VolumeDiscount> getVolumeDiscounts(String internalContractNumber)
 			throws AmazonDynamoDBException, AmazonClientException {
 		String volumeDiscDataJSON = getDetailsByPartitionKey(internalContractNumber,
-				ContractConstants.CONTRACT_SERVICE_SK_D4531 + "_" + internalContractNumber);
+				ContractConstants.CONTRACT_SERVICE_SK_D4532 + "_" + internalContractNumber);
 
 		if (volumeDiscDataJSON != null && volumeDiscDataJSON.length() > 0) {
 			List<VolumeDiscount> volumeDiscount = Arrays.asList(new Gson().fromJson(volumeDiscDataJSON, VolumeDiscount[].class));
@@ -247,7 +247,7 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	public List<VolumeRange> getVolumeRange(String internalContractNumber)
 			throws AmazonDynamoDBException, AmazonClientException {
 		String volumeRangeJSON = getDetailsByPartitionKey(internalContractNumber,
-				ContractConstants.CONTRACT_SERVICE_SK_D4531 + "_" + internalContractNumber);
+				ContractConstants.CONTRACT_SERVICE_SK_D41CD + "_" + internalContractNumber);
 
 		if (volumeRangeJSON != null && volumeRangeJSON.length() > 0) {
 			List<VolumeRange> volumeDiscount = Arrays.asList(new Gson().fromJson(volumeRangeJSON, VolumeRange[].class));

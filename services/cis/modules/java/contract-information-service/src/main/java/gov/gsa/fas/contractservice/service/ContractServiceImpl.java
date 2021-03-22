@@ -246,12 +246,17 @@ public class ContractServiceImpl implements ContractService {
 
 		try {
 			logger.info("Invoking Dynamodb data access getContractByGSAM()  :: ");
+			String contractAddress="";
 			RequisitionRes reqnRes = new RequisitionRes();
 			List<RequisitionRes> reqResList = new ArrayList<RequisitionRes>();
 			ContractServiceDAO contractServiceDAO = new ContractServiceDAOImpl();
 			ContractDataMaster contractMaster = contractServiceDAO.getContractByGSAM(inPOLines.getContractNum());
 
-			String contractAddress = extractAddress(contractDetail.getInternalContractNumber(), contractServiceDAO);
+			
+			if(contractMaster!=null) {
+				contractAddress = extractAddress(contractMaster.getD402_cont_no(), contractServiceDAO);
+			}
+					
 
 			if (contractMaster == null || StringUtils.isBlank(contractAddress)) {
 				contractDetail
@@ -262,7 +267,7 @@ public class ContractServiceImpl implements ContractService {
 			contractDetail.setPurchaseOrderNumber(inPOLines.getPurchaseOrderNum());
 			contractDetail.setFormalContractNumber(inPOLines.getContractNum());
 			contractDetail.setBuyerCode(inPOLines.getBuyerCode());
-
+			contractDetail.setReportingOffice(inPOLines.getRequisitionRecords().get(0).getReportingOffice());
 			String datesErrorMessage = contractDatesValidation(contractDetail, contractMaster);
 
 			if (StringUtils.isNotBlank(datesErrorMessage)) {
@@ -306,7 +311,7 @@ public class ContractServiceImpl implements ContractService {
 				return contractDetail;
 			}
 
-			if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) > 0
+			if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) ==1
 					&& (cdfMasterFiltered.getD430_bm_cd_alt() == null
 							|| cdfMasterFiltered.getD430_bm_cd_alt().trim().length() < 2)) {
 
@@ -322,69 +327,72 @@ public class ContractServiceImpl implements ContractService {
 				return contractDetail;
 			}
 
-			cdfMasterFiltered = null;
-			if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) > 0) {
+			if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) == 1) {
+				cdfMasterFiltered = null;
 				for (CDFMaster cdfMaster : cdfMasterList) {
 					if (filterReporting.equals(cdfMaster.getD430_rpt_off())
 							&& contractMaster.getD402_byr_cd().equals(byrALT)) {
 						cdfMasterFiltered = cdfMaster;
 					}
 				}
-			}
-			if (cdfMasterFiltered != null) {
-				contractDetail.setSignatureName(cdfMasterFiltered.getD430_bm_name());
-				byrDollarLimit = new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt());
-				byrALT = cdfMasterFiltered.getD430_bm_cd_alt();
-			} else {
-				contractDetail.setResult(String.format(ContractConstants.JS004_CONTRACT_DATA, byrALT, filterReporting));
-				return contractDetail;
-			}
+				
+				
+				if (cdfMasterFiltered != null) {
+					contractDetail.setSignatureName(cdfMasterFiltered.getD430_bm_name());
+					byrDollarLimit = new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt());
+					byrALT = cdfMasterFiltered.getD430_bm_cd_alt();
+				} else {
+					contractDetail.setResult(String.format(ContractConstants.JS004_CONTRACT_DATA, byrALT, filterReporting));
+					return contractDetail;
+				}
 
-			if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) > 0
-					&& (cdfMasterFiltered.getD430_bm_cd_alt() == null
-							|| cdfMasterFiltered.getD430_bm_cd_alt().trim().length() < 2)) {
+				if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) ==1
+						&& (cdfMasterFiltered.getD430_bm_cd_alt() == null
+								|| cdfMasterFiltered.getD430_bm_cd_alt().trim().length() < 2)) {
 
-				logger.info("Buyer Dollar Limit exceeded");
+					logger.info("Buyer Dollar Limit exceeded");
 
-				String dlrLmtMsg = String.format(ContractConstants.JS005_CONTRACT_DATA, byrALT,
-						new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt()).intValue(),
-						inPOLines.getTotalPOCost().toBigInteger().intValue());
+					String dlrLmtMsg = String.format(ContractConstants.JS005_CONTRACT_DATA, byrALT,
+							new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt()).intValue(),
+							inPOLines.getTotalPOCost().toBigInteger().intValue());
 
-				contractDetail.setResult(dlrLmtMsg);
+					contractDetail.setResult(dlrLmtMsg);
 
-				return contractDetail;
-			}
-			cdfMasterFiltered = null;
-			if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) > 0) {
-				for (CDFMaster cdfMaster : cdfMasterList) {
-					if (filterReporting.equals(cdfMaster.getD430_rpt_off())
-							&& contractMaster.getD402_byr_cd().equals(byrALT)) {
-						cdfMasterFiltered = cdfMaster;
+					return contractDetail;
+				}
+				cdfMasterFiltered = null;
+				if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) == 1) {
+					for (CDFMaster cdfMaster : cdfMasterList) {
+						if (filterReporting.equals(cdfMaster.getD430_rpt_off())
+								&& contractMaster.getD402_byr_cd().equals(byrALT)) {
+							cdfMasterFiltered = cdfMaster;
+						}
 					}
 				}
-			}
-			if (cdfMasterFiltered != null) {
-				contractDetail.setSignatureName(cdfMasterFiltered.getD430_bm_name());
-				byrDollarLimit = new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt());
-				byrALT = cdfMasterFiltered.getD430_bm_cd_alt();
-			} else {
-				contractDetail.setResult(String.format(ContractConstants.JS004_CONTRACT_DATA, byrALT, filterReporting));
-				return contractDetail;
-			}
+				if (cdfMasterFiltered != null) {
+					contractDetail.setSignatureName(cdfMasterFiltered.getD430_bm_name());
+					byrDollarLimit = new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt());
+					byrALT = cdfMasterFiltered.getD430_bm_cd_alt();
+				} else {
+					contractDetail.setResult(String.format(ContractConstants.JS004_CONTRACT_DATA, byrALT, filterReporting));
+					return contractDetail;
+				}
 
-			/* validating the dollar value limit with PO Total */
-			if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) > 0) {
-				String dlrLmtMsg = String.format(ContractConstants.JS005_CONTRACT_DATA, byrALT,
-						new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt()).intValue(),
-						inPOLines.getTotalPOCost().toBigInteger().intValue());
+				/* validating the dollar value limit with PO Total */
+				if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) == 1) {
+					String dlrLmtMsg = String.format(ContractConstants.JS005_CONTRACT_DATA, byrALT,
+							new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt()).intValue(),
+							inPOLines.getTotalPOCost().toBigInteger().intValue());
 
-				contractDetail.setResult(dlrLmtMsg);
+					contractDetail.setResult(dlrLmtMsg);
+				}
 			}
-
-			String instrumentType = deriveInstrumntType(contractMaster.getD402_pr_mthd(),
-					contractMaster.getD402_cont_ind());
-			logger.info("Instrument determinde is {}", instrumentType);
-			contractDetail.setInstrumentType(instrumentType);
+			
+			/* for now we are assigning main address to suplier address, once we are done with the API we will change this logic */
+			String supplierAddress  = contractAddress;
+			
+			contractDetail.setSupplierAddress(supplierAddress);
+			
 			String fssiType = StringUtils.isNotBlank(contractMaster.getD402_fssi_type())
 					? contractMaster.getD402_fssi_type()
 					: "";
@@ -521,6 +529,11 @@ public class ContractServiceImpl implements ContractService {
 			reqnRes.setItemNotesCount("" + itemNotesCount);
 			reqResList.add(reqnRes);
 			contractDetail.setRequisitionLinesRes(reqResList);
+			
+			String instrumentType = deriveInstrumntType(contractMaster.getD402_pr_mthd(),
+					contractMaster.getD402_cont_ind());
+			logger.info("Instrument determinde is {}", instrumentType);
+			contractDetail.setInstrumentType(instrumentType);
 			String contractReportingOffceAddress = contratReportingOfficeAddress(contractDetail.getReportingOffice(),
 					cdfMasterList);
 			contractDetail.setReportOfficeAddress(contractReportingOffceAddress);
