@@ -1,6 +1,6 @@
 'use strict';
 import { NsnData } from '../model/nsn-data';
-import { DynamoDB } from '../../node_modules/aws-sdk';
+import { DynamoDB } from 'aws-sdk';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { apiResponses, response } from '../model/responseAPI';
 import { getSettings } from '../config';
@@ -22,7 +22,6 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     if (isNaN(groupId)) {
         return apiResponses._400({ message: 'First 2 characters are group id and needs to be numeric' });
     }
-    debugger;
     let isGroupSearch: boolean = routingId.length == 2 ? true : false;
     // If the search is for class, then group information also need to be fetched.
     let searchStr = String(groupId);
@@ -83,6 +82,7 @@ function groupBy(list: any, keyGetter: any, searchStr: string) {
         ) {
             const key = keyGetter(item);
             const collection = map.get(key);
+            delete item.group_id;
             if (!collection) {
                 map.set(key, [item]);
             } else {
@@ -98,3 +98,7 @@ function groupBy(list: any, keyGetter: any, searchStr: string) {
     }
     return map;
 }
+
+module.exports = {
+    getNsn,
+};

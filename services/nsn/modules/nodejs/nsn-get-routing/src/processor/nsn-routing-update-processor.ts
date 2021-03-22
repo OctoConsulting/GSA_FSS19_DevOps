@@ -2,21 +2,22 @@
 
 import { NsnData } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { dynamoDocumentClient, getSettings } from '../config';
+import { getSettings } from '../config';
 import { apiResponses } from '../model/responseAPI';
+import { DynamoDB } from 'aws-sdk';
 
-export const putNsn = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
+export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     console.log('Updating the NSN data - ' + event);
-    if (event.body === null) {
+    if (event.body == null) {
         return apiResponses._400({ message: 'No routing data provided to update NSN routing record.' });
     }
 
-    const { group_id, routing_id, owa, is_civ_mgr, is_mil_mgr, ric } = JSON.parse(event.body);
+    let { routing_id, owa, is_civ_mgr, is_mil_mgr, ric } = JSON.parse(event.body);
 
     if (!routing_id) {
         return apiResponses._400({ message: 'Routing NSN number is mandetory to update NSN record' });
     }
-
+    let group_id = routing_id.substring(0, 2);
     console.log('Routing ID - ' + routing_id);
     var params = {
         TableName: getSettings().TABLE_NAME,
@@ -27,8 +28,11 @@ export const putNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
     };
 
     console.log('Fetching data from dynamoDB for update...');
-    const updateNsnData = await dynamoDocumentClient.get(params).promise();
+    const updateNsnData = await getDocumentDbClient().get(params).promise();
     console.log('Data fetched from DB  to update - ' + updateNsnData.Item);
+
+    is_civ_mgr = is_civ_mgr.toUpperCase() == 'Y' ? is_civ_mgr.toUpperCase() : 'N';
+    is_mil_mgr = is_mil_mgr.toUpperCase() == 'Y' ? is_mil_mgr.toUpperCase() : 'N';
 
     if (updateNsnData.Item == null) {
         return apiResponses._404({ message: 'No NSN Data found for update for routing_id - ' + routing_id });
@@ -36,11 +40,11 @@ export const putNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
 
     const nsnData: NsnData = {
         group_id,
-        routing_id,
-        owa,
+        routing_id: routing_id.toUpperCase(),
+        owa: owa.toUpperCase(),
         is_civ_mgr,
         is_mil_mgr,
-        ric,
+        ric: ric.toUpperCase(),
         type: updateNsnData.Item.type,
         create_date: updateNsnData.Item.createDate,
         created_by: updateNsnData.Item.createdBy,
@@ -49,10 +53,22 @@ export const putNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
 
     try {
         const model = { TableName: getSettings().TABLE_NAME, Item: nsnData };
-        await dynamoDocumentClient.put(model).promise();
+        await getDocumentDbClient().put(model).promise();
         return apiResponses._200(model);
     } catch (err) {
         console.log('Error while updating - ' + err);
         return apiResponses._500({ message: 'Error updating NSN record for routing ID - ' + routing_id });
     }
+};
+
+const getDocumentDbClient = (): DynamoDB.DocumentClient => {
+    let options = {};
+
+    if (process.env.IS_OFFLINE) {
+        options = {
+            region: 'localhost',
+            endpoint: 'http://localhost:8000',
+        };
+    }
+    return new DynamoDB.DocumentClient(options);
 };
