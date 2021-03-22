@@ -1,6 +1,7 @@
 import * as cdk from '@aws-cdk/core';
 import { DynamoConstructParms } from '../models/dynamo-construct-parms';
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
+import * as kms from '@aws-cdk/aws-kms';
 export class DynamoConstruct extends cdk.Construct {
     private nsnTable: dynamodb.Table;
     private props: DynamoConstructParms;
@@ -35,6 +36,14 @@ export class DynamoConstruct extends cdk.Construct {
                 : dynamodb.TableEncryption.DEFAULT,
             stream: dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,
         });
+
+        if (this.props.enableEncryptionAtRest) {
+            new kms.Alias(this, 'nsnrouting-kms-key-alias', {
+                aliasName: 'fss19/dynamodb/atrest/nsnrouting',
+                targetKey: this.nsnTable.encryptionKey!,
+                removalPolicy: cdk.RemovalPolicy.DESTROY,
+            });
+        }
     }
 
     private setOutputs() {

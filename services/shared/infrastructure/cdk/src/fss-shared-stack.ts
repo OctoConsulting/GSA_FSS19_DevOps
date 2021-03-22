@@ -5,13 +5,15 @@ import { VpcConstruct } from './constructs/vpc-construct';
 import { EnvHelper } from './helper/env-helper';
 import { EnvParameters } from './models/env-parms';
 import { existsSync } from 'fs';
+import { CognitoConstruct } from './constructs/cognito-userpool-construct';
+import { JenkinsConstruct } from './constructs/jenkins-construct';
 
 export class FssSharedStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
         const stackContext = this.node.tryGetContext(`${id}-${process.env.SHORT_ENV}`);
-        const envParameters: EnvParameters = new EnvHelper().getEnvironmentParams(stackContext);
+        const envParameters: EnvParameters = new EnvHelper().getEnvironmentParams(stackContext, props!);
 
         // ===== make sure cdk.context.json is populated first ======
         const myVpc:IVpc = Vpc.fromLookup(this, 'vpc-setup-lookup', {
@@ -22,15 +24,29 @@ export class FssSharedStack extends cdk.Stack {
         // ==========================================================
 
         const vpc = new VpcConstruct(this, 'vpc', {
-            envParameters: envParameters,
+            envParameters,
             availabilityZones: this.availabilityZones,
-            vpc: myVpc
+            vpc: myVpc,
+            stackContext: stackContext
         });
 
         new EndpointsConstruct(this, 'endpoints', {
-            envParameters: envParameters,
+            envParameters,
             vpc: myVpc,
-            isolatedSubnets: vpc.getIsolatedSubnets()
+            isolatedSubnets: vpc.getIsolatedLambdaSubnets()
+        });
+
+        const cognito = new CognitoConstruct(this, 'cognito', {
+            envParameters,
+            stackContext
+        });
+
+        new JenkinsConstruct(this, 'jenkins', {
+            vpc: myVpc,
+            envParameters,
+            stackContext,
+            ciCdSubnets: vpc.getPrivateCICDSubnets(),
+            cognitoUserPoolSecretArn: cognito.getCognitoUserPoolSecretArn()
         });
     }
 }

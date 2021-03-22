@@ -13,7 +13,7 @@ export const postNsn = async (event: APIGatewayProxyEvent, context: Context): Pr
     }
     console.log('1 body - ' + event.body);
 
-    const { group_id, routing_id, owa, isCivMgr, isMilMgr, ric, createdBy } = JSON.parse(event.body);
+    const { group_id, routing_id, owa, is_civ_mgr, is_mil_mgr, ric, created_by } = JSON.parse(event.body);
     console.log('2 - ' + group_id);
     if (!group_id) {
         return apiResponses._400({ message: 'Group id is mandetory to create NSN record' });
@@ -41,11 +41,12 @@ export const postNsn = async (event: APIGatewayProxyEvent, context: Context): Pr
         group_id,
         routing_id,
         owa,
-        isCivMgr,
-        isMilMgr,
+        is_civ_mgr,
+        is_mil_mgr,
         ric,
-        createdBy,
-        createDate: new Date().getTime().toString(),
+        type: routing_id.length == 2 ? 'group' : routing_id.length == 4 ? 'class' : 'nsn',
+        created_by,
+        create_date: new Date().getTime().toString(),
     };
     console.log('7');
     try {

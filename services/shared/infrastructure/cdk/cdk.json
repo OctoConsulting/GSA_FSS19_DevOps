@@ -9,6 +9,9 @@
         "@aws-cdk/aws-kms:defaultKeyPolicies": true,
         "@aws-cdk/aws-s3:grantWriteWithoutAcl": true,
         "fss-shared-dev": {
+            "githubRepoOwner": "octoConsulting",
+            "githubRepo": "GSA_FSS19_DevOps",
+            "githubTokenSecretArn": "arn:aws:secretsmanager:us-east-1:902479997164:secret:github_token-pNuenM",
             "vpcId": "vpc-02130393994755be9",
             "maxAzs": 2,
             "addonRoutesCidrs": [
@@ -45,11 +48,21 @@
                     "cidrMask": 28
                 },
                 {
+                    "name": "IsolatedDMS",
+                    "subnetType": "ISOLATED",
+                    "cidrMask": 28 
+                },
+                {
                     "name": "Reserved",
                     "subnetType": "ISOLATED",
                     "reserved": true
                 }
-            ]
+            ],
+            "domainName": "fss19-dev.fcs.gsa.gov",
+            "hostedZoneId": "Z01097173CROP4Z19PBV3",
+            "privateHostedZoneId": "Z02862103E4JZDDN2UEJZ",
+            "cognitoAdminGroup": "admins",
+            "jenkinsLogRetention": "ONE_WEEK"
         },
         "fss-shared-qa": {
             "vpcId": "vpc-02130393994755be9"

@@ -4,5 +4,8 @@ export interface ContractLambdasConstructParms {
     vpc: string;
     logRetentionInDays?: number;
     contractTable: dynamodb.Table;
+    artifactBucket: string;
+    artifactKey: string;
+    minCapacity?: number;
     xRayTracing: boolean;
 }

@@ -1,0 +1,170 @@
+jenkins:
+  securityRealm:
+    oic:
+      clientId: ${COGNITO_CLIENT_ID}
+      clientSecret: ${COGNITO_CLIENT_SECRET}
+      wellKnownOpenIDConfigurationUrl: ""
+      tokenServerUrl: "${COGNITO_SERVER_URL}/oauth2/token"
+      authorizationServerUrl: "${COGNITO_SERVER_URL}/oauth2/authorize"
+      userInfoServerUrl: "${COGNITO_SERVER_URL}/oauth2/userInfo"
+      tokenFieldToCheckKey: ""
+      tokenFieldToCheckValue: ""
+      fullNameFieldName: ""
+      groupsFieldName: "cognito:groups"
+      disableSslVerification: false
+      logoutFromOpenidProvider: true
+      endSessionEndpoint: "${COGNITO_SERVER_URL}/logout?client_id=${COGNITO_CLIENT_ID}&redirect_uri=https://${JENKINS_DOMAIN_NAME}&response_type=code&scope=openid email profile&state="
+      postLogoutRedirectUrl: ""
+      escapeHatchEnabled: true
+      escapeHatchUsername: ${JENKINS_ADMIN_ACCOUNT}
+      escapeHatchSecret: ${JENKINS_ADMIN_PASSWORD}
+      escapeHatchGroup: ""
+      automanualconfigure: ""
+      emailFieldName: "email"
+      userNameField: "username"
+      scopes: "openid email profile"
+  authorizationStrategy:
+    globalMatrix:
+      permissions:
+        - "Overall/Administer:escape-hatch-${JENKINS_ADMIN_ACCOUNT}"
+        - "Overall/Administer:${COGNITO_ADMIN_GROUP}"
+        - "Overall/Read:authenticated"
+        - "Agent/Build:authenticated"
+        - "Job/Build:authenticated"
+        - "Job/Read:authenticated"
+        - "Job/Cancel:authenticated"
+        - "View/Configure:authenticated"
+        - "View/Create:authenticated"
+        - "View/Delete:authenticated"
+        - "View/Read:authenticated"
+  globalNodeProperties:
+  - envVars:
+      env:
+      - key: "ARTIFACTS_BUCKET"
+        value: "${ARTIFACTS_BUCKET}"
+      - key: "SHORT_ENV"
+        value: "${SHORT_ENV}"
+  clouds:
+    - amazonEC2:
+        cloudName: "ec2"
+        region: "us-east-1"
+        sshKeysCredentialsId: "keypair"
+        useInstanceProfileForCredentials: false
+        templates:
+          - ami: ${JENKINS_WINDOWS_WORKER_AMI}
+            amiType:
+              windowsData:
+                password: ${JENKINS_WINDOWS_WORKER_PASSWORD}
+                specifyPassword: true
+                useHTTPS: false
+            description: "windows"
+            labelString: "windows"
+            remoteAdmin: ${JENKINS_WINDOWS_WORKER_ACCOUNT}
+            remoteFS: "c:\\jenkins"
+            spotConfig:
+              useBidPrice: false
+            subnetId: ${JENKINS_WINDOWS_WORKER_SUBNETS}
+            securityGroups: ${JENKINS_WINDOWS_WORKER_SECURITY_GROUPS}
+            tags:
+              - name: "Name"
+                value: "Jenkins-Dynamic-Windows-Worker"
+            type: T3Medium
+            userData: |-
+              <powershell>
+              $Password = "${JENKINS_WINDOWS_WORKER_PASSWORD}" | ConvertTo-SecureString -asPlainText -Force
+              New-LocalUser "${JENKINS_WINDOWS_WORKER_ACCOUNT}" -Password $Password -PasswordNeverExpires
+              Add-LocalGroupMember -Group "Administrators" -Member "${JENKINS_WINDOWS_WORKER_ACCOUNT}"
+              </powershell>
+    - ecs:
+        credentialsId: false
+        cluster: ${JENKINS_LINUX_WORKER_ECS_CLUSTER_ARN}
+        jenkinsUrl: "http://leader.jenkins.dev:8080"
+        name: "ecs"
+        regionName: "us-east-1"
+        templates:
+          - cpu: 512
+            memoryReservation: 1024
+            image: "jenkins/inbound-agent"
+            label: "linux"
+            taskDefinitionOverride: "ecsJenkinsStaticLinuxWorker"
+            launchType: "FARGATE"
+            platformVersion: "LATEST"
+            remoteFSRoot: "/home/jenkins"
+            securityGroups: ${JENKINS_LINUX_WORKER_SECURITY_GROUPS}
+            subnets: ${JENKINS_LINUX_WORKER_SUBNETS}
+            taskrole: ${JENKINS_LINUX_WORKER_TASK_ROLE}
+            executionRole: ${JENKINS_LINUX_WORKER_EXECUTION_ROLE}
+            templateName: "Jenkins-Dynamic-Linux-Worker"
+            assignPublicIp: ${JENKINS_LINUX_WORKER_USE_PUBLIC_SUBNETS}
+            logDriver: "awslogs"
+            logDriverOptions:
+              - name: "awslogs-group"
+                value: ${JENKINS_LINUX_WORKER_LOGS_GROUP}
+              - name: "awslogs-region"
+                value: "us-east-1"
+              - name: "awslogs-stream-prefix"
+                value: "jenkins-linux-worker"
+security:
+  queueItemAuthenticator:
+    authenticators:
+      - global:
+          strategy: triggeringUsersAuthorizationStrategy
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - usernamePassword:
+              scope: GLOBAL
+              id: "github-token"
+              username: ${GITHUB_USERNAME}
+              password: ${GITHUB_TOKEN}
+          - basicSSHUserPrivateKey:
+              scope: GLOBAL
+              id: "keypair"
+              username: "jenkins"
+              privateKeySource:
+                directEntry:
+                  privateKey: ${AWS_KEYPAIR}
+unclassified:
+  location:
+    url: "https://${JENKINS_DOMAIN_NAME}"
+jobs:
+  - script: >
+      job('Seed') {
+        quietPeriod(0)
+        concurrentBuild(false)
+        logRotator {
+          numToKeep(5)
+        }
+        scm {
+          git {
+            branch('*/master')
+            remote {
+              github('${GITHUB_REPO_OWNER}/${GITHUB_REPO}', 'https')
+              credentials('github-token')
+              }
+          }
+        }
+        steps {
+          jobDsl {
+            targets 'services/shared/infrastructure/cdk/src/jenkins/jobs/**/*.groovy'
+          }
+        }
+      }
+tool:
+  maven:
+    installations:
+    - name: "maven3"
+      properties:
+      - installSource:
+          installers:
+          - maven:
+              id: "3.6.3"
+  nodejs:
+    installations:
+    - name: "node15"
+      properties:
+      - installSource:
+          installers:
+          - nodeJSInstaller:
+              id: "15.11.0"

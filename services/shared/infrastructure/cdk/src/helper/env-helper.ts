@@ -1,15 +1,14 @@
 import { EnvParameters } from '../models/env-parms';
+import { StackProps } from '@aws-cdk/core';
 
 export class EnvHelper {
-    getEnvironmentParams(stackContext: any): EnvParameters {
+    getEnvironmentParams(stackContext: any, props: StackProps): EnvParameters {
         const shortEnv = process.env.SHORT_ENV!;
         const envParameters: EnvParameters = {
             shortEnv,
             vpcId: stackContext.vpcId,
-            maxAzs: stackContext.maxAzs,
-            addonRoutesCidrs: stackContext.addonRoutesCidrs,
-            addonRoutesVgw: stackContext.addonRoutesVgw,
-            subnetConfiguration: stackContext.subnetConfiguration
+            region: props.env?.region,
+            account: props.env?.account
         };
         return envParameters;
     }

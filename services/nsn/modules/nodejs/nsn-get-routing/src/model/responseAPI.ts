@@ -1,9 +1,9 @@
-export const response = function(statusCode: number, body: { [key: string]: any }) {
+export const response = function (statusCode: number, body: { [key: string]: any }) {
     return {
-      statusCode: statusCode,
-      body: JSON.stringify(body, null, 2),
-  };
-}
+        statusCode: statusCode,
+        body: JSON.stringify(body, null, 2),
+    };
+};
 
 export const apiResponses = {
     _200: (body: { [key: string]: any }) => {
@@ -13,10 +13,16 @@ export const apiResponses = {
         };
     },
     _201: (body: { [key: string]: any }) => {
-      return {
-          statusCode: 201,
-          body: JSON.stringify(body, null, 2),
-      };
+        return {
+            statusCode: 201,
+            body: JSON.stringify(body, null, 2),
+        };
+    },
+    _204: (body: { [key: string]: any }) => {
+        return {
+            statusCode: 204,
+            body: JSON.stringify(body, null, 2),
+        };
     },
     _400: (body: { [key: string]: any }) => {
         return {
@@ -25,21 +31,21 @@ export const apiResponses = {
         };
     },
     _404: (body: { [key: string]: any }) => {
-      return {
-          statusCode: 404,
-          body: JSON.stringify(body, null, 2),
-      };
+        return {
+            statusCode: 404,
+            body: JSON.stringify(body, null, 2),
+        };
     },
     _422: (body: { [key: string]: any }) => {
-      return {
-          statusCode: 422,
-          body: JSON.stringify(body, null, 2),
-      };
+        return {
+            statusCode: 422,
+            body: JSON.stringify(body, null, 2),
+        };
     },
-  _500: (body: { [key: string]: any }) => {
-    return {
-        statusCode: 500,
-        body: JSON.stringify(body, null, 2),
-    };
-  },
+    _500: (body: { [key: string]: any }) => {
+        return {
+            statusCode: 500,
+            body: JSON.stringify(body, null, 2),
+        };
+    },
 };

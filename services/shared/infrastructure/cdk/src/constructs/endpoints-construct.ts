@@ -36,8 +36,8 @@ export class EndpointsConstruct extends cdk.Construct {
             },
         });
         this.endpoints.apiGatewayEndPoint = apiGatewayEndPoint;
-        new cdk.CfnOutput(this, `api-gateway-endpoint-cfnout`, {
-            exportName: `api-gateway-vpc-endpoint-id`,
+        new cdk.CfnOutput(this, "api-gateway-endpoint-cfnout", {
+            exportName: "api-gateway-vpc-endpoint-id",
             value: apiGatewayEndPoint.vpcEndpointId,
         });
     }

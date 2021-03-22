@@ -2,21 +2,27 @@ import * as cdk from '@aws-cdk/core';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as awsLogs from '@aws-cdk/aws-logs';
 import * as ec2 from '@aws-cdk/aws-ec2';
+import * as s3 from '@aws-cdk/aws-s3';
 import { LambdaConstructProps } from '../../models/lambda-construct-props';
+import { constants } from '../../models/constants';
 
 export class LambdaConstruct extends cdk.Construct {
     private props: LambdaConstructProps;
     public lambdaFunction: lambda.Function;
+    public alias: lambda.Alias;
     constructor(parent: cdk.Construct, id: string, props: LambdaConstructProps) {
         super(parent, id);
         this.props = props;
         const lambdaLogGroup = this.createLogGroup();
-        const myVpc = ec2.Vpc.fromLookup(this, 'myVpc', {
-            vpcId: props.vpcId,
-        });
+
+        var bucket: s3.IBucket;
+        if (this.props.artifactBucket) {
+            bucket = s3.Bucket.fromBucketName(this, 'bucket', this.props.artifactBucket);
+        }
 
         this.lambdaFunction = new lambda.Function(this, props.functionName, {
             functionName: props.functionName,
+            description: `${props.functionName}-${Date.now()}`,
             memorySize: props.memorySize ? props.memorySize : 512,
             runtime:
                 props.type === LambdaConstructProps.LambdaTypeEnum.JAVA
@@ -27,14 +33,26 @@ export class LambdaConstruct extends cdk.Construct {
                 : props.type === LambdaConstructProps.LambdaTypeEnum.JAVA
                 ? 'com.gsa.MyHandler::handleRequest'
                 : 'index.handler',
-            vpc: props.vpcId ? myVpc : undefined,
+            vpc: this.props.vpc,
+            securityGroups: [this.props.securityGroup],
             vpcSubnets: {
                 subnetType: ec2.SubnetType.ISOLATED,
             },
             tracing: this.props.xRayTracing ? lambda.Tracing.ACTIVE : lambda.Tracing.DISABLED,
-            code: lambda.Code.fromAsset(props.assetLocation),
+            code: props.assetLocation
+                ? lambda.Code.fromAsset(props.assetLocation)
+                : lambda.Code.fromBucket(bucket!, this.props.artifactKey!),
             timeout: cdk.Duration.seconds(props.timeout ? props.timeout : 30),
             environment: props.lambdaEnvParameters ? props.lambdaEnvParameters : {},
+        });
+
+        this.alias = new lambda.Alias(this, 'alias', {
+            aliasName: constants.LIVE_ALIAS_NAME,
+            version: this.lambdaFunction.currentVersion,
+        });
+        this.alias.addAutoScaling({
+            minCapacity: this.props.minCapacity,
+            maxCapacity: constants.MAX_PROVISIONED_CAPACITY_FOR_LAMBDA,
         });
 
         lambdaLogGroup.grantWrite(this.lambdaFunction);
