@@ -1,16 +1,23 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { MyTestCompComponent } from './my-test-comp/my-test-comp.component';
+import { NsnWorkspaceComponent } from './nsn-workspace/nsn-workspace.component';
 
 const routes: Routes = [
-    {
-        path: 'test',
-        component: MyTestCompComponent,
-    },
+  {
+    path: '', component: NsnWorkspaceComponent, children: [
+      {
+        path: '',
+        loadChildren: () => import('./nsn-workspace/nsn-workspace.module').then(m => m.NsnWorkspaceModule),
+        data: {
+          title: 'NSN'
+        }
+      }
+    ]
+  },
 ];
 
 @NgModule({
-    imports: [RouterModule.forRoot(routes)],
-    exports: [RouterModule],
+  imports: [RouterModule.forRoot(routes, {onSameUrlNavigation: 'reload'})],
+  exports: [RouterModule]
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }
