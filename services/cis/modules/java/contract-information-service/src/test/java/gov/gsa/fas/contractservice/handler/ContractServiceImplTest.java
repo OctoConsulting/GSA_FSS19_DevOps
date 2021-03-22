@@ -1,40 +1,56 @@
 package gov.gsa.fas.contractservice.handler;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import gov.gsa.fas.contractservice.model.PathParameters;
-import gov.gsa.fas.contractservice.model.RequestWrapper;
-import gov.gsa.fas.contractservice.service.ContractService;
-import gov.gsa.fas.contractservice.service.ContractServiceImpl;
-import gov.gsa.fas.contractservice.util.ContractConstants;
-import gov.gsa.fas.contractservice.util.ContractServiceUtil;
 import gov.gsa.fas.contractservice.contract.CSDetailPO;
 import gov.gsa.fas.contractservice.contract.PORecordsType;
 import gov.gsa.fas.contractservice.contract.PORequestType;
+import gov.gsa.fas.contractservice.dao.ContractServiceDAOImpl;
+import gov.gsa.fas.contractservice.exception.ApplicationException;
+import gov.gsa.fas.contractservice.model.CDFMaster;
+import gov.gsa.fas.contractservice.model.ContractDataMaster;
+import gov.gsa.fas.contractservice.service.ContractServiceImpl;
+import gov.gsa.fas.contractservice.util.ContractConstants;
+import gov.gsa.fas.contractservice.util.ContractServiceUtil;
 
+
+//@RunWith(MockitoJUnitRunner.class)
 public class ContractServiceImplTest {
+
 	
-	ContractService contractService;
+	/*
+	@InjectMocks
+	ContractServiceImpl contractService = new ContractServiceImpl();
+	
+	ContractServiceDAOImpl contractDAO;
 	
 	@Before
 	public void setUp() throws Exception {
-		contractService = new ContractServiceImpl();		
+		MockitoAnnotations.initMocks(this);
+		//contractService = new ContractServiceImpl();	
+		contractDAO = Mockito.mock(ContractServiceDAOImpl.class);
 	}
 
 	@After
 	public void tearDown() throws Exception {
 	}
 
-	/*@Test
-	public void testGetContractDataSinglePO() {	
-		
+	@Test
+	public void testGetContractDataSinglePO() throws ApplicationException {
+
 		final String TEST_BODY = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:con=\"http://contract/\"><soapenv:Header/><soapenv:Body><con:PORequest><NumOfRecord>1</NumOfRecord><PurchaseOrders POLineNumber=\"01\"><PurchaseOrderNum>NMNJH753C8</PurchaseOrderNum>"
 				+ " <totalPOCost>12.75</totalPOCost>" + "  <ContractNum>47QSEA20T000E</ContractNum>"
 				+ "   <BuyerCode></BuyerCode>"
@@ -44,17 +60,34 @@ public class ContractServiceImplTest {
 				+ "     <itemNumber>7510015904409</itemNumber>" + "   <reportingOffice>M</reportingOffice>"
 				+ "    <pricingZone>01</pricingZone>" + "   </RequisitionRecords>" + "  </PurchaseOrders>"
 				+ "  </con:PORequest>" + "  </soapenv:Body>" + " </soapenv:Envelope>";
-		
-		PORequestType reqns = ContractServiceUtil.unmarshall(TEST_BODY,
-				PORequestType.class);
+
+		PORequestType reqns = ContractServiceUtil.unmarshall(TEST_BODY, PORequestType.class);
 		List<PORecordsType> inPORecords = reqns.getPurchaseOrders();
+		//inPORecords.add(Mockito.mock(PORecordsType.class));
+		
+		ContractDataMaster contractDataMaster = Mockito.mock(ContractDataMaster.class);
+		
+		//Mockito.when(Mockito.mock(PORecordsType.class).getContractNum()).thenReturn("Z");
+		Mockito.when(contractDAO.getContractByGSAM("47QSEA20T000E")).thenReturn(contractDataMaster);
+		Mockito.when(contractDataMaster.getD402_cont_no()).thenReturn("NFKA271");
+		Mockito.when(contractDAO.getBuyerDetails(Mockito.anyString())).thenReturn(new ArrayList<CDFMaster>());
+		CDFMaster cdfMasterFiltered = Mockito.mock(CDFMaster.class);
+
+		Mockito.when(contractDataMaster.getD402_cont_beg_dt()).thenReturn("2020226");
+		Mockito.when(contractDataMaster.getD402_cont_end_dt()).thenReturn("2021224");
+		Mockito.when(contractDataMaster.getD402_dt_terminated()).thenReturn("");
+		Mockito.when(cdfMasterFiltered.getD430_bm_dval_lmt()).thenReturn("20");
+		
+		//Mockito.when(inPORecords.get(Mockito.anyInt())).thenReturn(Mockito.mock(PORecordsType.class));
+
 		List<CSDetailPO> csDetails = contractService.getContractData(inPORecords);
+
 		assertEquals(ContractConstants.SUCCESS, csDetails.get(0).getResult());
 	}
 	
 	
-	@Test
-	public void testGetContractDataMultiPO() {	
+	/*@Test
+	public void testGetContractDataMultiPO() throws ApplicationException {	
 		
 		final String TEST_MULTIPLE_PO_BODY = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:con=\"http://contract/\">\n" + 
 				"   <soapenv:Header/>\n" + 
@@ -101,7 +134,7 @@ public class ContractServiceImplTest {
 		
 	}
 	@Test
-	public void testGetContractDataSinglePOMissingContractNumber() {	
+	public void testGetContractDataSinglePOMissingContractNumber() throws ApplicationException {	
 		
 		final String TEST_BODY = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:con=\"http://contract/\"><soapenv:Header/><soapenv:Body><con:PORequest><NumOfRecord>1</NumOfRecord><PurchaseOrders POLineNumber=\"01\"><PurchaseOrderNum>NMNJH753C8</PurchaseOrderNum>"
 				+ " <totalPOCost>12.75</totalPOCost>" + "  <ContractNum></ContractNum>"
@@ -121,7 +154,7 @@ public class ContractServiceImplTest {
 	}
 	
 	@Test
-	public void testGetContractDataMultiPONegitive() {	
+	public void testGetContractDataMultiPONegitive() throws ApplicationException {	
 		
 		final String TEST_MULTIPLE_PO_BODY = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:con=\"http://contract/\">\n" + 
 				"   <soapenv:Header/>\n" + 

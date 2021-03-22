@@ -9,14 +9,16 @@ public class EDIFax implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 
-private String d411_efpt_ind;
+	private String d411_efpt_ind;
 	
 	private String d411_fax1;
 	
 	private String d411_cont_no;
 	
 	private String d411_cecs;
-
+	
+	private String d411_x12_version;
+	
 	public String getD411_efpt_ind() {
 		return d411_efpt_ind;
 	}
@@ -49,5 +51,12 @@ private String d411_efpt_ind;
 		this.d411_cecs = d411_cecs;
 	}
 
+	public String getD411_x12_version() {
+		return d411_x12_version;
+	}
+
+	public void setD411_x12_version(String d411_x12_version) {
+		this.d411_x12_version = d411_x12_version;
+	}
 	
 }

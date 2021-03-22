@@ -27,10 +27,18 @@ public class App2 {
 
 		DynamoDB dynamoDB = new DynamoDB(client);
 
-		//createTable(dynamoDB);
+	//	deleteTable(dynamoDB);
+		
+	//	createTable(dynamoDB);
 
 		insertdata(dynamoDB);
 
+	}
+
+	private static void deleteTable(DynamoDB dynamoDB) {
+		Table table = dynamoDB.getTable("contract_data");
+		table.delete();
+		
 	}
 
 	public static void insertdata(DynamoDB dynamoDB) throws InterruptedException {
@@ -58,8 +66,21 @@ public class App2 {
 				.withString("contract_details_identity", "FCON_47QSEA20T000E");
 
 		Item item8 = new Item().withPrimaryKey("internal_contract_number", "NFKA271")
-				.withString("contract_details_identity", "DUNS_080970255");
-
+				.withString("contract_details_identity", "DUNS_080970255");//
+		
+		Item item9 = new Item().withPrimaryKey("internal_contract_number", "NFKA271")
+				.withString("contract_details_identity", "detail_d411_NFKA271").withJSON("details", getEdiFaxTable());
+		
+		
+				
+		System.out.println(getContractMaster());
+		
+		System.out.println(getContractMaster());
+		System.out.println(getAddress());
+		System.out.println(getNSN());
+		System.out.println(getCDFMaster());
+		System.out.println(getEdiFaxTable());
+		
 		table.putItem(item);
 		table.putItem(item2);
 		table.putItem(item3);
@@ -68,6 +89,16 @@ public class App2 {
 		table.putItem(item6);
 		table.putItem(item7);
 		table.putItem(item8);
+		table.putItem(item9);
+	
+		//table.deleteItem(new PrimaryKey("internal_contract_number", "12345x","contract_details_identity", "detail_d411_NFKA271"));
+		
+	//	System.out.println(table.getItem("internal_contract_number", "NFKA271"));
+		
+	//	System.out.println(table.getItem());
+
+		
+		
 		table.waitForActive();
 	}
 
@@ -101,7 +132,7 @@ public class App2 {
 					new KeySchemaElement().withAttributeName("contract_details_identity").withKeyType(KeyType.RANGE)); // Sort
 																														// key
 
-			GlobalSecondaryIndex precipIndex = new GlobalSecondaryIndex().withIndexName("contract_details_identity")
+			GlobalSecondaryIndex precipIndex = new GlobalSecondaryIndex().withIndexName("contract_details_identity_index")
 					.withProvisionedThroughput(new ProvisionedThroughput().withReadCapacityUnits((long) 10)
 							.withWriteCapacityUnits((long) 1))
 					.withProjection(new Projection().withProjectionType(ProjectionType.ALL));
@@ -120,7 +151,7 @@ public class App2 {
 					.withGlobalSecondaryIndexes(precipIndex);
 
 			Table table = dynamoDB.createTable(createTableRequest);
-			System.out.println("Success.  Table status: " + table.getDescription().getTableStatus());
+			System.out.println("Success.  Table status: " + table.getDescription().getTableStatus() +  table.getDescription() +  table.getTableName() +  table.toString());
 
 		} catch (Exception e) {
 			System.err.println("Cannot retrieve items.");
@@ -183,5 +214,12 @@ public class App2 {
 				+ "{\"d430_aco\":\"\",\"d430_actn_cd\":\"C\",\"d430_actn_dt\":\"95045\",\"d430_adrs1\":\"\",\"d430_adrs2\":\"\",\"d430_adrs3\":\"\",\"d430_adrs4\":\"\",\"d430_bm_cd\":\"\",\"d430_bm_cd_alt\":\"\",\"d430_bm_dval_lmt\":\"0\",\"d430_bm_name\":\"\",\"d430_bm_phone_no\":\"\",\"d430_email_adrs\":\"\",\"d430_fax_phone_no\":\"\",\"d430_long_desc\":\"\",\"d430_note_cd\":\"26\",\"d430_note1\":\"$3.00 SURCHARGE ON ORDERS UNDER $100\",\"d430_note2\":\"\",\"d430_office\":\"\",\"d430_pac_fac\":\"\",\"d430_rec_type\":\"N\",\"d430_rpt_off\":\"E\",\"d430_sdf\":\"\",\"d430_st\":\"\"},"
 				+ "{\"d430_aco\":\"\",\"d430_actn_cd\":\"C\",\"d430_actn_dt\":\"11241\",\"d430_adrs1\":\"\",\"d430_adrs2\":\"\",\"d430_adrs3\":\"\",\"d430_adrs4\":\"\",\"d430_bm_cd\":\"\",\"d430_bm_cd_alt\":\"\",\"d430_bm_dval_lmt\":\"0\",\"d430_bm_name\":\"\",\"d430_bm_phone_no\":\"\",\"d430_email_adrs\":\"\",\"d430_fax_phone_no\":\"\",\"d430_long_desc\":\"\",\"d430_note_cd\":\"26\",\"d430_note1\":\"MARKING IAW MIL-STD 129 IS REQUIRED.\",\"d430_note2\":\"\",\"d430_office\":\"\",\"d430_pac_fac\":\"\",\"d430_rec_type\":\"N\",\"d430_rpt_off\":\"M\",\"d430_sdf\":\"\",\"d430_st\":\"\"}]";
 		return cdf;
+	}
+	
+	private static String getEdiFaxTable() {
+		String edifax = "{\"d411_efpt_ind\" : \"E\",\"d411_fax1\" : \"703-658-2001\",\"d411_cont_no\" : \"NFKA271\",\"d411_cecs\" : \"080970255\",\"d411_x12_version\" : \"3040\"}";
+		
+
+		return edifax;
 	}
 }

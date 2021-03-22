@@ -5,13 +5,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-
-import com.amazonaws.AmazonClientException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
@@ -26,10 +23,15 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException;
 import com.google.gson.Gson;
 
-import gov.gsa.fas.contractservice.exception.CCSExceptions;
+import gov.gsa.fas.contractservice.model.ACCMapping;
 import gov.gsa.fas.contractservice.model.Address;
 import gov.gsa.fas.contractservice.model.CDFMaster;
+import gov.gsa.fas.contractservice.model.CFFContractFinder;
 import gov.gsa.fas.contractservice.model.ContractDataMaster;
+import gov.gsa.fas.contractservice.model.EDIFax;
+import gov.gsa.fas.contractservice.model.NIFData;
+import gov.gsa.fas.contractservice.model.VolumeDiscount;
+import gov.gsa.fas.contractservice.model.VolumeRange;
 import gov.gsa.fas.contractservice.util.ContractConstants;
 
 public class ContractServiceDAOImpl implements ContractServiceDAO {
@@ -161,6 +163,96 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 			Address address = new Gson().fromJson(addressDataJSON, Address.class);
 
 			return address;
+		}
+		return null;
+	}
+
+
+	@Override
+	public List<CFFContractFinder> getCFFDetail(String internalContractNumber)
+			throws AmazonDynamoDBException, AmazonClientException {
+		
+		String cffContractFinderDataJSON = getDetailsByPartitionKey(internalContractNumber,
+				ContractConstants.CONTRACT_SERVICE_SK_D407 + "_" + internalContractNumber);
+
+		if (cffContractFinderDataJSON != null && cffContractFinderDataJSON.length() > 0) {
+			List<CFFContractFinder> cdfMaster = Arrays.asList(new Gson().fromJson(cffContractFinderDataJSON, CFFContractFinder[].class));
+
+			return cdfMaster;
+		}
+		return null;
+	}
+
+
+	@Override
+	public NIFData getNIFDetails(String internalContractNumber) throws AmazonDynamoDBException, AmazonClientException {
+		
+		String nifDataJSON = getDetailsByPartitionKey(internalContractNumber,
+				ContractConstants.CONTRACT_SERVICE_SK_D403 + "_" + internalContractNumber);
+
+		if (nifDataJSON != null && nifDataJSON.length() > 0) {
+			NIFData nifData = new Gson().fromJson(nifDataJSON, NIFData.class);
+
+			return nifData;
+		}
+		return null;
+	}
+
+
+	@Override
+	public EDIFax getEDIFax(String internalContractNumber) throws AmazonDynamoDBException, AmazonClientException {
+		
+		String ediFaxDataJSON = getDetailsByPartitionKey(internalContractNumber,
+				ContractConstants.CONTRACT_SERVICE_SK_D411 + "_" + internalContractNumber);
+
+		if (ediFaxDataJSON != null && ediFaxDataJSON.length() > 0) {
+			EDIFax ediFaxData = new Gson().fromJson(ediFaxDataJSON, EDIFax.class);
+
+			return ediFaxData;
+		}
+		return null;
+	}
+	
+	@Override
+	public ACCMapping getReportingOfficeAAC(String internalContractNumber) throws AmazonDynamoDBException, AmazonClientException {
+		
+		String accDataJSON = getDetailsByPartitionKey(internalContractNumber,
+				ContractConstants.CONTRACT_SERVICE_SK_D4531 + "_" + internalContractNumber);
+
+		if (accDataJSON != null && accDataJSON.length() > 0) {
+			ACCMapping accData = new Gson().fromJson(accDataJSON, ACCMapping.class);
+
+			return accData;
+		}
+		return null;
+	}
+
+
+	@Override
+	public List<VolumeDiscount> getVolumeDiscounts(String internalContractNumber)
+			throws AmazonDynamoDBException, AmazonClientException {
+		String volumeDiscDataJSON = getDetailsByPartitionKey(internalContractNumber,
+				ContractConstants.CONTRACT_SERVICE_SK_D4532 + "_" + internalContractNumber);
+
+		if (volumeDiscDataJSON != null && volumeDiscDataJSON.length() > 0) {
+			List<VolumeDiscount> volumeDiscount = Arrays.asList(new Gson().fromJson(volumeDiscDataJSON, VolumeDiscount[].class));
+
+			return volumeDiscount;
+		}
+		return null;
+	}
+
+
+	@Override
+	public List<VolumeRange> getVolumeRange(String internalContractNumber)
+			throws AmazonDynamoDBException, AmazonClientException {
+		String volumeRangeJSON = getDetailsByPartitionKey(internalContractNumber,
+				ContractConstants.CONTRACT_SERVICE_SK_D41CD + "_" + internalContractNumber);
+
+		if (volumeRangeJSON != null && volumeRangeJSON.length() > 0) {
+			List<VolumeRange> volumeDiscount = Arrays.asList(new Gson().fromJson(volumeRangeJSON, VolumeRange[].class));
+
+			return volumeDiscount;
 		}
 		return null;
 	}
