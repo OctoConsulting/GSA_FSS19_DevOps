@@ -1213,5 +1213,9 @@ public class CSDetailPO {
 		this.requisitionLinesRes = reqResList;
 		
 	}
+	
+	public void setVolumeDiscount(List<Range> volumeDiscount) {
+		this.volumeDiscount = volumeDiscount;
+	}
 
 }

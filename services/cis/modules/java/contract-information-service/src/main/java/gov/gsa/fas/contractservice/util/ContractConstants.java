@@ -17,6 +17,7 @@ public class ContractConstants {
 	public static final String CONTRACT_SERVICE_SK_D410 = "detail_d410";
 	public static final String CONTRACT_SERVICE_SK_D411 = "detail_d411";
 	public static final String CONTRACT_SERVICE_SK_D430 = "detail_d430";
+	public static final String CONTRACT_SERVICE_SK_D4531 = "detail_d4531";
 	
 	public static final String TEST_BODY = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:con=\"http://contract/\"><soapenv:Header/><soapenv:Body><con:PORequest><NumOfRecord>1</NumOfRecord><PurchaseOrders POLineNumber=\"01\"><PurchaseOrderNum>NMNJH753C8</PurchaseOrderNum>"
 			+ " <totalPOCost>12.75</totalPOCost>" + "  <ContractNum>47QSEA20T000E</ContractNum>"

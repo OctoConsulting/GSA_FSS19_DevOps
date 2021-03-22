@@ -19,10 +19,12 @@ import gov.gsa.fas.contractservice.contract.CSDetailPO;
 import gov.gsa.fas.contractservice.contract.ContractsType;
 import gov.gsa.fas.contractservice.contract.ListContractsType;
 import gov.gsa.fas.contractservice.contract.PORecordsType;
+import gov.gsa.fas.contractservice.contract.Range;
 import gov.gsa.fas.contractservice.contract.RequisitionRes;
 import gov.gsa.fas.contractservice.dao.ContractServiceDAO;
 import gov.gsa.fas.contractservice.dao.ContractServiceDAOImpl;
 import gov.gsa.fas.contractservice.exception.ApplicationException;
+import gov.gsa.fas.contractservice.model.ACCMapping;
 import gov.gsa.fas.contractservice.model.Address;
 import gov.gsa.fas.contractservice.model.CDFMaster;
 import gov.gsa.fas.contractservice.model.CFFContractFinder;
@@ -31,6 +33,8 @@ import gov.gsa.fas.contractservice.model.EDIFax;
 import gov.gsa.fas.contractservice.model.NIFData;
 import gov.gsa.fas.contractservice.model.PathParameters;
 import gov.gsa.fas.contractservice.model.RequestWrapper;
+import gov.gsa.fas.contractservice.model.VolumeDiscount;
+import gov.gsa.fas.contractservice.model.VolumeRange;
 import gov.gsa.fas.contractservice.util.ContractConstants;
 import gov.gsa.fas.contractservice.util.ContractInternalIDType;
 import gov.gsa.fas.contractservice.util.ContractServiceUtil;
@@ -43,9 +47,9 @@ public class ContractServiceImpl implements ContractService {
 	Logger logger = LoggerFactory.getLogger(ContractServiceImpl.class);
 
 	private ContractServiceDAO contractServiceDAO;
-	
+
 	List<CSDetailPO> pOsResponse = new ArrayList<>();
-	
+
 	int notesCount = 0;
 
 	public RequestWrapper getListContractResponse(RequestWrapper inputStream) {
@@ -63,10 +67,10 @@ public class ContractServiceImpl implements ContractService {
 	public List<CSDetailPO> getContractData(List<PORecordsType> inPORequest) throws ApplicationException {
 
 		logger.info("Begin of the getContractData() :: ");
-		for(PORecordsType poRequest : inPORequest) {
+		for (PORecordsType poRequest : inPORequest) {
 			pOsResponse.add(validateRequest(poRequest));
 		}
-		
+
 		logger.info("End of the getContractData() :: ");
 		return pOsResponse;
 	}
@@ -76,7 +80,7 @@ public class ContractServiceImpl implements ContractService {
 	 * 
 	 * @param inPOLines
 	 * @return
-	 * @throws ApplicationException 
+	 * @throws ApplicationException
 	 */
 	private CSDetailPO validateRequest(PORecordsType inPOLines) throws ApplicationException {
 
@@ -128,6 +132,7 @@ public class ContractServiceImpl implements ContractService {
 			if (contractsType == null){
 				return new RequestWrapper(
 						ContractServiceUtil.marshallException(ContractConstants.FAULT_CODE, ContractConstants.JS007_INVALID_DATA_CONTRACT_NUMBER+inputStream.getPathParameters().getContractid()));
+
 			}
 			return new RequestWrapper(ContractServiceUtil.marshall(contractsType));
 		} catch (ApplicationException ex) {
@@ -164,10 +169,11 @@ public class ContractServiceImpl implements ContractService {
 
 	public ContractsType getContractDetails(String contractId) throws ApplicationException {
 
-		logger.info("getContractDetails : {} " , contractId);
+		logger.info("getContractDetails : {} ", contractId);
 		ContractServiceDAO contractServiceDAO = new ContractServiceDAOImpl();
 		try {
-			List<String> internals = contractServiceDAO.getInternalContractNumber(ContractInternalIDType.GSAM.get(contractId));
+			List<String> internals = contractServiceDAO
+					.getInternalContractNumber(ContractInternalIDType.GSAM.get(contractId));
 			if (internals == null || internals.size() <= 0) {
 				internals = contractServiceDAO.getInternalContractNumber(ContractInternalIDType.FCON.get(contractId));
 			}
@@ -231,7 +237,7 @@ public class ContractServiceImpl implements ContractService {
 	 * 
 	 * @param contractDetail
 	 * @return
-	 * @throws ApplicationException 
+	 * @throws ApplicationException
 	 */
 	private CSDetailPO validateGetContractData(CSDetailPO contractDetail, PORecordsType inPOLines)
 			throws ApplicationException, AmazonDynamoDBException {
@@ -515,13 +521,20 @@ public class ContractServiceImpl implements ContractService {
 			reqnRes.setItemNotesCount("" + itemNotesCount);
 			reqResList.add(reqnRes);
 			contractDetail.setRequisitionLinesRes(reqResList);
-			String contractReportingOffceAddress = contratReportingOfficeAddress(contractDetail.getReportingOffice(), cdfMasterList);
+			String contractReportingOffceAddress = contratReportingOfficeAddress(contractDetail.getReportingOffice(),
+					cdfMasterList);
 			contractDetail.setReportOfficeAddress(contractReportingOffceAddress);
-			
+
 			String acoAddress = getACOOfficeAddress(contractDetail.getACO(), cdfMasterList);
 			contractDetail.setAcoAddress(acoAddress);
-			
-			contractDetail.setResult(ContractConstants.SUCCESS);
+			setEDIFax(contractDetail);
+			setReportingOfficeAAC(contractDetail);
+			setBpaServiceChargeNote(contractDetail, contractMaster, inPOLines.getTotalPOCost());
+			getVolumeDiscount(contractDetail, inPOLines.getTotalPOCost());
+			if (StringUtils.isBlank(contractDetail.getResult())) {
+				contractDetail.setResult(ContractConstants.SUCCESS);
+			}
+
 		} catch (AmazonClientException ex) {
 			logger.error("Error in the ContractServiceDAO::{}", ex);
 			throw new ApplicationException(ContractConstants.J020_CS_EXCEPTION);
@@ -535,12 +548,14 @@ public class ContractServiceImpl implements ContractService {
 
 	/***
 	 * contract dates validation
+	 * 
 	 * @param contractDetail
 	 * @param contractMaster
 	 * @return
 	 * @throws ParseException
 	 */
-	private String contractDatesValidation(CSDetailPO contractDetail,ContractDataMaster contractMaster) throws ParseException {
+	private String contractDatesValidation(CSDetailPO contractDetail, ContractDataMaster contractMaster)
+			throws ParseException {
 		String[] currentDate = DateUtil.getDateTime();
 		String errorMessage = "";
 		if (StringUtils.isNotBlank(contractMaster.getD402_cont_beg_dt()) && DateUtil.dateCompare(currentDate[0],
@@ -579,8 +594,8 @@ public class ContractServiceImpl implements ContractService {
 	private void mapContractData(CSDetailPO contractDetail, ContractDataMaster contractMaster) {
 
 		logger.info("Begin of the mapContractData() :: ");
-		
-		List<String> inspectionOriginCodes= Arrays.asList("1","4","5","7","9");
+
+		List<String> inspectionOriginCodes = Arrays.asList("1", "4", "5", "7", "9");
 		contractDetail.setACO(contractMaster.getD402_aco());
 		contractDetail.setAcceptDays(contractMaster.getD402_accept_dys());
 		contractDetail.setARNCode(contractMaster.getD402_arn_aro_cd());
@@ -596,37 +611,35 @@ public class ContractServiceImpl implements ContractService {
 		contractDetail.setPurchaseOrderContractNumber(contractMaster.getD421_f_cont_no_ows());
 		contractDetail.setParentMASContractNumber(contractMaster.getD421_f_cont_no());
 		contractDetail.setContractNotesList(contractMaster.getD402_note_cd());
-		
-		if (StringUtils.isNotBlank(contractMaster.getD402_insp_cd()) && !("D").equals(contractMaster.getD402_insp_cd())){
-			contractDetail.setInspectAcceptByOriginRegion(contractMaster.getD402_insp_cd()); 
+
+		if (StringUtils.isNotBlank(contractMaster.getD402_insp_cd())
+				&& !("D").equals(contractMaster.getD402_insp_cd())) {
+			contractDetail.setInspectAcceptByOriginRegion(contractMaster.getD402_insp_cd());
 		}
-		if (inspectionOriginCodes.contains(contractMaster.getD402_insp_cd())){
+		if (inspectionOriginCodes.contains(contractMaster.getD402_insp_cd())) {
 			contractDetail.setInspectionPoint("S");
-		}
-		else {
+		} else {
 			contractDetail.setInspectionPoint("D");
 		}
-		
-		
-		
+
 		logger.info("End of the mapContractData() :: ");
 	}
 
 	private Optional<ContractsType> getContractsType(String internal, String flowTypeListcontracts) {
 		Gson gson = new Gson();
 		String[] currentDate = DateUtil.getDateTime();
-		
+
 		ContractServiceDAO contractServiceDAO = getContractServiceDAO();
-		
+
 		ContractsType contractsType = new ContractsType();
 
 		String masterDetails = contractServiceDAO.getDetailsByPartitionKey(internal,
 				ContractConstants.CONTRACT_SERVICE_SK_D402 + "_" + internal);
 
-		if(StringUtils.isNotBlank(masterDetails)) {
-					
+		if (StringUtils.isNotBlank(masterDetails)) {
+
 			ContractDataMaster master = gson.fromJson(masterDetails, ContractDataMaster.class);
-					
+
 			contractsType.setContractNumber(internal);
 			contractsType.setAcoRegion(master.getD402_aco());
 			contractsType.setContractType(master.getD402_cont_ind());
@@ -676,7 +689,7 @@ public class ContractServiceImpl implements ContractService {
 				}
 				
 				String contractAddress = extractAddress(internal, contractServiceDAO);
-				
+
 				contractsType.setContractorAddress(contractAddress);
 				
 				List<CDFMaster> cdfMasterList = contractServiceDAO
@@ -713,7 +726,8 @@ public class ContractServiceImpl implements ContractService {
 		return edifaxDetail;
 	}
 	/***
-	 * this method used to set the address for get contract data /list 
+	 * this method used to set the address for get contract data /list
+	 * 
 	 * @param internal
 	 * @param contractServiceDAO
 	 * @return
@@ -742,8 +756,8 @@ public class ContractServiceImpl implements ContractService {
 							+ wcity + " " + wstate + " " + wzip);
 					contractorAddress.trimToSize();
 				} else {
-					logger.info("Address1: {}",wadrs1);
-					logger.info("Address2: {}",wadrs2);
+					logger.info("Address1: {}", wadrs1);
+					logger.info("Address2: {}", wadrs2);
 					contractorAddress.append(
 							wadrs1.substring(0, 32) + wadrs2.substring(0, 32) + wcity + " " + wstate + " " + wzip);
 					contractorAddress.trimToSize();
@@ -781,23 +795,20 @@ public class ContractServiceImpl implements ContractService {
 		}
 		return contractServiceDAO;
 	}
-	
+
 	/**
-	 * The following method is to determine the instrument type based on 
-	 * procurement, contract indicator
-	 * if its a bpa then return F
-	 * if its a purchase order then return P
-	 * if its a delivery order then return F
-	 * if its a dca then return C
-	 * if none of the above then return blank  
-	 * */
+	 * The following method is to determine the instrument type based on
+	 * procurement, contract indicator if its a bpa then return F if its a purchase
+	 * order then return P if its a delivery order then return F if its a dca then
+	 * return C if none of the above then return blank
+	 */
 	private String deriveInstrumntType(String procurementMethod, String contractIndicator) {
 
 		List<String> simplifiedAcquisition = Arrays.asList("3", "4", "E");
 		List<String> nonDefinitiveContract = Arrays.asList("6", "T", "W", "X", "9");
 		List<String> definitiveContract = Arrays.asList("1", "2", "5");
 
-		logger.info("Procuremetn method {} , ContractIndicator {}",procurementMethod,contractIndicator);
+		logger.info("Procuremetn method {} , ContractIndicator {}", procurementMethod, contractIndicator);
 		if ("B".equals(contractIndicator)) {
 			return "F";
 		} else {
@@ -818,9 +829,10 @@ public class ContractServiceImpl implements ContractService {
 		return "";
 
 	}
-	
+
 	/***
 	 * Contract Notes
+	 * 
 	 * @param contractMaster
 	 * @param cdfMasterList
 	 * @return
@@ -938,9 +950,10 @@ public class ContractServiceImpl implements ContractService {
 		}
 		return "";
 	}
-	
+
 	/***
-	 * Reporting office address 
+	 * Reporting office address
+	 * 
 	 * @param contractReportingOffice
 	 * @param cdfMasterList
 	 * @return
@@ -948,7 +961,7 @@ public class ContractServiceImpl implements ContractService {
 	private String contratReportingOfficeAddress(String contractReportingOffice, List<CDFMaster> cdfMasterList) {
 
 		CDFMaster reportingOfficeAddress = null;
-		String address ="";
+		String address = "";
 		if (cdfMasterList != null) {
 			for (CDFMaster cdfMaster : cdfMasterList) {
 				if (contractReportingOffice.equals(cdfMaster.getD430_rpt_off())
@@ -958,25 +971,30 @@ public class ContractServiceImpl implements ContractService {
 			}
 		}
 
-		if(reportingOfficeAddress!=null) {
-			if(StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs1()) && reportingOfficeAddress.getD430_adrs1().length()<35) {
-				address = reportingOfficeAddress.getD430_adrs1()+" ";
+		if (reportingOfficeAddress != null) {
+			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs1())
+					&& reportingOfficeAddress.getD430_adrs1().length() < 35) {
+				address = reportingOfficeAddress.getD430_adrs1() + " ";
 			}
-			if(StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs2()) && reportingOfficeAddress.getD430_adrs2().length()<35) {
-				address = address + reportingOfficeAddress.getD430_adrs2()+" ";
+			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs2())
+					&& reportingOfficeAddress.getD430_adrs2().length() < 35) {
+				address = address + reportingOfficeAddress.getD430_adrs2() + " ";
 			}
-			if(StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs3()) && reportingOfficeAddress.getD430_adrs3().length()<35) {
-				address = address + reportingOfficeAddress.getD430_adrs3()+" ";
+			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs3())
+					&& reportingOfficeAddress.getD430_adrs3().length() < 35) {
+				address = address + reportingOfficeAddress.getD430_adrs3() + " ";
 			}
-			if(StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs4()) && reportingOfficeAddress.getD430_adrs4().length()<35) {
-				address = address +reportingOfficeAddress.getD430_adrs4()+" ";
+			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs4())
+					&& reportingOfficeAddress.getD430_adrs4().length() < 35) {
+				address = address + reportingOfficeAddress.getD430_adrs4() + " ";
 			}
 		}
 		return address;
 	}
-	
+
 	/***
 	 * aco address for get contract data
+	 * 
 	 * @param aco
 	 * @param cdfMasterList
 	 * @return
@@ -984,7 +1002,7 @@ public class ContractServiceImpl implements ContractService {
 	private String getACOOfficeAddress(String aco, List<CDFMaster> cdfMasterList) {
 
 		CDFMaster reportingOfficeAddress = null;
-		String address ="";
+		String address = "";
 		if (cdfMasterList != null) {
 			for (CDFMaster cdfMaster : cdfMasterList) {
 				if (aco.equals(cdfMaster.getD430_aco())) {
@@ -993,21 +1011,141 @@ public class ContractServiceImpl implements ContractService {
 			}
 		}
 
-		if(reportingOfficeAddress!=null) {
-			if(StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs1()) && reportingOfficeAddress.getD430_adrs1().length()<35) {
-				address = reportingOfficeAddress.getD430_adrs1()+" ";
+		if (reportingOfficeAddress != null) {
+			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs1())
+					&& reportingOfficeAddress.getD430_adrs1().length() < 35) {
+				address = reportingOfficeAddress.getD430_adrs1() + " ";
 			}
-			if(StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs2()) && reportingOfficeAddress.getD430_adrs2().length()<35) {
-				address = address + reportingOfficeAddress.getD430_adrs2()+" ";
+			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs2())
+					&& reportingOfficeAddress.getD430_adrs2().length() < 35) {
+				address = address + reportingOfficeAddress.getD430_adrs2() + " ";
 			}
-			if(StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs3()) && reportingOfficeAddress.getD430_adrs3().length()<35) {
-				address = address + reportingOfficeAddress.getD430_adrs3()+" ";
+			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs3())
+					&& reportingOfficeAddress.getD430_adrs3().length() < 35) {
+				address = address + reportingOfficeAddress.getD430_adrs3() + " ";
 			}
-			if(StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs4()) && reportingOfficeAddress.getD430_adrs4().length()<35) {
-				address = address +reportingOfficeAddress.getD430_adrs4()+" ";
+			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs4())
+					&& reportingOfficeAddress.getD430_adrs4().length() < 35) {
+				address = address + reportingOfficeAddress.getD430_adrs4() + " ";
 			}
 		}
 		return address;
+	}
+
+	/***
+	 * getEDIFax
+	 * 
+	 * @param contractDetail
+	 */
+	private void setEDIFax(CSDetailPO contractDetail) {
+
+		if (contractServiceDAO == null) {
+			contractServiceDAO = new ContractServiceDAOImpl();
+		}
+
+		EDIFax ediFax = contractServiceDAO.getEDIFax(contractDetail.getInternalContractNumber());
+		contractDetail.setEfptIndicator(ediFax.getD411_efpt_ind());
+		contractDetail.setFaxNumber(ediFax.getD411_fax1());
+
+	}
+
+	/***
+	 * set reporting office
+	 * 
+	 * @param contractDetail
+	 */
+	private void setReportingOfficeAAC(CSDetailPO contractDetail) {
+
+		ACCMapping accMapping = contractServiceDAO.getReportingOfficeAAC(contractDetail.getInternalContractNumber());
+		contractDetail.setReportingOfficeAAC(accMapping.getD4531_cont_off_aac());
+
+	}
+
+	private void setBpaServiceChargeNote(CSDetailPO contractDetail, ContractDataMaster contractMaster,
+			BigDecimal poCost) {
+		double dvalMinOrder = new Double(contractMaster.getD402_dval_min_ord());
+		double bpaServiceCharge = new Double(contractMaster.getD402_bpa_service_chg());
+		if (dvalMinOrder > 0 && bpaServiceCharge > 0 && poCost != null) {
+			if (poCost.doubleValue() < dvalMinOrder) {
+				String jsNote = ContractConstants.CF_LIT_1 + String.format("%.2f", dvalMinOrder)
+						+ ContractConstants.CF_LIT_2 + String.format("%.2f", bpaServiceCharge)
+						+ ContractConstants.CF_LIT_3;
+				StringBuffer contractNotesDetails = new StringBuffer(contractDetail.getContractNotesList());
+				contractNotesDetails.append(jsNote);
+				if (contractNotesDetails.toString().trim().length() > 0) {
+					contractDetail.setContractNotesDetails(contractNotesDetails.toString());
+					contractDetail.setContractNotesList(contractDetail.getContractNotesList() + "CF");
+				}
+			}
+		}
+	}
+
+	private double getRangeFrom(String no, List<VolumeRange> volumeRanges) {
+		if (volumeRanges == null) {
+			return 0;
+		}
+
+		Optional<VolumeRange> volumeRange = volumeRanges.stream()
+				.filter(volRange -> no.equals(volRange.getD41d_value())).findFirst();
+		if (!volumeRange.isPresent()) {
+			return 0;
+		}
+
+		return new Double(volumeRange.get().getD41d_alt_value()).doubleValue();
+	}
+
+	private double getRangeto(String no, List<VolumeRange> volumeRanges) {
+
+		if (volumeRanges == null) {
+			return 0;
+		}
+
+		Optional<VolumeRange> volumeRange = volumeRanges.stream()
+				.filter(volRange -> no.equals(volRange.getD41d_value())).findFirst();
+		if (!volumeRange.isPresent()) {
+			return 0;
+		}
+
+		return new Double(volumeRange.get().getD41d_desc()).doubleValue();
+	}
+
+	private void getVolumeDiscount(CSDetailPO contractDetail, BigDecimal totalPOCost) {
+		String rangeNo = "";
+		double from = 0;
+		double to = 0;
+		double discount = 0;
+		List<VolumeDiscount> volumeDiscounts = null;
+		List<Range> volumeDis = new ArrayList<>();
+
+		if (contractServiceDAO == null) {
+			contractServiceDAO = new ContractServiceDAOImpl();
+		}
+		volumeDiscounts = contractServiceDAO.getVolumeDiscounts(contractDetail.getInternalContractNumber());
+		List<VolumeRange> volumeRanges = contractServiceDAO.getVolumeRange(contractDetail.getInternalContractNumber());
+		int i = 0;
+		if (volumeDiscounts != null) {
+			for (VolumeDiscount volumeDiscount : volumeDiscounts) {
+				Range range = new Range();
+				rangeNo = volumeDiscount.getD4532_discount_cd();
+				discount = new Double(volumeDiscount.getD4532_discount_percentage());
+				from = getRangeFrom(rangeNo, volumeRanges);
+				to = getRangeto(rangeNo, volumeRanges);
+				range.setLineNumber(i++);
+				range.setFromValue(new BigDecimal(from).setScale(2, BigDecimal.ROUND_HALF_UP));
+				range.setToValue(new BigDecimal(to).setScale(2, BigDecimal.ROUND_HALF_UP));
+				range.setDiscount(new BigDecimal(discount).setScale(2, BigDecimal.ROUND_HALF_UP));
+				volumeDis.add(range);
+
+				if (totalPOCost.compareTo(range.getFromValue()) != -1
+						&& totalPOCost.compareTo(range.getToValue()) != 1) {
+					contractDetail.setVolumeDiscountAmount(
+							totalPOCost.doubleValue() * range.getDiscount().doubleValue() / 100);
+					contractDetail.setVolumeDiscountPercentage(range.getDiscount().doubleValue());
+				}
+			}
+			contractDetail.setVolumeDiscount(volumeDis);
+		}
+
 	}
 
 }
