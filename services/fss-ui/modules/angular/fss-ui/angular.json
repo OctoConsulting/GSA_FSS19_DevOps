@@ -34,7 +34,7 @@
               "src/assets"
             ],
             "styles": [
-               "src/assets/css/uswds.min.css",
+               "src/styles.scss",
 			   "src/assets/css/fss19.css"
             ],
             "scripts": []
@@ -98,7 +98,7 @@
               "src/assets"
             ],
             "styles": [
-               "src/assets/css/uswds.min.css",
+               "src/styles.scss",
 			   "src/assets/css/fss19.css"
             ],
             "scripts": []
