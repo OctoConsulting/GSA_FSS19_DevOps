@@ -677,7 +677,7 @@ public class ContractServiceImpl implements ContractService {
 				contractsType.setContractEndDate(
 						DateUtil.stringToXMLGregorianCalendar(DateUtil.julianToGregf2(contractTermDate)));
 
-				if (ContractConstants.FLOW_TYPE_LISTCONTRACTS.equalsIgnoreCase(flowTypeListcontracts)){
+				if (ContractConstants.FLOW_TYPE_CONTRACTDETAILS.equalsIgnoreCase(flowTypeListcontracts)){
 					if (contractsType.getContractRemarks() == null || contractsType.getContractRemarks().trim().length() < 1){
 						contractsType.setContractRemarks("Contract is active");
 						contractsType.setContractorDUNS(master.getD402_cecc());
