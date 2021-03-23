@@ -45,7 +45,6 @@ export class LambdaConstruct extends cdk.Construct {
             timeout: cdk.Duration.seconds(props.timeout ? props.timeout : 30),
             environment: props.lambdaEnvParameters ? props.lambdaEnvParameters : {},
         });
-        // 'CFtOCmb6cO693OOYt6FsQn.7W_.fsvzK',
 
         this.alias = new lambda.Alias(this, 'alias', {
             aliasName: constants.LIVE_ALIAS_NAME,

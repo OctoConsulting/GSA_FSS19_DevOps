@@ -36,7 +36,6 @@ export class ContractLambdasConstruct extends cdk.Construct {
                     Bucket: this.props.artifactBucket,
                     Prefix: this.props.artifactKey,
                     MaxKeys: 1,
-                    TIMESTAMP: Date.now(),
                 },
                 physicalResourceId: customResource.PhysicalResourceId.of(Date.now().toString()),
             },
@@ -47,7 +46,6 @@ export class ContractLambdasConstruct extends cdk.Construct {
         const artifactBucket = s3.Bucket.fromBucketName(this, 'artifact-bucket', this.props.artifactBucket);
         artifactBucket.grantRead(s3VersionResource);
         this.artifactVersion = s3VersionResource.getResponseField('Versions.0.VersionId');
-        // this.artifactVersion = 'q1TgYPqsLr3quU8mQOde76UogoVgFAqL';
     }
 
     private buildPreRequisites() {
@@ -73,6 +71,7 @@ export class ContractLambdasConstruct extends cdk.Construct {
                 SHORT_ENV: this.props.shortEnv,
                 TABLE_NAME: this.props.contractTable.tableName,
                 GSI_BY_CONTRACT_DETAILS_INDEITTY: constants.BY_CONTRACT_DETAILS_IDENTITY_GSI_NAME,
+                ARTIFACT_VERSION: this.artifactVersion,
             },
             handler: 'gov.gsa.fas.contractservice.handler.ContractDetailsServiceHandler::handleRequest',
             type: LambdaConstructProps.LambdaTypeEnum.JAVA,
@@ -97,6 +96,7 @@ export class ContractLambdasConstruct extends cdk.Construct {
                 SHORT_ENV: this.props.shortEnv,
                 TABLE_NAME: this.props.contractTable.tableName,
                 GSI_BY_CONTRACT_DETAILS_INDEITTY: constants.BY_CONTRACT_DETAILS_IDENTITY_GSI_NAME,
+                ARTIFACT_VERSION: this.artifactVersion,
             },
             handler: 'gov.gsa.fas.contractservice.handler.ListContractsServiceHandler::handleRequest',
             type: LambdaConstructProps.LambdaTypeEnum.JAVA,
@@ -121,6 +121,7 @@ export class ContractLambdasConstruct extends cdk.Construct {
                 SHORT_ENV: this.props.shortEnv,
                 TABLE_NAME: this.props.contractTable.tableName,
                 GSI_BY_CONTRACT_DETAILS_INDEITTY: constants.BY_CONTRACT_DETAILS_IDENTITY_GSI_NAME,
+                ARTIFACT_VERSION: this.artifactVersion,
             },
             minCapacity: this.props.minCapacity,
             handler: 'gov.gsa.fas.contractservice.handler.ServiceHandler::handleRequest',
