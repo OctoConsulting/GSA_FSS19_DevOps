@@ -31,12 +31,14 @@
             "aot": true,
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+			  {
+				"glob": "**/*",
+				"input": "./node_modules/uswds/dist/",
+				"output": "/assets/"
+			  }
             ],
-            "styles": [
-               "src/assets/css/uswds.min.css",
-			   "src/assets/css/fss19.css"
-            ],
+            "styles": [],
             "scripts": []
           },
           "configurations": {
@@ -95,12 +97,14 @@
             "karmaConfig": "karma.conf.js",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+			  {
+				"glob": "**/*",
+				"input": "./node_modules/uswds/dist/",
+				"output": "/assets/"
+			  }
             ],
-            "styles": [
-               "src/assets/css/uswds.min.css",
-			   "src/assets/css/fss19.css"
-            ],
+            "styles": [],
             "scripts": []
           }
         },
