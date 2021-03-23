@@ -71,15 +71,17 @@ public class App2 {
 		Item item9 = new Item().withPrimaryKey("internal_contract_number", "NFKA271")
 				.withString("contract_details_identity", "detail_d411_NFKA271").withJSON("details", getEdiFaxTable());
 		
-		
-				
-		System.out.println(getContractMaster());
+		Item item10 =
+				new Item().withPrimaryKey("internal_contract_number", "NFKA271")
+				.withString("contract_details_identity", "detail_MQCID_NFKA271_C08_C_A").withJSON("details", getMQCIDData());
+
 		
 		System.out.println(getContractMaster());
 		System.out.println(getAddress());
 		System.out.println(getNSN());
 		System.out.println(getCDFMaster());
 		System.out.println(getEdiFaxTable());
+		System.out.println(getMQCIDData());
 		
 		table.putItem(item);
 		table.putItem(item2);
@@ -90,6 +92,7 @@ public class App2 {
 		table.putItem(item7);
 		table.putItem(item8);
 		table.putItem(item9);
+		table.putItem(item10);
 	
 		//table.deleteItem(new PrimaryKey("internal_contract_number", "12345x","contract_details_identity", "detail_d411_NFKA271"));
 		
@@ -109,7 +112,7 @@ public class App2 {
 	}
 
 	private static String getContractMaster() {
-		String cmd_data = "{\"d402_aco\":\"R\",\"d402_accept_dys\":\"7\",\"d402_byr_cd\":\"JV\",\"d402_cecc\":\"080970255\",\"d402_cecs\":\"080970255\",\"d402_cecm\":\"\",\"d402_cont_no\":\"NFKA271\",\"d402_disc_terms\":\"00.000%-00 00.000%-00 NET-30\",\"d402_fob_cd\":\"E\",\"d402_pct_var_mi\":\"00\",\"d402_pct_var_pl\":\"00\",\"d402_ship_del_cd\":\"D\",\"d402_note_cd\":\"26\",\"d402_arn_aro_cd\":\"O\",\"d402_arn_aro_dys\":\"7\",\"d402_sch_cont_no\":\"\",\"d402_pr_mthd\":\"T\",\"d402_cont_ind\":\"B\",\"d402_note_cd\":\"26\",\"d402_cont_beg_dt\":\"2020226\",\"d402_cont_end_dt\":\"2021224\",\"d402_dt_terminated\":\"\",\"d402_rpt_off\":\"M\",\"d402_fssi_type\":\"\",\"d402_insp_cd\":\"D\",\"d402_dval_min_ord\":\"0\",\"d402_bpa_service_chg\":\"0\",\"d402_dval_max_ord\":\"0\",\"d421_f_cont_no_ows\":\"47QSEA20T000E\"}";
+		String cmd_data = "{\"d402_aco\":\"5\",\"d402_accept_dys\":\"7\",\"d402_byr_cd\":\"JV\",\"d402_cecc\":\"080970255\",\"d402_cecs\":\"080970255\",\"d402_cecm\":\"\",\"d402_cont_no\":\"NFKA271\",\"d402_disc_terms\":\"00.000%-00 00.000%-00 NET-30\",\"d402_fob_cd\":\"E\",\"d402_pct_var_mi\":\"00\",\"d402_pct_var_pl\":\"00\",\"d402_ship_del_cd\":\"D\",\"d402_note_cd\":\"26\",\"d402_arn_aro_cd\":\"O\",\"d402_arn_aro_dys\":\"7\",\"d402_sch_cont_no\":\"\",\"d402_pr_mthd\":\"T\",\"d402_cont_ind\":\"B\",\"d402_note_cd\":\"26\",\"d402_cont_beg_dt\":\"2020226\",\"d402_cont_end_dt\":\"2021224\",\"d402_dt_terminated\":\"\",\"d402_rpt_off\":\"M\",\"d402_fssi_type\":\"\",\"d402_insp_cd\":\"D\",\"d402_dval_min_ord\":\"0\",\"d402_bpa_service_chg\":\"0\",\"d402_dval_max_ord\":\"0\",\"d421_f_cont_no_ows\":\"47QSEA20T000E\",\"d402_qc_aco\":\"C08\"}";
 		return cmd_data;
 	}
 
@@ -222,4 +225,12 @@ public class App2 {
 
 		return edifax;
 	}
+	
+	private static String getMQCIDData() {
+		String mqcid = "{\"full_name\" : \"Aretha J Clayton\",\"phone\" : \"3128868879\",\"gen_email\" : \"aretha.clayton@gsa.gov\"}";
+		
+
+		return mqcid;
+	}
+	
 }

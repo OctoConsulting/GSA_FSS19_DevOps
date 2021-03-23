@@ -40,6 +40,8 @@ public class ContractDataMaster implements Serializable {
 	private String d402_pct_var_pl;
 	private String d402_insp_cd;
 	private String d402_dval_max_ord;
+	private String d402_qc_aco;
+	
 	
 	public String getD402_sch_cont_no() {
 		return d402_sch_cont_no;
@@ -228,10 +230,11 @@ public class ContractDataMaster implements Serializable {
 	public void setD402_dval_max_ord(String d402_dval_max_ord) {
 		this.d402_dval_max_ord = d402_dval_max_ord;
 	}
-	
-	
-	
-	
-	
+	public String getD402_qc_aco() {
+		return d402_qc_aco;
+	}
+	public void setD402_qc_aco(String d402_qc_aco) {
+		this.d402_qc_aco = d402_qc_aco;
+	}
 
 }
