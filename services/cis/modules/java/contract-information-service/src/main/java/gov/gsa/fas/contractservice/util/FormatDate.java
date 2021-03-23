@@ -162,7 +162,7 @@ public class FormatDate {
 		return formattedDate;
 	}
 
-	public static String formatDateDDMMMYYYY(String dt) throws CCSExceptions {
+	public static String formatDateDDMMMYYYY(String dt) {
 		String strFormat = "yyyyMMdd";
 		DateFormat formattedDate = new SimpleDateFormat(strFormat);
 		Date date = null;
@@ -173,8 +173,8 @@ public class FormatDate {
 			SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
 			dateToReturn = formatter.format(date);
 		}catch (ParseException e) {
-			LOGGER.error(e.getLocalizedMessage());
-			throw new CCSExceptions("Invalid Date Parser Exception ", e);
+			LOGGER.error("formatDateDDMMMYYYY Error " +e.getLocalizedMessage() , e);
+			//throw new CCSExceptions("Invalid Date Parser Exception ", e);
 		}
 
 		return dateToReturn;

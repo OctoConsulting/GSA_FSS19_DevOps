@@ -16,6 +16,7 @@ public class ContractConstants {
 	public static final String CONTRACT_SERVICE_SK_D407 = "detail_d407";
 	public static final String CONTRACT_SERVICE_SK_D410 = "detail_d410";
 	public static final String CONTRACT_SERVICE_SK_D411 = "detail_d411";
+	public static final String CONTRACT_SERVICE_SK_MQCID = "detail_MQCID";
 	public static final String CONTRACT_SERVICE_SK_D430 = "detail_d430";
 	public static final String CONTRACT_SERVICE_SK_D4531 = "detail_d4531";
 	public static final String CONTRACT_SERVICE_SK_D4532 = "detail_d4532";

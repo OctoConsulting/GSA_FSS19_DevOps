@@ -25,6 +25,7 @@ import gov.gsa.fas.contractservice.dao.ContractServiceDAO;
 import gov.gsa.fas.contractservice.dao.ContractServiceDAOImpl;
 import gov.gsa.fas.contractservice.exception.ApplicationException;
 import gov.gsa.fas.contractservice.model.ACCMapping;
+import gov.gsa.fas.contractservice.model.ACOContractDetails;
 import gov.gsa.fas.contractservice.model.Address;
 import gov.gsa.fas.contractservice.model.CDFMaster;
 import gov.gsa.fas.contractservice.model.CFFContractFinder;
@@ -39,6 +40,8 @@ import gov.gsa.fas.contractservice.util.ContractConstants;
 import gov.gsa.fas.contractservice.util.ContractInternalIDType;
 import gov.gsa.fas.contractservice.util.ContractServiceUtil;
 import gov.gsa.fas.contractservice.util.DateUtil;
+import gov.gsa.fas.contractservice.util.FormatDate;
+
 
 
 
@@ -668,19 +671,31 @@ public class ContractServiceImpl implements ContractService {
 				String contractBeginDate = master.getD402_cont_beg_dt();
 				if (StringUtils.isNotBlank(contractBeginDate)
 						&& DateUtil.dateCompare(currentDate[0], DateUtil.julianToGregf2(contractBeginDate)) == 2) {
-					includeContract = false;
+					if(ContractConstants.FLOW_TYPE_CONTRACTDETAILS.equalsIgnoreCase(flowTypeListcontracts)){
+						contractsType.setContractRemarks("Contract has not Begun. Begin date is " + FormatDate.formatDateDDMMMYYYY(DateUtil.julianToGregf2(contractBeginDate)));
+					} else { 
+						includeContract = false;
+					}
 				}
 
 				String contractEndDate = master.getD402_cont_end_dt();
 				if (StringUtils.isNotBlank(contractEndDate)
 						&& DateUtil.dateCompare(currentDate[0], DateUtil.julianToGregf2(contractEndDate)) == 1) {
-					includeContract = false;
+					if(ContractConstants.FLOW_TYPE_CONTRACTDETAILS.equalsIgnoreCase(flowTypeListcontracts)){
+						contractsType.setContractRemarks("Contract has ended. End date was "  + FormatDate.formatDateDDMMMYYYY(DateUtil.julianToGregf2(contractEndDate)));
+					} else { 
+						includeContract = false;
+					}
 				}
 
 				String contractTermDate = master.getD402_dt_terminated();
 				if (StringUtils.isNotBlank(contractTermDate)
 						&& DateUtil.dateCompare(currentDate[0], DateUtil.julianToGregf2(contractTermDate)) == 1) {
-					includeContract = false;
+					if(ContractConstants.FLOW_TYPE_CONTRACTDETAILS.equalsIgnoreCase(flowTypeListcontracts)){
+						contractsType.setContractRemarks("Contract has been terminated. Termination Date was " + FormatDate.formatDateDDMMMYYYY(DateUtil.julianToGregf2(contractTermDate)));
+					} else { 
+						includeContract = false;
+					}
 				}
 
 				contractsType.setContractBeginDate(
@@ -715,7 +730,7 @@ public class ContractServiceImpl implements ContractService {
 				contractsType.setEfptIndicator(edifaxDetails.getD411_efpt_ind());
 				contractsType.setEdiMessageSetVersion(StringUtils.isNotBlank(edifaxDetails.getD411_x12_version())?edifaxDetails.getD411_x12_version():null);
 				
-				
+				setAcoContractDetails(internal,contractsType, master);
 
 				if (includeContract) {
 					return Optional.of(contractsType);
@@ -726,6 +741,32 @@ public class ContractServiceImpl implements ContractService {
 			}
 		}
 		return Optional.empty();
+	}
+
+	private void setAcoContractDetails(String internal, ContractsType contractsType  ,ContractDataMaster master) {
+		if(contractsType!=null && !"R".equalsIgnoreCase(contractsType.getAcoRegion())) {
+			String aco_region = "";
+			aco_region = contractsType.getAcoRegion();
+			if (aco_region.equals("1")) {
+				aco_region = "B";
+			} else if (aco_region.equals("4")) {
+				aco_region = "A";
+			} else if (aco_region.equals("5")) {
+				aco_region = "C";
+			} else if (aco_region.equals("9")) {
+				aco_region = "S";
+			}
+			String acoContactDetails = getContractServiceDAO().getDetailsByPartitionKey(internal,
+					ContractConstants.CONTRACT_SERVICE_SK_MQCID + "_" + internal + "_" +master.getD402_qc_aco()+"_"+ aco_region +"_"+"A");
+			if (StringUtils.isNotBlank(acoContactDetails)) {
+				Gson gson = new Gson();
+				ACOContractDetails acoContractDetail = new ACOContractDetails();
+				acoContractDetail = gson.fromJson(acoContactDetails, ACOContractDetails.class);
+				contractsType.setAcoName(acoContractDetail.getFull_name());
+				contractsType.setAcoPhone(acoContractDetail.getPhone());
+				contractsType.setAcoEmail(acoContractDetail.getGen_email());
+			}
+		}
 	}
 
 	private EDIFax extractEdifax(String internal, ContractServiceDAO contractServiceDAO) {
