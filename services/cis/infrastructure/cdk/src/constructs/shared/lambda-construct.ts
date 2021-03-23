@@ -22,7 +22,7 @@ export class LambdaConstruct extends cdk.Construct {
 
         this.lambdaFunction = new lambda.Function(this, props.functionName, {
             functionName: props.functionName,
-            description: `${props.functionName}-${Date.now()}`,
+            description: `${props.functionName}`,
             memorySize: props.memorySize ? props.memorySize : 512,
             runtime:
                 props.type === LambdaConstructProps.LambdaTypeEnum.JAVA
@@ -41,7 +41,7 @@ export class LambdaConstruct extends cdk.Construct {
             tracing: this.props.xRayTracing ? lambda.Tracing.ACTIVE : lambda.Tracing.DISABLED,
             code: props.assetLocation
                 ? lambda.Code.fromAsset(props.assetLocation)
-                : lambda.Code.fromBucket(bucket!, this.props.artifactKey!),
+                : lambda.Code.fromBucket(bucket!, this.props.artifactKey!, this.props.artifactVersion),
             timeout: cdk.Duration.seconds(props.timeout ? props.timeout : 30),
             environment: props.lambdaEnvParameters ? props.lambdaEnvParameters : {},
         });

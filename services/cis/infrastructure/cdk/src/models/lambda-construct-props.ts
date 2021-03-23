@@ -11,6 +11,7 @@ export interface LambdaConstructProps {
     exportResource?: boolean;
     artifactBucket?: string;
     artifactKey?: string;
+    artifactVersion: string;
     handler?: string;
     logRetentionInDays?: number;
     minCapacity?: number;
