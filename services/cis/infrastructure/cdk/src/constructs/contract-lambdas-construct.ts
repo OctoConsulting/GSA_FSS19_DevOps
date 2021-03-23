@@ -1,4 +1,6 @@
 import * as cdk from '@aws-cdk/core';
+import * as customResource from '@aws-cdk/custom-resources';
+import * as s3 from '@aws-cdk/aws-s3';
 import { ContractLambdasConstructParms } from '../models/contract/contract-lambdas-consruct-props';
 import { LambdaConstruct } from './shared/lambda-construct';
 import { LambdaConstructProps } from '../models/lambda-construct-props';
@@ -13,15 +15,49 @@ export class ContractLambdasConstruct extends cdk.Construct {
     private contractLambdaFunctions: ContractLambdaFunctions = {};
     vpc: ec2.IVpc;
     securityGroup: ec2.ISecurityGroup;
+    private artifactVersion: string;
 
     constructor(parent: cdk.Construct, id: string, props: ContractLambdasConstructParms) {
         super(parent, id);
         this.props = props;
         this.buildPreRequisites();
-
+        this.getArtifactVersion();
         this.createGetContractsLambda();
         this.createGetContractDetailsByContractIdLambda();
         this.createGetContractDetailsByEntityIdLambda();
+    }
+
+    getArtifactVersion() {
+        const s3VersionResource = new customResource.AwsCustomResource(this, `s3VersionResource`, {
+            onCreate: {
+                service: 'S3',
+                action: 'listObjectVersions',
+                parameters: {
+                    Bucket: this.props.artifactBucket,
+                    Prefix: this.props.artifactKey,
+                    MaxKeys: 1,
+                },
+                physicalResourceId: customResource.PhysicalResourceId.of('S3ArtifactVersion'),
+            },
+            onUpdate: {
+                service: 'S3',
+                action: 'listObjectVersions',
+                parameters: {
+                    Bucket: this.props.artifactBucket,
+                    Prefix: this.props.artifactKey,
+                    MaxKeys: 1,
+                    TIMESTAMP: Date.now(),
+                },
+                physicalResourceId: customResource.PhysicalResourceId.of('S3ArtifactVersion'),
+            },
+            policy: customResource.AwsCustomResourcePolicy.fromSdkCalls({
+                resources: customResource.AwsCustomResourcePolicy.ANY_RESOURCE,
+            }),
+        });
+        const artifactBucket = s3.Bucket.fromBucketName(this, 'artifact-bucket', this.props.artifactBucket);
+        artifactBucket.grantRead(s3VersionResource);
+        this.artifactVersion = s3VersionResource.getResponseField('Versions.0.VersionId');
+        // this.artifactVersion = 'CFtOCmb6cO693OOYt6FsQn.7W_.fsvzK';
     }
 
     private buildPreRequisites() {
@@ -42,6 +78,7 @@ export class ContractLambdasConstruct extends cdk.Construct {
             securityGroup: this.securityGroup,
             artifactBucket: this.props.artifactBucket,
             artifactKey: this.props.artifactKey,
+            artifactVersion: this.artifactVersion,
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
                 TABLE_NAME: this.props.contractTable.tableName,
@@ -65,6 +102,7 @@ export class ContractLambdasConstruct extends cdk.Construct {
             securityGroup: this.securityGroup,
             artifactBucket: this.props.artifactBucket,
             artifactKey: this.props.artifactKey,
+            artifactVersion: this.artifactVersion,
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
                 TABLE_NAME: this.props.contractTable.tableName,
@@ -88,6 +126,7 @@ export class ContractLambdasConstruct extends cdk.Construct {
             securityGroup: this.securityGroup,
             artifactBucket: this.props.artifactBucket,
             artifactKey: this.props.artifactKey,
+            artifactVersion: this.artifactVersion,
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
                 TABLE_NAME: this.props.contractTable.tableName,
