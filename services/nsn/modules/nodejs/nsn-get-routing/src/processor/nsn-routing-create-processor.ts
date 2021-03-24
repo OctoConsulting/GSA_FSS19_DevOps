@@ -72,6 +72,7 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         type: routing_id.length == 2 ? 'group' : routing_id.length == 4 ? 'class' : 'nsn',
         created_by: created_by.toUpperCase(),
         create_date: new Date().getTime().toString(),
+        update_date:new Date().getTime().toString(),
     };
     console.log('7');
     try {

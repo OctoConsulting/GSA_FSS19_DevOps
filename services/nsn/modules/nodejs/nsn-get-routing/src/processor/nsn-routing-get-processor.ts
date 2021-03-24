@@ -22,44 +22,107 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     if (isNaN(groupId)) {
         return apiResponses._400({ message: 'First 2 characters are group id and needs to be numeric' });
     }
-    let isGroupSearch: boolean = routingId.length == 2 ? true : false;
     // If the search is for class, then group information also need to be fetched.
     let searchStr = String(groupId);
-    let classStr = routingId.length < 4 ? null : routingId.substring(0, 4);
 
     let nsnData;
+    debugger;
+
     try {
-        const params = {
-            TableName: getSettings().TABLE_NAME,
-            KeyConditionExpression: 'group_id = :group_id and begins_with(routing_id, :routing_id)',
-            //This condition may be needed if class information needs to be fetched for a routing id search with string length > 4
-            //KeyConditionExpression: 'group_id = :group_id and (begins_with(routing_id, :routing_id) or equals(routing_id, :classStr))',
-            ExpressionAttributeValues: {
-                ':group_id': groupId,
-                ':routing_id': searchStr,
-                //This condition may be needed if class information needs to be fetched for a routing id search with string length > 4
-                //':routing_id': classStr,
-            },
-        };
+        if (routingId.length == 2) {
+            const groupParams = {
+                TableName: getSettings().TABLE_NAME,
+                KeyConditionExpression: 'group_id = :group_id and  routing_id = :routing_id ',
+                ExpressionAttributeValues: {
+                    ':group_id': groupId,
+                    ':routing_id': searchStr,
+                },
+            };
 
-        nsnData = await getDocumentDbClient().query(params).promise();
-        console.log('Found items - ' + nsnData.Items);
-        if (!nsnData.Items || nsnData.Items.length === 0) {
-            return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
+            nsnData = await getDocumentDbClient().query(groupParams).promise();
+
+            const groupArr = classifyNsnData(nsnData.Items, (item: NsnData) => item.type, 'group');
+
+            if (!groupArr || groupArr.length == 0) {
+                return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
+            }
+
+            let routinIdMinVal = routingId + '00';
+            let routingIdMax = routingId + '99';
+            const params = {
+                TableName: getSettings().TABLE_NAME,
+                KeyConditionExpression:
+                    'group_id = :group_id and routing_id between :routing_id_min and :routing_id_max',
+                ExpressionAttributeValues: {
+                    ':group_id': groupId,
+                    ':routing_id_min': routinIdMinVal,
+                    ':routing_id_max': routingIdMax,
+                },
+            };
+
+            nsnData = await getDocumentDbClient().query(params).promise();
+
+            const classArr = classifyNsnData(nsnData.Items, (item: NsnData) => item.type, 'class');
+
+            let nsnResponse = {
+                group: groupArr[0],
+                class: classArr && classArr.length > 0 ? classArr : null,
+            };
+            return apiResponses._200(nsnResponse);
+        } else {
+            // Fetch nsn data
+            const nsnParams = {
+                TableName: getSettings().TABLE_NAME,
+                KeyConditionExpression: 'group_id = :group_id and  begins_with(routing_id, :routing_id) ',
+                ExpressionAttributeValues: {
+                    ':group_id': groupId,
+                    ':routing_id': routingId,
+                },
+            };
+            nsnData = await getDocumentDbClient().query(nsnParams).promise();
+
+            let nsnArr = classifyNsnData(nsnData.Items, (item: NsnData) => item.type, 'nsn');
+
+            // Fetch class data
+            let classStr = routingId.substring(0, 4);
+            const classParams = {
+                TableName: getSettings().TABLE_NAME,
+                KeyConditionExpression: 'group_id = :group_id and  routing_id = :routing_id ',
+                ExpressionAttributeValues: {
+                    ':group_id': groupId,
+                    ':routing_id': classStr,
+                },
+            };
+            let classNsnData = await getDocumentDbClient().query(classParams).promise();
+            const classArr = classifyNsnData(classNsnData.Items, (item: NsnData) => item.type, 'class');
+
+            if (
+                (routingId.length > 4 && (!nsnArr || nsnArr.length == 0)) ||
+                (routingId.length == 4 && (!classArr || classArr.length == 0))
+            ) {
+                return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
+            }
+
+            // Fetch group data
+            const groupParams = {
+                TableName: getSettings().TABLE_NAME,
+                KeyConditionExpression: 'group_id = :group_id and  routing_id = :routing_id ',
+                ExpressionAttributeValues: {
+                    ':group_id': groupId,
+                    ':routing_id': searchStr,
+                },
+            };
+
+            let groupNsnData = await getDocumentDbClient().query(groupParams).promise();
+            const groupArr = classifyNsnData(groupNsnData.Items, (item: NsnData) => item.type, 'group');
+
+            let nsnResponse = {
+                group: groupArr && groupArr.length > 0 ? groupArr[0] : null,
+                class: classArr && classArr.length > 0 ? classArr : null,
+                nsn: nsnArr && nsnArr.length > 0 ? nsnArr : null,
+            };
+            return apiResponses._200(nsnResponse);
         }
-
-        var nsnResponseMap = groupBy(nsnData.Items, (item: NsnData) => item.type, routingId);
-
-        if (
-            (routingId.length > 4 && !nsnResponseMap.get('nsn')) ||
-            (routingId.length == 4 && !nsnResponseMap.get('class'))
-        ) {
-            return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
-        }
-
-        console.log('nsnResponseMap - ' + JSON.stringify(Array.from(nsnResponseMap.entries())));
-
-        return apiResponses._200(Array.from(nsnResponseMap.entries()));
     } catch (err) {
         console.log('Error >>>>>> ' + err);
         return apiResponses._500({ message: 'Error fetching record for NSN id - ' + routingId });
@@ -78,32 +141,18 @@ const getDocumentDbClient = (): DynamoDB.DocumentClient => {
     return new DynamoDB.DocumentClient(options);
 };
 
-function groupBy(list: any, keyGetter: any, searchStr: string) {
-    const map = new Map();
+function classifyNsnData(list: any, keyGetter: any, searchStr: string): NsnData[] {
+    let classifiedData: NsnData[] = [];
+
     list.forEach((item: any) => {
         let itemRoutingId = item.routing_id;
-        if (
-            itemRoutingId.length == 2 || // Group info.
-            (searchStr.length >= 4 && itemRoutingId === searchStr.substring(0, 4)) || // Matching class info, if search is for class or nsn.
-            item.routing_id.startsWith(searchStr) // All matching nsn records for the search string.
-        ) {
-            const key = keyGetter(item);
-            const collection = map.get(key);
-            delete item.group_id;
-            if (!collection) {
-                map.set(key, [item]);
-            } else {
-                collection.push(item);
-            }
+        const key = keyGetter(item);
+        if (key === searchStr) {
+            classifiedData.push(item);
         }
     });
-    if (searchStr.length == 2) {
-        map.delete('nsn');
-    }
-    if (searchStr.length > 4 && !map.has('nsn')) {
-        map.clear();
-    }
-    return map;
+    console.log('Got classified data for search string: ' + searchStr + ' - ' + classifiedData);
+    return classifiedData;
 }
 
 module.exports = {
