@@ -1124,7 +1124,7 @@ public class ContractServiceImpl implements ContractService {
 				String jsNote = ContractConstants.CF_LIT_1 + String.format("%.2f", dvalMinOrder)
 						+ ContractConstants.CF_LIT_2 + String.format("%.2f", bpaServiceCharge)
 						+ ContractConstants.CF_LIT_3;
-				StringBuffer contractNotesDetails = new StringBuffer(contractDetail.getContractNotesList());
+				StringBuffer contractNotesDetails = new StringBuffer(contractDetail.getContractNotesDetails());
 				contractNotesDetails.append(jsNote);
 				if (contractNotesDetails.toString().trim().length() > 0) {
 					contractDetail.setContractNotesDetails(contractNotesDetails.toString());
