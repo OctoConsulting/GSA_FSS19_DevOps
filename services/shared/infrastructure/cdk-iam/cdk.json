@@ -41,6 +41,12 @@
                     ]
                 },
                 {
+                    "groupName": "FSS-DataOps-Eng",
+                    "roleName": "FSS-DataOps-Eng",
+                    "users": [],
+                    "permissions": ["iam-mfa"]
+                },
+                {
                     "groupName": "FSS-BusinessAnalysts",
                     "roleName": "FSS-BusinessAnalysts",
                     "users": [],
