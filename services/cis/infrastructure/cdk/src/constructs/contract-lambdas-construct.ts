@@ -27,7 +27,7 @@ export class ContractLambdasConstruct extends cdk.Construct {
         this.createGetContractDetailsByEntityIdLambda();
     }
 
-    getArtifactVersion() {
+    private getArtifactVersion() {
         const s3VersionResource = new customResource.AwsCustomResource(this, `s3VersionResource`, {
             onUpdate: {
                 service: 'S3',

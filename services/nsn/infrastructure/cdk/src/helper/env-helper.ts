@@ -8,6 +8,7 @@ export class EnvHelper {
             vpc: stackContext.vpc,
             domainSuffix: stackContext.domainSuffix,
             certArn: stackContext.certArn,
+            artifactsBucket: stackContext.artifactsBucket,
             enableEncryptionAtRest: stackContext.enableEncryptionAtRest,
             logRetentionInDays: stackContext.logRetentionInDays,
             apiKeySecruity: stackContext.apiKeySecruity,

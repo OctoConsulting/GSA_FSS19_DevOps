@@ -5,6 +5,7 @@ import { EnvParameters } from './models/env-parms';
 import { DynamoConstruct } from './constructs/dynamo-construct';
 import { ApiGatewayConstruct } from './constructs/api-gateway-construct';
 import { NsnLambdasConstruct } from './constructs/nsn-lambdas-construct';
+import { constants } from './models/constants';
 export class NsnApiStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
@@ -24,6 +25,8 @@ export class NsnApiStack extends cdk.Stack {
             shortEnv: envParameters.shortEnv,
             vpc: envParameters.vpc,
             xRayTracing: true,
+            artifactBucket: envParameters.artifactsBucket,
+            artifactKey: constants.NSN_ROUTING_LAMBDA_ZIP_PATH,
             logRetentionInDays: 30,
         });
 
