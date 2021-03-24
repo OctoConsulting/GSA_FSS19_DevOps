@@ -30,10 +30,13 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     if (routing_id.length > 15) {
         return apiResponses._400({ message: 'Routing id can not be more than 15 characters.' });
     }
-    let owaRegex = /^[A-X,Z,0-9]$/;
-    if (!owa || !owaRegex.test(owa)) {
+    routing_id = routing_id.toUpperCase();
+    //  let owaRegex = /^[A-X,Z,0-9]$/;
+    const owaAllowedVal = ['F', 'M', 'N' , 'P'];
+  //  if (!owa || !owaRegex.test(owa)) {
+    if (!owaAllowedVal.includes(owa.toUpperCase())) {
         return apiResponses._400({
-            message: 'Invalid owa value. Allowed values are  A through W, X, Z and 0 through 9.',
+            message: 'Invalid Commodity Center value. Allowed values are F, P, M, N.',
         });
     }
     // Setting valid values for Civ and Mil Manager
@@ -51,12 +54,12 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         TableName: getSettings().TABLE_NAME,
         Key: {
             group_id: group_id,
-            routing_id: routing_id,
+            routing_id: routing_id.toUpperCase(),
         },
     };
-    console.log('4 - params - ' + params);
+    console.log('4 - params - ' + JSON.stringify(params, null, 2));
     let existingNsnData = await getDocumentDbClient().get(params).promise();
-    console.log('5 existingNsnData - ' + existingNsnData);
+    console.log('5 existingNsnData - ' + JSON.stringify(existingNsnData, null,2));
     if (existingNsnData.Item != null) {
         return apiResponses._422({ message: 'NSN routing record already exists for the routing id - ' + routing_id });
     }
@@ -68,10 +71,11 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         owa: owa.toUpperCase(),
         is_civ_mgr,
         is_mil_mgr,
-        ric: ric.toUpperCase(),
+        ric: !ric?ric:ric.toUpperCase(),
         type: routing_id.length == 2 ? 'group' : routing_id.length == 4 ? 'class' : 'nsn',
         created_by: created_by.toUpperCase(),
         create_date: new Date().getTime().toString(),
+        update_date: new Date().getTime().toString(),
     };
     console.log('7');
     try {

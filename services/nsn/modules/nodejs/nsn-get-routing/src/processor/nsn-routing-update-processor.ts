@@ -40,12 +40,14 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         return apiResponses._422({ message: 'NSN routing record not found for - ' + routing_id });
     }
 
-    let owaRegex = /^[A-X,Z,0-9]$/;
-    if (!owa || !owaRegex.test(owa)) {
-        return apiResponses._400({
-            message: 'Invalid owa value. Allowed values are  A through W, X, Z and 0 through 9.',
-        });
-    }
+   //  let owaRegex = /^[A-X,Z,0-9]$/;
+   const owaAllowedVal = ['F', 'M', 'N' , 'P'];
+   //  if (!owa || !owaRegex.test(owa)) {
+     if (!owaAllowedVal.includes(owa.toUpperCase())) {
+         return apiResponses._400({
+            message: 'Invalid Commodity Center value. Allowed values are F, P, M, N.',
+         });
+     }
     // Setting valid values for Civ and Mil Manager
     is_civ_mgr = is_civ_mgr.toUpperCase() == 'Y' ? is_civ_mgr.toUpperCase() : 'N';
     is_mil_mgr = is_mil_mgr.toUpperCase() == 'Y' ? is_mil_mgr.toUpperCase() : 'N';
@@ -68,10 +70,10 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         owa: owa.toUpperCase(),
         is_civ_mgr,
         is_mil_mgr,
-        ric: ric.toUpperCase(),
+        ric: !ric?ric:ric.toUpperCase(),
         type: updateNsnData.Item.type,
-        create_date: updateNsnData.Item.createDate,
-        created_by: updateNsnData.Item.createdBy,
+        create_date: existingNsnData.Item.createDate,
+        created_by: existingNsnData.Item.createdBy,
         update_date: new Date().getTime().toString()
     };
 
