@@ -46,14 +46,22 @@ export class LambdaConstruct extends cdk.Construct {
             environment: props.lambdaEnvParameters ? props.lambdaEnvParameters : {},
         });
 
+        const lambdaVersion = new lambda.Version(this, `${props.functionName}-version`, {
+            lambda: this.lambdaFunction,
+            description: `${props.functionName}-${this.props.artifactVersion}`,
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+        });
+
         this.alias = new lambda.Alias(this, 'alias', {
             aliasName: constants.LIVE_ALIAS_NAME,
-            version: this.lambdaFunction.currentVersion,
+            version: lambdaVersion,
         });
-        this.alias.addAutoScaling({
-            minCapacity: this.props.minCapacity,
-            maxCapacity: constants.MAX_PROVISIONED_CAPACITY_FOR_LAMBDA,
-        });
+        if (this.props.minCapacity) {
+            this.alias.addAutoScaling({
+                minCapacity: this.props.minCapacity,
+                maxCapacity: constants.MAX_PROVISIONED_CAPACITY_FOR_LAMBDA,
+            });
+        }
 
         lambdaLogGroup.grantWrite(this.lambdaFunction);
 
