@@ -26,36 +26,57 @@
                 "206.137.126.0/24"
             ],
             "addonRoutesVgw": "vgw-088b7aba402f16f23",
-            "subnetConfiguration": [
+            "extendedSubnetConfiguration": [
                 {
-                    "name": "PrivateCICD",
-                    "subnetType": "PRIVATE",
-                    "cidrMask": 24
+                    "subnetConfiguration": {
+                        "name": "PrivateCICD",
+                        "subnetType": "PRIVATE",
+                        "cidrMask": 24
+                    }
                 },
                 {
-                    "name": "PrivateDev",
-                    "subnetType": "PRIVATE",
-                    "cidrMask": 24
+                    "subnetConfiguration": {
+                        "name": "PrivateDev",
+                        "subnetType": "PRIVATE",
+                        "cidrMask": 24
+                    }
                 },
                 {
-                    "name": "Isolated",
-                    "subnetType": "ISOLATED",
-                    "cidrMask": 28
+                    "subnetConfiguration": {
+                        "name": "Isolated",
+                        "subnetType": "ISOLATED",
+                        "cidrMask": 28
+                    }
                 },
                 {
-                    "name": "Public",
-                    "subnetType": "PUBLIC",
-                    "cidrMask": 28
+                    "subnetConfiguration": {
+                        "name": "Public",
+                        "subnetType": "PUBLIC",
+                        "cidrMask": 28
+                    }
                 },
                 {
-                    "name": "IsolatedDMS",
-                    "subnetType": "ISOLATED",
-                    "cidrMask": 28 
+                    "subnetConfiguration": {
+                        "name": "IsolatedDMS",
+                        "subnetType": "ISOLATED",
+                        "cidrMask": 28
+                    },
+                    "availabilityZonesCount": 3
                 },
                 {
-                    "name": "Reserved",
-                    "subnetType": "ISOLATED",
-                    "reserved": true
+                    "subnetConfiguration": {
+                        "name": "IsolatedDataPlane",
+                        "subnetType": "ISOLATED",
+                        "cidrMask": 28
+                    },
+                    "availabilityZonesCount": 3
+                },
+                {
+                    "subnetConfiguration": {
+                        "name": "Reserved",
+                        "subnetType": "ISOLATED",
+                        "reserved": true
+                    }
                 }
             ],
             "domainName": "fss19-dev.fcs.gsa.gov",
