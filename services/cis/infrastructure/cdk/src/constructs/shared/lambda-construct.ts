@@ -1,7 +1,6 @@
 import * as cdk from '@aws-cdk/core';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as awsLogs from '@aws-cdk/aws-logs';
-import * as ec2 from '@aws-cdk/aws-ec2';
 import * as s3 from '@aws-cdk/aws-s3';
 import { LambdaConstructProps } from '../../models/lambda-construct-props';
 import { constants } from '../../models/constants';
@@ -36,7 +35,7 @@ export class LambdaConstruct extends cdk.Construct {
             vpc: this.props.vpc,
             securityGroups: [this.props.securityGroup],
             vpcSubnets: {
-                subnetType: ec2.SubnetType.ISOLATED,
+                subnetGroupName: constants.LAMBDA_SUBNET_GROUP_NAME,
             },
             tracing: this.props.xRayTracing ? lambda.Tracing.ACTIVE : lambda.Tracing.DISABLED,
             code: props.assetLocation
