@@ -46,7 +46,7 @@ export class LambdaConstruct extends cdk.Construct {
             environment: props.lambdaEnvParameters ? props.lambdaEnvParameters : {},
         });
 
-        const lambdaVersion = new lambda.Version(this, `${props.functionName}-version`, {
+        const lambdaVersion = new lambda.Version(this, `${props.functionName}-version-${Date.now().toString()}`, {
             lambda: this.lambdaFunction,
             description: `${props.functionName}-${this.props.artifactVersion}`,
             removalPolicy: cdk.RemovalPolicy.DESTROY,
