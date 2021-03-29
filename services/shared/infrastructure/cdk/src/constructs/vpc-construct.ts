@@ -1,6 +1,6 @@
 import * as cdk from '@aws-cdk/core';
 import * as ec2 from '@aws-cdk/aws-ec2';
-import { VpcConstructParms } from '../models/vpc-construct-parms';
+import { VpcConstructParms, ExtendedSubnetConfiguration } from '../models/vpc-construct-parms';
 import { NetworkBuilder } from '../lib/network-util';
 
 export class VpcConstruct extends cdk.Construct {
@@ -9,7 +9,7 @@ export class VpcConstruct extends cdk.Construct {
     private isolatedSubnets: ec2.Subnet[];
     private props: VpcConstructParms;
     private networkBuilder: NetworkBuilder;
-    private subnetConfiguration: ec2.SubnetConfiguration[];
+    private extendedSubnetConfiguration: ExtendedSubnetConfiguration[];
     private ngws: ec2.CfnNatGateway[];
     private igw: ec2.CfnInternetGateway;
     private att: ec2.CfnVPCGatewayAttachment;
@@ -17,21 +17,24 @@ export class VpcConstruct extends cdk.Construct {
     constructor(parent: cdk.Construct, id: string, props: VpcConstructParms) {
         super(parent, id);
         this.props = props;
-        this.subnetConfiguration = [];
+        this.extendedSubnetConfiguration = [];
         /**
          * Public, Private and Isolated Subnets
          */
+        this.maxAzs = this.props.stackContext.maxAzs ?? 3;
         const vpcRange = this.props.vpc.vpcCidrBlock;
         this.networkBuilder = new NetworkBuilder(vpcRange);
-        for (const config of this.props.stackContext.subnetConfiguration) {
-            this.subnetConfiguration.push({
-                name: config.name,
-                subnetType: getSubnetType(config.subnetType)!,
-                cidrMask: config.cidrMask,
-                reserved: (config.reserved === true)
+        for (const config of this.props.stackContext.extendedSubnetConfiguration) {
+            this.extendedSubnetConfiguration.push({
+                subnetConfiguration: {
+                    name: config.subnetConfiguration.name,
+                    subnetType: (<any>ec2.SubnetType)[config.subnetConfiguration.subnetType],
+                    cidrMask: config.subnetConfiguration.cidrMask,
+                    reserved: (config.subnetConfiguration.reserved === true)
+                },
+                availibilityZonesCount: config.availabilityZonesCount ?? this.maxAzs
             });
         }
-        this.maxAzs = this.props.stackContext.maxAzs ?? 3;
         this.addInternetGateway(); 
         this.ngws = [];
         this.privateSubnets = [];
@@ -49,24 +52,26 @@ export class VpcConstruct extends cdk.Construct {
             vpcId: this.props.envParameters.vpcId
         });
     }
-    addSubnets() {
-        this.props.availabilityZones = this.props.availabilityZones.slice(0, this.maxAzs);
+    private addSubnets() {
+        const defaultAvailabilityZones = this.props.availabilityZones.slice(0, this.maxAzs);
         const remainingSpaceSubnets: ec2.SubnetConfiguration[] = [];
-        for (const subnet of this.subnetConfiguration) {
+        for (const extendedSubnet of this.extendedSubnetConfiguration) {
+            const subnet = extendedSubnet.subnetConfiguration;
             if (subnet.cidrMask === undefined) {
               remainingSpaceSubnets.push(subnet);
               continue;
             }
-            this.createSubnetResources(subnet, subnet.cidrMask);
+            this.createSubnetResources(subnet, subnet.cidrMask, extendedSubnet.availibilityZonesCount);
         }
-        const totalRemaining = remainingSpaceSubnets.length * this.props.availabilityZones.length;
+        const totalRemaining = remainingSpaceSubnets.length * defaultAvailabilityZones.length;
         const cidrMaskForRemaining = this.networkBuilder.maskForRemainingSubnets(totalRemaining);
         for (const subnet of remainingSpaceSubnets) {
             this.createSubnetResources(subnet, cidrMaskForRemaining);
         }
     }
-    private createSubnetResources(subnetConfig: ec2.SubnetConfiguration, cidrMask: number) {
-        this.props.availabilityZones.forEach((zone, index) => {
+    private createSubnetResources(subnetConfig: ec2.SubnetConfiguration, cidrMask: number, subnetAvailabilityZoneCount = this.maxAzs) {
+        const subnetGroupAvailabilityZones = this.props.availabilityZones.slice(0, subnetAvailabilityZoneCount);
+        subnetGroupAvailabilityZones.forEach((zone, index) => {
             if (subnetConfig.reserved === true) {
                 // For reserved subnets, just allocate ip space but do not create any resources
                 this.networkBuilder.addSubnet(cidrMask);
@@ -162,15 +167,6 @@ function subnetTypeTagValue(type: ec2.SubnetType) {
     case ec2.SubnetType.PRIVATE: return 'Private';
     case ec2.SubnetType.ISOLATED: return 'Isolated';
   }
-}
-
-function getSubnetType(type: string) {
-    switch(type) {
-        case "PUBLIC": return ec2.SubnetType.PUBLIC;
-        case "PRIVATE": return ec2.SubnetType.PRIVATE;
-        case "ISOLATED": return ec2.SubnetType.ISOLATED;
-    }
-    return ec2.SubnetType.ISOLATED;
 }
 
 function subnetGroupNameFromConstructId(subnet: ec2.ISubnet) {

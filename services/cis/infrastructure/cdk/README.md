@@ -4,6 +4,7 @@ MacOs/Linux Shell:
 
 ```
 export SHORT_ENV='dev' AWS_ACCOUNT='902479997164' AWS_REGION='us-east-1'
+aws s3 cp ../../modules/java/contract-information-service/target/contract-information-service-0.0.1-SNAPSHOT.jar s3://artifacts-902479997164-us-east-1-dev/services/cis/contract-information-service/contract-information-service.jar --profile fss
 ```
 
 Windows PowerShell:
@@ -16,6 +17,8 @@ $env:SHORT_ENV='dev'
 
 ```
 cdk deploy contract-api
+aws s3 cp ../ s3://mybucket/test2.txt
+
 ```
 
 ## Useful commands

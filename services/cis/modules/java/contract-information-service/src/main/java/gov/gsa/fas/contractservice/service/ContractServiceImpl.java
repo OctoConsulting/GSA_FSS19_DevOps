@@ -431,7 +431,9 @@ public class ContractServiceImpl implements ContractService {
 				if (cffContractFinder != null) {
 					contractDetail.setPOPCode(cffContractFinder.getD407_pop_cd());
 					contractDetail.setMSDSCOde(cffContractFinder.getD407_msds_cd());
-					contractDetail.setFOBCode(cffContractFinder.getD407_fob_cd());
+					if(StringUtils.isNotBlank(cffContractFinder.getD407_fob_cd())) {
+						contractDetail.setFOBCode(cffContractFinder.getD407_fob_cd());
+					}
 					String byrCode = StringUtils.isNotBlank(inPOLines.getBuyerCode()) ? inPOLines.getBuyerCode()
 							: cffContractFinder.getD407_byr_cd();
 					contractDetail.setBuyerCode(byrCode);
