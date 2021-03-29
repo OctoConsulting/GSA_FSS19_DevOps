@@ -1,16 +1,19 @@
 'use strict';
-import { NsnData } from '../model/nsn-data';
+import { NsnData, nsnRoutingId } from '../model/nsn-data';
 import { DynamoDB } from 'aws-sdk';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { apiResponses, response } from '../model/responseAPI';
 import { getSettings } from '../config';
+import { int } from 'aws-sdk/clients/datapipeline';
 
 export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    if (!event.pathParameters) {
+    if (!event.body) {
         return apiResponses._400({ message: 'Routing id is needed to retrieve NSN data' });
     }
-    let routingId = event.pathParameters['routingId'];
 
+    let { routing_id, pageSize, last_routing_id } = JSON.parse(event.body);
+
+    let routingId = routing_id;
     console.log('routingId in GET - ' + routingId);
     if (!routingId || routingId.trim().length < 2 || routingId.trim().length == 3) {
         return apiResponses._400({
@@ -22,44 +25,141 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     if (isNaN(groupId)) {
         return apiResponses._400({ message: 'First 2 characters are group id and needs to be numeric' });
     }
-    let isGroupSearch: boolean = routingId.length == 2 ? true : false;
     // If the search is for class, then group information also need to be fetched.
     let searchStr = String(groupId);
-    let classStr = routingId.length < 4 ? null : routingId.substring(0, 4);
 
     let nsnData;
+
     try {
-        const params = {
-            TableName: getSettings().TABLE_NAME,
-            KeyConditionExpression: 'group_id = :group_id and begins_with(routing_id, :routing_id)',
-            //This condition may be needed if class information needs to be fetched for a routing id search with string length > 4
-            //KeyConditionExpression: 'group_id = :group_id and (begins_with(routing_id, :routing_id) or equals(routing_id, :classStr))',
-            ExpressionAttributeValues: {
-                ':group_id': groupId,
-                ':routing_id': searchStr,
-                //This condition may be needed if class information needs to be fetched for a routing id search with string length > 4
-                //':routing_id': classStr,
-            },
-        };
+        if (routingId.length == 2) {
+            let groupParams = {
+                TableName: getSettings().TABLE_NAME,
+                KeyConditionExpression: 'group_id = :group_id and  routing_id = :routing_id ',
+                ExpressionAttributeValues: {
+                    ':group_id': groupId,
+                    ':routing_id': searchStr,
+                },
+            };
 
-        nsnData = await getDocumentDbClient().query(params).promise();
-        console.log('Found items - ' + nsnData.Items);
-        if (!nsnData.Items || nsnData.Items.length === 0) {
-            return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
+            nsnData = await getDocumentDbClient().query(groupParams).promise();
+
+            const groupArr = classifyNsnData(nsnData.Items, (item: NsnData) => item.type, 'group');
+
+            if (!groupArr || groupArr.length == 0) {
+                return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
+            }
+
+            let routinIdMinVal = routingId + '00';
+            let routingIdMax = routingId + '99';
+            let classParams = {
+                TableName: getSettings().TABLE_NAME,
+                KeyConditionExpression:
+                    'group_id = :group_id and routing_id between :routing_id_min and :routing_id_max',
+                ExpressionAttributeValues: {
+                    ':group_id': groupId,
+                    ':routing_id_min': routinIdMinVal,
+                    ':routing_id_max': routingIdMax,
+                },
+                Limit: pageSize ? pageSize : 5,
+                ExclusiveStartKey: last_routing_id ? { routing_id: last_routing_id, group_id: groupId } : undefined,
+            };
+
+            let classNsnData = await getDocumentDbClient().query(classParams).promise();
+
+            // Generate the pagination information only once
+            // 1. when there is last evaluated key from the get query above and
+            // 2. call to this api is without the paramter of last_routing_id
+
+            let paginationInfo =
+                classNsnData.LastEvaluatedKey &&
+                classNsnData.LastEvaluatedKey.routing_id.length == 4 &&
+                !last_routing_id
+                    ? await generatePaginationInfo(classParams, 'class')
+                    : null;
+
+            const classArr = classifyNsnData(classNsnData.Items, (item: NsnData) => item.type, 'class');
+
+            let nsnResponse = {
+                group: groupArr[0],
+                class: classArr && classArr.length > 0 ? classArr : null,
+                paginationInfo: paginationInfo,
+                recordCount: paginationInfo && paginationInfo.itemCount ? paginationInfo.itemCount : 0,
+                last_routing_id:
+                    classNsnData.LastEvaluatedKey && classNsnData.LastEvaluatedKey.routing_id.length == 4
+                        ? classNsnData.LastEvaluatedKey.routing_id
+                        : null,
+            };
+
+            return apiResponses._200(nsnResponse);
+        } else {
+            // Fetch nsn data
+            let nsnParams = {
+                TableName: getSettings().TABLE_NAME,
+                KeyConditionExpression: 'group_id = :group_id and begins_with(routing_id, :routing_id) ',
+                ExpressionAttributeValues: {
+                    ':group_id': groupId,
+                    ':routing_id': '#' + routing_id,
+                },
+
+                Limit: pageSize ? pageSize : 5,
+                ExclusiveStartKey: last_routing_id ? { routing_id: last_routing_id, group_id: groupId } : undefined,
+            };
+
+            nsnData = await getDocumentDbClient().query(nsnParams).promise();
+
+            // Generate the pagination information only once
+            // 1. when there is last evaluated key from the get query above and
+            // 2. call to this api is without the paramter of last_routing_id
+            let paginationInfo =
+                nsnData.LastEvaluatedKey && nsnData.LastEvaluatedKey.routing_id.length > 4 && !last_routing_id
+                    ? await generatePaginationInfo(nsnParams, 'nsn')
+                    : null;
+
+            let nsnArr = classifyNsnData(nsnData.Items, (item: NsnData) => item.type, 'nsn');
+
+            // Fetch class data
+            let classStr = routingId.substring(0, 4);
+            let classParams = {
+                TableName: getSettings().TABLE_NAME,
+                KeyConditionExpression: 'group_id = :group_id and  routing_id = :routing_id ',
+                ExpressionAttributeValues: {
+                    ':group_id': groupId,
+                    ':routing_id': classStr,
+                },
+            };
+            let classNsnData = await getDocumentDbClient().query(classParams).promise();
+            const classArr = classifyNsnData(classNsnData.Items, (item: NsnData) => item.type, 'class');
+
+            if (
+                (routingId.length > 4 && (!nsnArr || nsnArr.length == 0)) ||
+                (routingId.length == 4 && (!classArr || classArr.length == 0))
+            ) {
+                return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
+            }
+
+            // Fetch group data
+            let groupParams = {
+                TableName: getSettings().TABLE_NAME,
+                KeyConditionExpression: 'group_id = :group_id and  routing_id = :routing_id ',
+                ExpressionAttributeValues: {
+                    ':group_id': groupId,
+                    ':routing_id': searchStr,
+                },
+            };
+
+            let groupNsnData = await getDocumentDbClient().query(groupParams).promise();
+            const groupArr = classifyNsnData(groupNsnData.Items, (item: NsnData) => item.type, 'group');
+
+            let nsnResponse = {
+                group: groupArr && groupArr.length > 0 ? groupArr[0] : null,
+                class: classArr && classArr.length > 0 ? classArr : null,
+                nsn: nsnArr && nsnArr.length > 0 ? nsnArr : null,
+                paginationInfo: paginationInfo,
+                recordCount: paginationInfo && paginationInfo.itemCount ? paginationInfo.itemCount : 0,
+                last_routing_id: nsnData.LastEvaluatedKey ? nsnData.LastEvaluatedKey.routing_id : null,
+            };
+            return apiResponses._200(nsnResponse);
         }
-
-        var nsnResponseMap = groupBy(nsnData.Items, (item: NsnData) => item.type, routingId);
-
-        if (
-            (routingId.length > 4 && !nsnResponseMap.get('nsn')) ||
-            (routingId.length == 4 && !nsnResponseMap.get('class'))
-        ) {
-            return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
-        }
-
-        console.log('nsnResponseMap - ' + JSON.stringify(Array.from(nsnResponseMap.entries())));
-
-        return apiResponses._200(Array.from(nsnResponseMap.entries()));
     } catch (err) {
         console.log('Error >>>>>> ' + err);
         return apiResponses._500({ message: 'Error fetching record for NSN id - ' + routingId });
@@ -78,32 +178,66 @@ const getDocumentDbClient = (): DynamoDB.DocumentClient => {
     return new DynamoDB.DocumentClient(options);
 };
 
-function groupBy(list: any, keyGetter: any, searchStr: string) {
-    const map = new Map();
-    list.forEach((item: any) => {
-        let itemRoutingId = item.routing_id;
-        if (
-            itemRoutingId.length == 2 || // Group info.
-            (searchStr.length >= 4 && itemRoutingId === searchStr.substring(0, 4)) || // Matching class info, if search is for class or nsn.
-            item.routing_id.startsWith(searchStr) // All matching nsn records for the search string.
-        ) {
-            const key = keyGetter(item);
-            const collection = map.get(key);
-            delete item.group_id;
-            if (!collection) {
-                map.set(key, [item]);
-            } else {
-                collection.push(item);
+async function generatePaginationInfo(queryParams: any, searchType: string) {
+    let pageIndexInfo: Array<object> = [];
+    let itemCount: number = 0;
+
+    // Build the pagination ind=formation for the page
+    let cnt: int = 1;
+    let paginationParams = {
+        TableName: getSettings().TABLE_NAME,
+        KeyConditionExpression: queryParams.KeyConditionExpression,
+        ExpressionAttributeValues: queryParams.ExpressionAttributeValues,
+        Limit: queryParams.Limit,
+        ExclusiveStartKey: queryParams.ExclusiveStartKey,
+    };
+    let next: boolean = false;
+    do {
+        let tmpResultForPagination = await getDocumentDbClient().query(paginationParams).promise();
+        next = tmpResultForPagination.LastEvaluatedKey ? true : false;
+        itemCount += tmpResultForPagination.Items ? tmpResultForPagination.Items.length : 0;
+        console.log('tmpResultForPagination.LastEvaluatedKey - ' + tmpResultForPagination.LastEvaluatedKey);
+
+        if (tmpResultForPagination.LastEvaluatedKey) {
+            let routingId = tmpResultForPagination.LastEvaluatedKey.routing_id
+                ? tmpResultForPagination.LastEvaluatedKey.routing_id
+                : null;
+
+            console.log('routingId inside paginationInfo - ' + routingId);
+            if (searchType === 'class' && routingId && routingId.length > 4) {
+                break;
             }
+
+            pageIndexInfo.push({
+                page: ++cnt,
+                last_routing_id: routingId,
+            });
+
+            paginationParams.ExclusiveStartKey = {
+                routing_id: routingId,
+                group_id: Number(routingId.startsWith('#') ? routingId.substring(1, 3) : routingId.substring(0, 2)),
+            };
+        }
+    } while (next);
+    return { pageIndexInfo, itemCount };
+}
+
+function classifyNsnData(list: any, keyGetter: any, searchStr: string): NsnData[] {
+    let classifiedData: NsnData[] = [];
+
+    list.forEach((item: any) => {
+        const key = keyGetter(item);
+        if (key === searchStr) {
+            let itemRoutingId = item.routing_id;
+            item.routing_id =
+                itemRoutingId && itemRoutingId.startsWith('#')
+                    ? itemRoutingId.substring(1, itemRoutingId.length)
+                    : itemRoutingId;
+            classifiedData.push(item);
         }
     });
-    if (searchStr.length == 2) {
-        map.delete('nsn');
-    }
-    if (searchStr.length > 4 && !map.has('nsn')) {
-        map.clear();
-    }
-    return map;
+    console.log('Got classified data for search string: ' + searchStr + ' - ' + classifiedData);
+    return classifiedData;
 }
 
 module.exports = {

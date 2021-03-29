@@ -1,6 +1,6 @@
 'use strict';
 
-import { NsnData } from '../model/nsn-data';
+import { NsnData, nsnRoutingId } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { dynamoDocumentClient, getSettings } from '../config';
 import { apiResponses } from '../model/responseAPI';
@@ -24,7 +24,7 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     if (routing_id.length < 4 && routing_id.length != 2) {
         return apiResponses._400({ message: 'Invalid routing Id, please check routing Id restrictions.' });
     }
-    if (routing_id.length >4 && routing_id.length<13) {
+    if (routing_id.length > 4 && routing_id.length < 13) {
         return apiResponses._400({ message: 'Invalid routing Id, Please Enter valid Routing ID.' });
     }
     if (routing_id.length > 15) {
@@ -48,6 +48,8 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
 
     let group_id = Number(routing_id.substring(0, 2));
+    // prepend nsn routing id with # to identify the record for nsns routing.
+    routing_id = nsnRoutingId(routing_id);
 
     console.log('3 ' + routing_id);
     const params = {

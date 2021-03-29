@@ -1,6 +1,6 @@
 'use strict';
 
-import { NsnData } from '../model/nsn-data';
+import { NsnData, nsnRoutingId } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { getSettings } from '../config';
 import { apiResponses } from '../model/responseAPI';
@@ -26,6 +26,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     let group_id = Number(routing_id.substring(0, 2));
 
     console.log('Routing ID - ' + routing_id);
+    routing_id = nsnRoutingId(routing_id);
     var params = {
         TableName: getSettings().TABLE_NAME,
         Key: {
@@ -34,7 +35,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         },
     };
     let existingNsnData = await getDocumentDbClient().get(params).promise();
-    console.log("putNsn flow existingNsnData :: " + existingNsnData);
+    console.log('putNsn flow existingNsnData :: ' + existingNsnData);
 
     if (existingNsnData.Item == null) {
         return apiResponses._422({ message: 'NSN routing record not found for - ' + routing_id });
@@ -72,9 +73,9 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         is_mil_mgr,
         ric: !ric?ric:ric.toUpperCase(),
         type: updateNsnData.Item.type,
-        create_date: existingNsnData.Item.createDate,
-        created_by: existingNsnData.Item.createdBy,
-        update_date: new Date().getTime().toString()
+        create_date: updateNsnData.Item.createDate,
+        created_by: updateNsnData.Item.createdBy,
+        update_date: new Date().getTime().toString(),
     };
 
     try {

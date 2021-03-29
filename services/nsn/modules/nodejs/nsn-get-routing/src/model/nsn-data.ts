@@ -13,3 +13,7 @@ export interface NsnData {
     created_by?: string;
     create_date?: string;
 }
+
+export function nsnRoutingId(routingIdStr: string): string {
+    return routingIdStr && routingIdStr.length > 4 ? '#' + routingIdStr : routingIdStr;
+}
