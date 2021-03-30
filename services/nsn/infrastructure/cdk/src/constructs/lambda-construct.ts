@@ -21,7 +21,7 @@ export class LambdaConstruct extends cdk.Construct {
 
         this.lambdaFunction = new lambda.Function(this, props.functionName, {
             functionName: props.functionName,
-            description: `${props.functionName}`,
+            description: `${props.functionName}-${Date.now().toString()}`,
             memorySize: props.memorySize ? props.memorySize : 512,
             runtime:
                 props.type === LambdaConstructProps.LambdaTypeEnum.JAVA
