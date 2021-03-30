@@ -23,7 +23,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         return apiResponses._400({ message: 'Please check routing Id restrictions.' });
     }
 
-    if (!checkForExistingNsn(routing_id)) {
+    if (!(await checkForExistingNsn(routing_id))) {
         return apiResponses._422({ message: 'NSN routing record not found for - ' + routing_id });
     }
 
@@ -67,7 +67,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     }
 
     const nsnData: NsnData = {
-        group_id: group_id,
+        group_id: routing_id.length > 4 ? class_id : group_id,
         routing_id: routing_id.toUpperCase(),
         owa: owa.toUpperCase(),
         is_civ_mgr,

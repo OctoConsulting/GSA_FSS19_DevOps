@@ -51,7 +51,7 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     // check for the class keyed nsn information -- A group_id column can be groupId or classId value
     let classId = routing_id.length >= 4 ? Number(routing_id.substring(0, 4)) : 0;
 
-    if (checkForExistingNsn(routing_id)) {
+    if (await checkForExistingNsn(routing_id)) {
         return apiResponses._422({ message: 'NSN routing record already exists for the routing id - ' + routing_id });
     }
     console.log('6');

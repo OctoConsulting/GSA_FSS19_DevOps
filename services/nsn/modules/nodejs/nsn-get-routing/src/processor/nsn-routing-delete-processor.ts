@@ -16,7 +16,7 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
         return apiResponses._400({ message: 'Routing id is needed to delete NSN data' });
     }
 
-    if (!checkForExistingNsn(routingId)) {
+    if (!(await checkForExistingNsn(routingId))) {
         return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
     }
     let group_id = Number(routingId.substring(0, 2));
@@ -27,7 +27,7 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
             TableName: getSettings().TABLE_NAME,
             Key: {
                 group_id: routingId.length > 4 ? class_id : group_id,
-                routing_id: routingId,
+                routing_id: routingId.toUpperCase(),
             },
         };
 
