@@ -1,5 +1,5 @@
 'use strict';
-import { NsnData, nsnRoutingId } from '../model/nsn-data';
+import { NsnData } from '../model/nsn-data';
 import { DynamoDB } from 'aws-sdk';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { apiResponses, response } from '../model/responseAPI';
@@ -34,20 +34,18 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         if (routingId.length == 2) {
             let groupParams = {
                 TableName: getSettings().TABLE_NAME,
-                KeyConditionExpression: 'group_id = :group_id and  routing_id = :routing_id ',
+                KeyConditionExpression: 'group_id = :group_id',
                 ExpressionAttributeValues: {
                     ':group_id': groupId,
-                    ':routing_id': searchStr,
                 },
             };
 
             nsnData = await getDocumentDbClient().query(groupParams).promise();
-
-            const groupArr = classifyNsnData(nsnData.Items, (item: NsnData) => item.type, 'group');
-
-            if (!groupArr || groupArr.length == 0) {
+            if (!nsnData.Items) {
                 return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
             }
+
+            const groupArr = classifyNsnData(nsnData.Items, (item: NsnData) => item.type, 'group');
 
             let routinIdMinVal = routingId + '00';
             let routingIdMax = routingId + '99';
@@ -92,17 +90,18 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
 
             return apiResponses._200(nsnResponse);
         } else {
+            let classId = Number(routingId.substring(0, 4));
             // Fetch nsn data
             let nsnParams = {
                 TableName: getSettings().TABLE_NAME,
-                KeyConditionExpression: 'group_id = :group_id and begins_with(routing_id, :routing_id) ',
+                KeyConditionExpression: 'group_id = :class_id and begins_with(routing_id, :routing_id) ',
                 ExpressionAttributeValues: {
-                    ':group_id': groupId,
-                    ':routing_id': '#' + routing_id,
+                    ':class_id': classId,
+                    ':routing_id': routing_id,
                 },
 
                 Limit: pageSize ? pageSize : 5,
-                ExclusiveStartKey: last_routing_id ? { routing_id: last_routing_id, group_id: groupId } : undefined,
+                ExclusiveStartKey: last_routing_id ? { routing_id: last_routing_id, group_id: classId } : undefined,
             };
 
             nsnData = await getDocumentDbClient().query(nsnParams).promise();
@@ -204,9 +203,6 @@ async function generatePaginationInfo(queryParams: any, searchType: string) {
                 : null;
 
             console.log('routingId inside paginationInfo - ' + routingId);
-            if (searchType === 'class' && routingId && routingId.length > 4) {
-                break;
-            }
 
             pageIndexInfo.push({
                 page: ++cnt,
@@ -215,7 +211,7 @@ async function generatePaginationInfo(queryParams: any, searchType: string) {
 
             paginationParams.ExclusiveStartKey = {
                 routing_id: routingId,
-                group_id: Number(routingId.startsWith('#') ? routingId.substring(1, 3) : routingId.substring(0, 2)),
+                group_id: routingId.length > 4 ? Number(routingId.substring(0, 4)) : Number(routingId.substring(0, 2)),
             };
         }
     } while (next);

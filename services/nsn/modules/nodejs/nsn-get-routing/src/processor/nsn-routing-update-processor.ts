@@ -1,6 +1,6 @@
 'use strict';
 
-import { NsnData, nsnRoutingId } from '../model/nsn-data';
+import { NsnData, checkForExistingNsn } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { getSettings } from '../config';
 import { apiResponses } from '../model/responseAPI';
@@ -23,32 +23,33 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         return apiResponses._400({ message: 'Please check routing Id restrictions.' });
     }
 
+    if (!checkForExistingNsn(routing_id)) {
+        return apiResponses._422({ message: 'NSN routing record not found for - ' + routing_id });
+    }
+
     let group_id = Number(routing_id.substring(0, 2));
+    let class_id = routing_id.length >= 4 ? Number(routing_id.substring(0, 4)) : 0;
 
     console.log('Routing ID - ' + routing_id);
-    routing_id = nsnRoutingId(routing_id);
+
     var params = {
         TableName: getSettings().TABLE_NAME,
         Key: {
-            group_id: group_id,
+            group_id: routing_id.length > 4 ? class_id : group_id,
             routing_id: routing_id,
         },
     };
     let existingNsnData = await getDocumentDbClient().get(params).promise();
     console.log('putNsn flow existingNsnData :: ' + existingNsnData);
 
-    if (existingNsnData.Item == null) {
-        return apiResponses._422({ message: 'NSN routing record not found for - ' + routing_id });
-    }
-
-   //  let owaRegex = /^[A-X,Z,0-9]$/;
-   const owaAllowedVal = ['F', 'M', 'N' , 'P'];
-   //  if (!owa || !owaRegex.test(owa)) {
-     if (!owaAllowedVal.includes(owa.toUpperCase())) {
-         return apiResponses._400({
+    //  let owaRegex = /^[A-X,Z,0-9]$/;
+    const owaAllowedVal = ['F', 'M', 'N', 'P'];
+    //  if (!owa || !owaRegex.test(owa)) {
+    if (!owaAllowedVal.includes(owa.toUpperCase())) {
+        return apiResponses._400({
             message: 'Invalid Commodity Center value. Allowed values are F, P, M, N.',
-         });
-     }
+        });
+    }
     // Setting valid values for Civ and Mil Manager
     is_civ_mgr = is_civ_mgr.toUpperCase() == 'Y' ? is_civ_mgr.toUpperCase() : 'N';
     is_mil_mgr = is_mil_mgr.toUpperCase() == 'Y' ? is_mil_mgr.toUpperCase() : 'N';
@@ -71,7 +72,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         owa: owa.toUpperCase(),
         is_civ_mgr,
         is_mil_mgr,
-        ric: !ric?ric:ric.toUpperCase(),
+        ric: !ric ? ric : ric.toUpperCase(),
         type: updateNsnData.Item.type,
         create_date: updateNsnData.Item.createDate,
         created_by: updateNsnData.Item.createdBy,

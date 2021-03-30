@@ -4,6 +4,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda
 import { getSettings } from '../config';
 import { apiResponses } from '../model/responseAPI';
 import { DynamoDB } from 'aws-sdk';
+import { checkForExistingNsn } from '../model/nsn-data';
 
 export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     console.log('Getting the NSN data - ' + event.pathParameters);
@@ -15,11 +16,17 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
         return apiResponses._400({ message: 'Routing id is needed to delete NSN data' });
     }
 
+    if (!checkForExistingNsn(routingId)) {
+        return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
+    }
+    let group_id = Number(routingId.substring(0, 2));
+    let class_id = routingId.length >= 4 ? Number(routingId.substring(0, 4)) : 0;
+
     try {
         var params = {
             TableName: getSettings().TABLE_NAME,
             Key: {
-                group_id: parseInt(routingId.substring(0, 2), 10),
+                group_id: routingId.length > 4 ? class_id : group_id,
                 routing_id: routingId,
             },
         };
@@ -28,9 +35,6 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
         const nsnData = await getDocumentDbClient().get(params).promise();
         console.log('Data fetched from DB - ' + nsnData.Item);
 
-        if (nsnData.Item == null) {
-            return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
-        }
         console.log('About to delete NSN record for routing id - ' + routingId);
         await getDocumentDbClient().delete(params).promise();
         console.log('NSN record for routing id - ' + routingId);

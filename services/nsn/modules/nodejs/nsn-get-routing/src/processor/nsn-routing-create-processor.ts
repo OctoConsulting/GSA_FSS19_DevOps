@@ -1,6 +1,6 @@
 'use strict';
 
-import { NsnData, nsnRoutingId } from '../model/nsn-data';
+import { NsnData, checkForExistingNsn } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { dynamoDocumentClient, getSettings } from '../config';
 import { apiResponses } from '../model/responseAPI';
@@ -32,8 +32,8 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
     routing_id = routing_id.toUpperCase();
     //  let owaRegex = /^[A-X,Z,0-9]$/;
-    const owaAllowedVal = ['F', 'M', 'N' , 'P'];
-  //  if (!owa || !owaRegex.test(owa)) {
+    const owaAllowedVal = ['F', 'M', 'N', 'P'];
+    //  if (!owa || !owaRegex.test(owa)) {
     if (!owaAllowedVal.includes(owa.toUpperCase())) {
         return apiResponses._400({
             message: 'Invalid Commodity Center value. Allowed values are F, P, M, N.',
@@ -48,32 +48,21 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
 
     let group_id = Number(routing_id.substring(0, 2));
-    // prepend nsn routing id with # to identify the record for nsns routing.
-    routing_id = nsnRoutingId(routing_id);
+    // check for the class keyed nsn information -- A group_id column can be groupId or classId value
+    let classId = routing_id.length >= 4 ? Number(routing_id.substring(0, 4)) : 0;
 
-    console.log('3 ' + routing_id);
-    const params = {
-        TableName: getSettings().TABLE_NAME,
-        Key: {
-            group_id: group_id,
-            routing_id: routing_id.toUpperCase(),
-        },
-    };
-    console.log('4 - params - ' + JSON.stringify(params, null, 2));
-    let existingNsnData = await getDocumentDbClient().get(params).promise();
-    console.log('5 existingNsnData - ' + JSON.stringify(existingNsnData, null,2));
-    if (existingNsnData.Item != null) {
+    if (checkForExistingNsn(routing_id)) {
         return apiResponses._422({ message: 'NSN routing record already exists for the routing id - ' + routing_id });
     }
     console.log('6');
 
     const nsnData: NsnData = {
-        group_id: group_id,
+        group_id: routing_id.length > 4 ? classId : group_id,
         routing_id: routing_id.toUpperCase(),
         owa: owa.toUpperCase(),
         is_civ_mgr,
         is_mil_mgr,
-        ric: !ric?ric:ric.toUpperCase(),
+        ric: !ric ? ric : ric.toUpperCase(),
         type: routing_id.length == 2 ? 'group' : routing_id.length == 4 ? 'class' : 'nsn',
         created_by: created_by.toUpperCase(),
         create_date: new Date().getTime().toString(),
