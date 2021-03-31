@@ -73,6 +73,13 @@
                 },
                 {
                     "subnetConfiguration": {
+                        "name": "IsolatedSFTPLambda",
+                        "subnetType": "ISOLATED",
+                        "cidrMask": 28
+                    }
+                },
+                {
+                    "subnetConfiguration": {
                         "name": "Reserved",
                         "subnetType": "ISOLATED",
                         "reserved": true
