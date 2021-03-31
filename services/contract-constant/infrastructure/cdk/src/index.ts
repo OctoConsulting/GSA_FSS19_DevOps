@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from '@aws-cdk/core';
-import { NsnApiStack } from './nsn-api-stack';
+import { ContractConstApiStack } from './contract-const-api-stack';
 
 const app = new cdk.App();
 
@@ -14,6 +14,9 @@ const env = { account: AWS_ACCOUNT, region: AWS_REGION };
 /**
  * NSN API Statck
  */
-const nsnApiStack = new NsnApiStack(app, 'nsn-api', { env, stackName: `nsn-api-${SHORT_ENV}` });
+const nsnApiStack = new ContractConstApiStack(app, 'contract-const-api', {
+    env,
+    stackName: `contract-const-api-${SHORT_ENV}`,
+});
 cdk.Tags.of(nsnApiStack).add('Env', SHORT_ENV.toUpperCase());
-cdk.Tags.of(nsnApiStack).add('ApplicationID', 'nsn-api');
+cdk.Tags.of(nsnApiStack).add('ApplicationID', 'contract-const-api');

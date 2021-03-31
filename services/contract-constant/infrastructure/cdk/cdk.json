@@ -8,7 +8,7 @@
         "@aws-cdk/aws-secretsmanager:parseOwnedSecretName": true,
         "@aws-cdk/aws-kms:defaultKeyPolicies": true,
         "@aws-cdk/aws-s3:grantWriteWithoutAcl": true,
-        "nsn-api-dev": {
+        "contract-const-api-dev": {
             "artifactsBucket": "artifacts-902479997164-us-east-1-dev",
             "vpc": "vpc-02130393994755be9",
             "logRetentionInDays": 7,
@@ -16,7 +16,7 @@
             "enableEncryptionAtRest": true,
             "xRayTracing": true
         },
-        "nsn-api-qa": {
+        "contract-const-api-qa": {
             "vpc": "vpc-02130393994755be9",
             "logRetentionInDays": 30,
             "apiKeySecruity": false,
