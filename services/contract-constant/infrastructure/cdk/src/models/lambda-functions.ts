@@ -1,8 +1,8 @@
 import * as lambda from '@aws-cdk/aws-lambda';
 
 export interface LambdaFunctions {
-    postRoutingLambda?: lambda.IFunction;
-    putRoutingLambda?: lambda.IFunction;
-    getRoutingLambda?: lambda.IFunction;
-    deleteRoutingLambda?: lambda.IFunction;
+    getContractNotesLambda?: lambda.IFunction;
+    getContractBuyerLambda?: lambda.IFunction;
+    getContractVendorAddressDetailsLambda?: lambda.IFunction;
+    getContractAcOfficeAddressDetailsLambda?: lambda.IFunction;
 }

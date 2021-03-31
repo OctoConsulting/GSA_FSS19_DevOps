@@ -4,7 +4,7 @@ import { CrossStackImporter } from './helper/CrossStackImporter';
 import { EnvParameters } from './models/env-parms';
 import { DynamoConstruct } from './constructs/dynamo-construct';
 import { ApiGatewayConstruct } from './constructs/api-gateway-construct';
-import { NsnLambdasConstruct } from './constructs/nsn-lambdas-construct';
+import { AllLambdasConstruct } from './constructs/all-lambdas-construct';
 import { constants } from './models/constants';
 export class ContractConstApiStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -21,15 +21,15 @@ export class ContractConstApiStack extends cdk.Stack {
         });
         const crossStackImporter = new CrossStackImporter(this, 'corss-stack-imports', envParameters);
 
-        // const lambdas = new NsnLambdasConstruct(this, 'lambdas', {
-        //     nsnTable: dynamoDbConstruct.getNsnTable(),
-        //     shortEnv: envParameters.shortEnv,
-        //     vpc: envParameters.vpc,
-        //     xRayTracing: true,
-        //     artifactBucket: envParameters.artifactsBucket,
-        //     artifactKey: constants.NSN_ROUTING_LAMBDA_ZIP_PATH,
-        //     logRetentionInDays: 30,
-        // });
+        const lambdas = new AllLambdasConstruct(this, 'lambdas', {
+            contractConstTable: dynamoDbConstruct.getNsnTable(),
+            shortEnv: envParameters.shortEnv,
+            vpc: envParameters.vpc,
+            xRayTracing: true,
+            artifactBucket: envParameters.artifactsBucket,
+            artifactKey: constants.LAMBDA_ZIP_PATH,
+            logRetentionInDays: 30,
+        });
 
         // new ApiGatewayConstruct(this, 'api', {
         //     envParameters: envParameters,

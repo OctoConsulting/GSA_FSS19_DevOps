@@ -4,27 +4,37 @@ import * as customResource from '@aws-cdk/custom-resources';
 import * as s3 from '@aws-cdk/aws-s3';
 import { LambdaConstructProps } from '../models/lambda-construct-props';
 import { LambdaFunctions } from '../models/lambda-functions';
-import { NsnLambdasConstructParms } from '../models/nsn-lambdas-consruct-props';
+import { AllLambdasConstructParms } from '../models/all-lambdas-consruct-props';
 import { LambdaConstruct } from './lambda-construct';
 import { constants } from '../models/constants';
 
-export class NsnLambdasConstruct extends cdk.Construct {
+export class AllLambdasConstruct extends cdk.Construct {
     private zipPathInsideModules = 'nodejs/nsn-get-routing/dist/nsn-get-routing/index.zip';
-    private props: NsnLambdasConstructParms;
+    private props: AllLambdasConstructParms;
     private lambdaFunctions: LambdaFunctions = {};
     private vpc: ec2.IVpc;
     private securityGroup: ec2.ISecurityGroup;
     private artifactVersion: string;
 
-    constructor(parent: cdk.Construct, id: string, props: NsnLambdasConstructParms) {
+    constructor(parent: cdk.Construct, id: string, props: AllLambdasConstructParms) {
         super(parent, id);
         this.props = props;
         this.buildPreRequisites();
         this.getArtifactVersion();
-        this.lambdaFunctions.postRoutingLambda = this.nsnLambda('post-nsn-routing-lambda', 'index.postNsn');
-        this.lambdaFunctions.getRoutingLambda = this.nsnLambda('get-nsn-routing-lambda', 'index.getNsn', false);
-        this.lambdaFunctions.putRoutingLambda = this.nsnLambda('put-nsn-routing-lambda', 'index.putNsn');
-        this.lambdaFunctions.deleteRoutingLambda = this.nsnLambda('delete-nsn-routing-lambda', 'index.deleteNsn');
+        this.buildAllLambdas();
+    }
+
+    private buildAllLambdas() {
+        this.lambdaFunctions.getContractAcOfficeAddressDetailsLambda = this.buildLambda(
+            'get-contract-acoofficeaddress-details',
+            'index.handler'
+        );
+        this.lambdaFunctions.getContractBuyerLambda = this.buildLambda('get-contract-buyer-details', 'index.handler');
+        this.lambdaFunctions.getContractNotesLambda = this.buildLambda('get-contract-notes-details', 'index.handler');
+        this.lambdaFunctions.getContractVendorAddressDetailsLambda = this.buildLambda(
+            'get-contract-vendoraddress-details',
+            'index.handler'
+        );
     }
 
     private buildPreRequisites() {
@@ -59,7 +69,7 @@ export class NsnLambdasConstruct extends cdk.Construct {
         this.artifactVersion = s3VersionResource.getResponseField('Versions.0.VersionId');
     }
 
-    private nsnLambda(name: string, handler: string, writeAccessToDynamo = true) {
+    private buildLambda(name: string, handler: string, writeAccessToDynamo = false) {
         const lambdaFun = new LambdaConstruct(this, `${name}`, {
             functionName: `${name}-${this.props.shortEnv}`,
             vpc: this.vpc,
@@ -67,7 +77,7 @@ export class NsnLambdasConstruct extends cdk.Construct {
             assetLocation: `../../modules/${this.zipPathInsideModules}`,
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
-                TABLE_NAME: this.props.nsnTable.tableName,
+                TABLE_NAME: this.props.contractConstTable.tableName,
             },
             handler: handler,
             type: LambdaConstructProps.LambdaTypeEnum.NODEJS,
@@ -77,8 +87,8 @@ export class NsnLambdasConstruct extends cdk.Construct {
         });
 
         writeAccessToDynamo
-            ? this.props.nsnTable.grantReadWriteData(lambdaFun.lambdaFunction)
-            : this.props.nsnTable.grantReadData(lambdaFun.lambdaFunction);
+            ? this.props.contractConstTable.grantReadWriteData(lambdaFun.lambdaFunction)
+            : this.props.contractConstTable.grantReadData(lambdaFun.lambdaFunction);
         return lambdaFun.alias;
     }
 

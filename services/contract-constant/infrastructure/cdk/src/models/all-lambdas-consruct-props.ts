@@ -1,10 +1,10 @@
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
-export interface NsnLambdasConstructParms {
+export interface AllLambdasConstructParms {
     shortEnv: string;
     vpc: string;
     artifactBucket: string;
     artifactKey: string;
     logRetentionInDays?: number;
-    nsnTable: dynamodb.Table;
+    contractConstTable: dynamodb.Table;
     xRayTracing: boolean;
 }
