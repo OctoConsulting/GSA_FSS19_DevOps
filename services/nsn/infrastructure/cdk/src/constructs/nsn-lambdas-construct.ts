@@ -64,7 +64,9 @@ export class NsnLambdasConstruct extends cdk.Construct {
             functionName: `${name}-${this.props.shortEnv}`,
             vpc: this.vpc,
             securityGroup: this.securityGroup,
-            assetLocation: `../../modules/${this.zipPathInsideModules}`,
+            artifactBucket: this.props.artifactBucket,
+            artifactKey: this.props.artifactKey,
+            artifactVersion: this.artifactVersion,
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
                 TABLE_NAME: this.props.nsnTable.tableName,
