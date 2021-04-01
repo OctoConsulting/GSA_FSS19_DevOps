@@ -20,47 +20,19 @@ export class ApiGatewayConstruct extends cdk.Construct {
         this.addRoute53Alias();
     }
     private addApiResourcesAndMethods() {
-        const baseResource = this.restApi.root.addResource('nsnrouting').addResource('v1').addResource('details');
-        this.addPostRoutingIntegration(baseResource);
-        this.addPutRoutingIntegration(baseResource);
-        this.addDeleteRoutingIntegration(baseResource);
-        this.addGetRoutingIntegration(baseResource);
+        const baseResource = this.restApi.root.addResource('contractconstantdata').addResource('v1');
+        this.addGetContractNotesLambdaIntegration(baseResource);
+        // this.addGetContractBuyerLambdaIntegration(baseResource);
+        // this.addGetContractVendorAddressDetailsLambdaIntegration(baseResource);
+        // this.addGetContractAcOfficeAddressDetailsLambdaIntegration(baseResource);
     }
 
-    private addPostRoutingIntegration(baseResource: apigw.Resource) {
-        baseResource.addMethod(
+    private addGetContractNotesLambdaIntegration(baseResource: apigw.Resource) {
+        const resource = baseResource.addResource('notes').addResource('details');
+
+        resource.addMethod(
             'POST',
-            new apigw.LambdaIntegration(this.props.lambdaFunctions.postRoutingLambda!, {
-                credentialsRole: this.apiRole,
-            })
-        );
-    }
-
-    private addPutRoutingIntegration(baseResource: apigw.Resource) {
-        baseResource.addMethod(
-            'PUT',
-            new apigw.LambdaIntegration(this.props.lambdaFunctions.putRoutingLambda!, {
-                credentialsRole: this.apiRole,
-            })
-        );
-    }
-
-    private addDeleteRoutingIntegration(baseResource: apigw.Resource) {
-        const routingResource = baseResource.addResource('{routingId}');
-        routingResource.addMethod(
-            'DELETE',
-            new apigw.LambdaIntegration(this.props.lambdaFunctions.deleteRoutingLambda!, {
-                credentialsRole: this.apiRole,
-            })
-        );
-    }
-
-    private addGetRoutingIntegration(baseResource: apigw.Resource) {
-        const paginatedResource = baseResource.addResource('paginated');
-
-        paginatedResource.addMethod(
-            'POST',
-            new apigw.LambdaIntegration(this.props.lambdaFunctions.getRoutingLambda!, {
+            new apigw.LambdaIntegration(this.props.lambdaFunctions.getContractNotesLambda, {
                 credentialsRole: this.apiRole,
             })
         );
@@ -112,7 +84,6 @@ export class ApiGatewayConstruct extends cdk.Construct {
         });
     }
 
-    //TODO added actual lambda function arns
     private createApiRole() {
         this.apiRole = new iam.Role(this, 'api-role', {
             roleName: `${constants.API_PREFIX}-gateway-role-${this.props.envParameters.shortEnv}`,
