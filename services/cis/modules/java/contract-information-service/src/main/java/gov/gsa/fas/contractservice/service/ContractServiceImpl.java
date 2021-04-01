@@ -323,12 +323,15 @@ public class ContractServiceImpl implements ContractService {
 				List<CFFContractFinder> cffContractFinderList = contractServiceDAO
 						.getCFFDetail(contractMaster.getD402_cont_no());
 
-				for (CFFContractFinder buyer : cffContractFinderList) {
-					if (inPOLines.getRequisitionRecords().get(0).getItemNumber().equals(buyer.getD407_nsn())
-							&& wZone.equals(buyer.getD407_zone_sdf())) {
-						cffContractFinder = buyer;
+				if (cffContractFinderList != null && !cffContractFinderList.isEmpty()) {
+					for (CFFContractFinder buyer : cffContractFinderList) {
+						if (inPOLines.getRequisitionRecords().get(0).getItemNumber().equals(buyer.getD407_nsn())
+								&& wZone.equals(buyer.getD407_zone_sdf())) {
+							cffContractFinder = buyer;
+						}
 					}
 				}
+				
 
 				if (cffContractFinder != null) {
 					contractDetail.setPOPCode(cffContractFinder.getD407_pop_cd());
@@ -1111,8 +1114,10 @@ public class ContractServiceImpl implements ContractService {
 		}
 
 		EDIFax ediFax = contractServiceDAO.getEDIFax(contractDetail.getInternalContractNumber());
-		contractDetail.setEfptIndicator(ediFax.getD411_efpt_ind());
-		contractDetail.setFaxNumber(ediFax.getD411_fax1());
+		if (ediFax != null) {
+			contractDetail.setEfptIndicator(ediFax.getD411_efpt_ind());
+			contractDetail.setFaxNumber(ediFax.getD411_fax1());
+		}
 
 	}
 
@@ -1124,7 +1129,10 @@ public class ContractServiceImpl implements ContractService {
 	private void setReportingOfficeAAC(CSDetailPO contractDetail) {
 
 		ACCMapping accMapping = contractServiceDAO.getReportingOfficeAAC(contractDetail.getInternalContractNumber());
-		contractDetail.setReportingOfficeAAC(accMapping.getD4531_cont_off_aac());
+		if(accMapping!=null) {
+			contractDetail.setReportingOfficeAAC(accMapping.getD4531_cont_off_aac());
+		}
+		
 
 	}
 
