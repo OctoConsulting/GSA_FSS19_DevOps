@@ -1,8 +1,32 @@
+def s3ObjectLatestVersion = "latest"
+
+// branches for parallel deployment of functions
+def updateLambdas() {
+    def branches = [:]
+    def functions = [ "get-contracts-lambda", "get-contract-details-by-contract-id-lambda", "get-contract-details-by-entity-id-lambda" ]
+    for (function in functions) {
+        branches[function] = {
+            sh '''
+                cd ${APP_DIR}
+                FUNCTION_NAME=''' + function + '''-${SHORT_ENV}
+                ~/aws lambda update-function-code --function-name ${FUNCTION_NAME} --s3-bucket "${ARTIFACTS_BUCKET}" --s3-key "${S3_PREFIX}" --s3-object-version "${S3_OBJECT_LATEST_VERSION}"
+                FUNCTION_VERSION=$(~/aws lambda publish-version --function-name ${FUNCTION_NAME} --query 'FunctionArn' --output text | cut -d: -f8)
+                ~/aws lambda update-alias --function-name ${FUNCTION_NAME} --name ${LAMBDA_ALIAS_NAME} --version "${FUNCTION_VERSION}"
+            '''
+        }
+    }
+    return branches
+}
+
 pipeline {
     environment {
         SHORT_ENV = "${env.SHORT_ENV}"
         ARTIFACTS_BUCKET = "${env.ARTIFACTS_BUCKET}"
+        S3_PREFIX = "services/cis/contract-information-service/contract-information-service.jar"
+        APP_DIR = "services/cis/modules/java/contract-information-service"
+        LAMBDA_ALIAS_NAME="live"
     }
+
     agent {
         label "linux"
     }
@@ -12,20 +36,20 @@ pipeline {
     }
 
     stages {
-        stage('Install') {
+        stage('Install:awscli') {
             steps {
                 sh '''
                     curl https://s3.amazonaws.com/aws-cli/awscli-bundle.zip -o awscli-bundle.zip
                     unzip awscli-bundle.zip
-                    ./awscli-bundle/install
+                    ./awscli-bundle/install -b ~/aws
                 '''
             }
         }
-        stage('Build') {
+        stage('Build:mvn') {
             steps {
                 git 'https://github.com/OctoConsulting/GSA_FSS19_DevOps'
                 sh '''
-                    cd services/cis/modules/java/contract-information-service
+                    cd ${APP_DIR}
                     mvn clean install -DskipTests
                 '''
             }
@@ -39,17 +63,28 @@ pipeline {
                 }
             }
         }
-        stage('Deploy') {
+        stage('UploadArtifact:S3') {
             steps {
                 sh '''
-                    cd services/cis/modules/java/contract-information-service
-                    export PATH=${PATH}:/home/jenkins/.local/lib/aws/bin/
-                    S3_PREFIX="services/cis/contract-information-service/contract-information-service.jar"
-                    FUNCTION_NAME=get-contracts-lambda-${SHORT_ENV}
-                    aws s3 cp target/contract-information-service-0.0.1-SNAPSHOT.jar s3://${ARTIFACTS_BUCKET}/${S3_PREFIX}
-                    LATEST_VERSION=$(aws s3api list-object-versions --bucket "${ARTIFACTS_BUCKET}" --prefix "${S3_PREFIX}" --query 'Versions[*].VersionId' --output text | cut -f1)
-                    aws lambda update-function-code --function-name ${FUNCTION_NAME} --s3-bucket "${ARTIFACTS_BUCKET}" --s3-key "${S3_PREFIX}" --s3-object-version "${LATEST_VERSION}"
+                    cd ${APP_DIR}
+                    ~/aws s3 cp target/contract-information-service-0.0.1-SNAPSHOT.jar s3://${ARTIFACTS_BUCKET}/${S3_PREFIX}
                 '''
+                script {
+                    s3ObjectLatestVersion = sh (
+                        script: '''~/aws s3api list-object-versions --bucket "${ARTIFACTS_BUCKET}" --prefix "${S3_PREFIX}" --query 'Versions[*].VersionId' --output text | cut -f1''',
+                        returnStdout: true).trim()
+                }
+            }
+        }
+
+        stage('Deploy:Lambdas') {
+            environment {
+                S3_OBJECT_LATEST_VERSION = "${s3ObjectLatestVersion}"
+            }
+            steps {
+                script {
+                    parallel updateLambdas()
+                }
             }
         }
     }

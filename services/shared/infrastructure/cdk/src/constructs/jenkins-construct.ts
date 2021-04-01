@@ -297,7 +297,9 @@ export class JenkinsConstruct extends Construct {
           new PolicyStatement({
             effect: Effect.ALLOW,
             actions: [
-              "lambda:UpdateFunctionCode"
+              "lambda:UpdateFunctionCode",
+              "lambda:PublishVersion",
+              "lambda:UpdateAlias"
             ],
             resources: ['*']
           })
