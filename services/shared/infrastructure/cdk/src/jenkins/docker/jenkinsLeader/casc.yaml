@@ -47,7 +47,7 @@ jenkins:
   clouds:
     - amazonEC2:
         cloudName: "ec2"
-        region: "us-east-1"
+        region: "${AWS_REGION}"
         sshKeysCredentialsId: "keypair"
         useInstanceProfileForCredentials: false
         templates:
@@ -80,8 +80,30 @@ jenkins:
         cluster: ${JENKINS_LINUX_WORKER_ECS_CLUSTER_ARN}
         jenkinsUrl: "http://leader.jenkins.dev:8080"
         name: "ecs"
-        regionName: "us-east-1"
+        regionName: ${AWS_REGION}
         templates:
+          - cpu: 512
+            memoryReservation: 1024
+            image: "jenkins/inbound-agent"
+            label: "linux-admin"
+            taskDefinitionOverride: "ecsJenkinsStaticLinuxAdminWorker"
+            launchType: "FARGATE"
+            platformVersion: "LATEST"
+            remoteFSRoot: "/home/jenkins"
+            securityGroups: ${JENKINS_LINUX_WORKER_SECURITY_GROUPS}
+            subnets: ${JENKINS_LINUX_WORKER_SUBNETS}
+            taskrole: ${JENKINS_LINUX_ADMIN_WORKER_TASK_ROLE}
+            executionRole: ${JENKINS_LINUX_WORKER_EXECUTION_ROLE}
+            templateName: "Jenkins-Dynamic-Admin-Linux-Worker"
+            assignPublicIp: ${JENKINS_LINUX_WORKER_USE_PUBLIC_SUBNETS}
+            logDriver: "awslogs"
+            logDriverOptions:
+              - name: "awslogs-group"
+                value: ${JENKINS_LINUX_WORKER_LOGS_GROUP}
+              - name: "awslogs-region"
+                value: "${AWS_REGION}"
+              - name: "awslogs-stream-prefix"
+                value: "jenkins-linux-admin-worker"
           - cpu: 512
             memoryReservation: 1024
             image: "jenkins/inbound-agent"
@@ -101,7 +123,7 @@ jenkins:
               - name: "awslogs-group"
                 value: ${JENKINS_LINUX_WORKER_LOGS_GROUP}
               - name: "awslogs-region"
-                value: "us-east-1"
+                value: "${AWS_REGION}"
               - name: "awslogs-stream-prefix"
                 value: "jenkins-linux-worker"
 security:
