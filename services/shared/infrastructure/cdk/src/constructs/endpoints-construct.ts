@@ -48,10 +48,15 @@ export class EndpointsConstruct extends cdk.Construct {
             privateZone: true,
         });
 
-        const domainName = `execute-api-.${this.props.domainName}`;
+        const publicHostedZone = route53.HostedZone.fromLookup(this, 'public-hosted-zone-lookup', {
+            domainName: `${this.props.domainName}`,
+            privateZone: false,
+        });
+
+        const domainName = `execute-api.${this.props.domainName}`;
         const certificate = new acm.Certificate(this, 'certificate', {
             domainName: domainName,
-            validation: acm.CertificateValidation.fromDns(privateHostedZone),
+            validation: acm.CertificateValidation.fromDns(publicHostedZone),
         });
 
         new route53.ARecord(this, 'cloudfront-route53', {
