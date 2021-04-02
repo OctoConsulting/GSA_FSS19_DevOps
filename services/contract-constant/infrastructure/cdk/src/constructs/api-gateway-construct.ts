@@ -22,9 +22,9 @@ export class ApiGatewayConstruct extends cdk.Construct {
     private addApiResourcesAndMethods() {
         const baseResource = this.restApi.root.addResource('contractconstantdata').addResource('v1');
         this.addGetContractNotesLambdaIntegration(baseResource);
-        // this.addGetContractBuyerLambdaIntegration(baseResource);
-        // this.addGetContractVendorAddressDetailsLambdaIntegration(baseResource);
-        // this.addGetContractAcOfficeAddressDetailsLambdaIntegration(baseResource);
+        this.addGetContractBuyerLambdaIntegration(baseResource);
+        this.addGetContractVendorAddressDetailsLambdaIntegration(baseResource);
+        this.addGetContractAcoOfficeAddressDetailsLambdaIntegration(baseResource);
     }
 
     private addGetContractNotesLambdaIntegration(baseResource: apigw.Resource) {
@@ -33,6 +33,36 @@ export class ApiGatewayConstruct extends cdk.Construct {
         resource.addMethod(
             'POST',
             new apigw.LambdaIntegration(this.props.lambdaFunctions.getContractNotesLambda, {
+                credentialsRole: this.apiRole,
+            })
+        );
+    }
+    private addGetContractBuyerLambdaIntegration(baseResource: apigw.Resource) {
+        const resource = baseResource.addResource('buyer').addResource('details');
+
+        resource.addMethod(
+            'POST',
+            new apigw.LambdaIntegration(this.props.lambdaFunctions.getContractBuyerLambda, {
+                credentialsRole: this.apiRole,
+            })
+        );
+    }
+    private addGetContractVendorAddressDetailsLambdaIntegration(baseResource: apigw.Resource) {
+        const resource = baseResource.addResource('vendorAddress').addResource('details');
+
+        resource.addMethod(
+            'POST',
+            new apigw.LambdaIntegration(this.props.lambdaFunctions.getContractVendorAddressDetailsLambda, {
+                credentialsRole: this.apiRole,
+            })
+        );
+    }
+    private addGetContractAcoOfficeAddressDetailsLambdaIntegration(baseResource: apigw.Resource) {
+        const resource = baseResource.addResource('acoOfficeAddress').addResource('details');
+
+        resource.addMethod(
+            'POST',
+            new apigw.LambdaIntegration(this.props.lambdaFunctions.getContractAcoOfficeAddressDetailsLambda, {
                 credentialsRole: this.apiRole,
             })
         );

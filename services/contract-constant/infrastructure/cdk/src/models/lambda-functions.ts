@@ -4,5 +4,5 @@ export interface LambdaFunctions {
     getContractNotesLambda: lambda.IFunction;
     getContractBuyerLambda: lambda.IFunction;
     getContractVendorAddressDetailsLambda: lambda.IFunction;
-    getContractAcOfficeAddressDetailsLambda: lambda.IFunction;
+    getContractAcoOfficeAddressDetailsLambda: lambda.IFunction;
 }

@@ -8,13 +8,13 @@ const LAMBDA_ARTIFACT_PATH_PREFIX = 'services/contract-const';
 const GET_CONTRACT_NOTES_DETAILS_NAME: string = 'get-contract-notes-details';
 const GET_CONTRACT_BUYER_DETAILS_NAME: string = 'get-contract-buyer-details';
 const GET_CONTRACT_VENDOR_ADDRESS_DETAILS_NAME: string = 'get-contract-vendor-address-details';
-const GET_CONTRACT_AC_OFFICE_ADDRESS_DETAILS_NAME: string = 'get-contract-ac-office-address-details';
+const GET_CONTRACT_ACO_OFFICE_ADDRESS_DETAILS_NAME: string = 'get-contract-aco-office-address-details';
 
 const FUNCTION_NAMES = {
     GET_CONTRACT_NOTES_DETAILS_NAME,
     GET_CONTRACT_BUYER_DETAILS_NAME,
     GET_CONTRACT_VENDOR_ADDRESS_DETAILS_NAME,
-    GET_CONTRACT_AC_OFFICE_ADDRESS_DETAILS_NAME,
+    GET_CONTRACT_ACO_OFFICE_ADDRESS_DETAILS_NAME,
 };
 
 const constants = {
