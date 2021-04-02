@@ -8,7 +8,8 @@ export class EnvHelper {
             shortEnv,
             vpcId: stackContext.vpcId,
             region: props.env?.region,
-            account: props.env?.account
+            domainName: stackContext.domainName,
+            account: props.env?.account,
         };
         return envParameters;
     }
