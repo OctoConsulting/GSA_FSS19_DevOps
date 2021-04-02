@@ -34,14 +34,15 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         if (routingId.length == 2) {
             let groupParams = {
                 TableName: getSettings().TABLE_NAME,
-                KeyConditionExpression: 'group_id = :group_id',
+                KeyConditionExpression: 'group_id = :group_id and routing_id = :routing_id',
                 ExpressionAttributeValues: {
                     ':group_id': groupId,
+                    ':routing_id': routing_id,
                 },
             };
 
             nsnData = await getDocumentDbClient().query(groupParams).promise();
-            if (!nsnData.Items) {
+            if (!nsnData.Items || nsnData.Items.length == 0) {
                 return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
             }
 
@@ -69,6 +70,9 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             // 2. call to this api is without the paramter of last_routing_id
 
             let paginationInfo =
+                classNsnData &&
+                classNsnData.Items &&
+                classNsnData.Items.length > 0 &&
                 classNsnData.LastEvaluatedKey &&
                 classNsnData.LastEvaluatedKey.routing_id.length == 4 &&
                 !last_routing_id
