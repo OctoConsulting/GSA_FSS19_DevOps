@@ -1,10 +1,11 @@
 'use strict';
 
-import { NsnData, checkForExistingNsn } from '../model/nsn-data';
+import { NsnData } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { dynamoDocumentClient, getSettings } from '../config';
 import { apiResponses } from '../model/responseAPI';
 import { DynamoDB } from 'aws-sdk';
+import { checkForExistingNsn } from '../util/nsn-data-util';
 
 export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     console.log('Saving the NSN data - ' + event);
@@ -63,10 +64,10 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         is_civ_mgr,
         is_mil_mgr,
         ric: !ric ? ric : ric.toUpperCase(),
-        type: routing_id.length == 2 ? 'group' : routing_id.length == 4 ? 'class' : 'nsn',
+        routing_id_category: routing_id.length == 2 ? 'group' : routing_id.length == 4 ? 'class' : 'nsn',
         created_by: created_by.toUpperCase(),
         create_date: new Date().getTime().toString(),
-        update_date: new Date().getTime().toString(),
+        updated_date: new Date().getTime().toString(),
     };
     console.log('7');
     try {

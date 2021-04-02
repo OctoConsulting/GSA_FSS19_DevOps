@@ -4,7 +4,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda
 import { getSettings } from '../config';
 import { apiResponses } from '../model/responseAPI';
 import { DynamoDB } from 'aws-sdk';
-import { checkForExistingNsn } from '../model/nsn-data';
+import { checkForExistingNsn } from '../util/nsn-data-util';
 
 export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     console.log('Getting the NSN data - ' + event.pathParameters);

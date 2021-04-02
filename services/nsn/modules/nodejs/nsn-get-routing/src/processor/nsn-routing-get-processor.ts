@@ -45,7 +45,7 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
                 return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
             }
 
-            const groupArr = classifyNsnData(nsnData.Items, (item: NsnData) => item.type, 'group');
+            const groupArr = classifyNsnData(nsnData.Items, (item: NsnData) => item.routing_id_category, 'group');
 
             let routinIdMinVal = routingId + '00';
             let routingIdMax = routingId + '99';
@@ -75,7 +75,7 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
                     ? await generatePaginationInfo(classParams, 'class')
                     : null;
 
-            const classArr = classifyNsnData(classNsnData.Items, (item: NsnData) => item.type, 'class');
+            const classArr = classifyNsnData(classNsnData.Items, (item: NsnData) => item.routing_id_category, 'class');
 
             let nsnResponse = {
                 group: groupArr[0],
@@ -114,7 +114,7 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
                     ? await generatePaginationInfo(nsnParams, 'nsn')
                     : null;
 
-            let nsnArr = classifyNsnData(nsnData.Items, (item: NsnData) => item.type, 'nsn');
+            let nsnArr = classifyNsnData(nsnData.Items, (item: NsnData) => item.routing_id_category, 'nsn');
 
             // Fetch class data
             let classStr = routingId.substring(0, 4);
@@ -127,7 +127,7 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
                 },
             };
             let classNsnData = await getDocumentDbClient().query(classParams).promise();
-            const classArr = classifyNsnData(classNsnData.Items, (item: NsnData) => item.type, 'class');
+            const classArr = classifyNsnData(classNsnData.Items, (item: NsnData) => item.routing_id_category, 'class');
 
             if (
                 (routingId.length > 4 && (!nsnArr || nsnArr.length == 0)) ||
@@ -147,7 +147,7 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             };
 
             let groupNsnData = await getDocumentDbClient().query(groupParams).promise();
-            const groupArr = classifyNsnData(groupNsnData.Items, (item: NsnData) => item.type, 'group');
+            const groupArr = classifyNsnData(groupNsnData.Items, (item: NsnData) => item.routing_id_category, 'group');
 
             let nsnResponse = {
                 group: groupArr && groupArr.length > 0 ? groupArr[0] : null,
