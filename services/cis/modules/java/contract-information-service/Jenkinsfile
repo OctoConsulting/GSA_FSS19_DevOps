@@ -4,7 +4,7 @@ def s3ObjectLatestVersion = "latest"
 def updateLambdas() {
     def branches = [:]
     def functions = [ "get-contracts-lambda", "get-contract-details-by-contract-id-lambda", "get-contract-details-by-entity-id-lambda" ]
-    for (function in functions) {
+    functions.each { function ->
         branches[function] = {
             sh '''
                 cd ${APP_DIR}
