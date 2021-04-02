@@ -1,26 +1,36 @@
 pipeline {
+    environment {
+        APP_DIR="services/cis/infrastructure/cdk/"
+        SHORT_ENV = "${env.SHORT_ENV}"
+        AWS_REGION = "${env.AWS_REGION}"
+        AWS_ACCOUNT = "${env.AWS_ACCOUNT}"
+    }
     agent {
-        label "linux"
+        label "linux-admin"
+    }
+
+    tools {
+        nodejs "node15"
     }
 
     stages {
         stage('Install') {
             steps {
+                git 'https://github.com/OctoConsulting/GSA_FSS19_DevOps'
                 sh '''
-                    #curl https://s3.amazonaws.com/aws-cli/awscli-bundle.zip -o awscli-bundle.zip
-                    #unzip awscli-bundle.zip
-                    #./awscli-bundle/install
-                    #install cdk
-                    
+                    npm config set prefix '~/.local/'
+                    npm install -g cdk@1.87.1
+                    cd "${APP_DIR}"
+                    npm install
                 '''
             }
         }
         stage('Deploy') {
             steps {
-                git 'https://github.com/OctoConsulting/GSA_FSS19_DevOps'
                 sh '''
-                    cd services/cis/infrastructure/cdk/
-                    #cdk deploy
+                    cd "${APP_DIR}"
+                    export SHORT_ENV="${SHORT_ENV}" AWS_ACCOUNT="${AWS_ACCOUNT}" AWS_REGION="${AWS_REGION}"
+                    ~/.local/bin/cdk deploy
                 '''
             }
 

@@ -44,6 +44,10 @@ jenkins:
         value: "${ARTIFACTS_BUCKET}"
       - key: "SHORT_ENV"
         value: "${SHORT_ENV}"
+      - key: "AWS_REGION"
+        value: "${AWS_REGION}"
+      - key: "AWS_ACCOUNT"
+        value: "${AWS_ACCOUNT}"
   clouds:
     - amazonEC2:
         cloudName: "ec2"

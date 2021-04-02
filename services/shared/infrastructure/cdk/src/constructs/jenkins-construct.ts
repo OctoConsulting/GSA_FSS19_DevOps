@@ -169,6 +169,7 @@ export class JenkinsConstruct extends Construct {
             COGNITO_ADMIN_GROUP: cognitoAdminGroup,
             SHORT_ENV: props.envParameters.shortEnv,
             AWS_REGION: this.props.envParameters.region!,
+            AWS_ACCOUNT: this.props.envParameters.account!,
             ARTIFACTS_BUCKET: this.artifactsBucket.bucketName
           },
           secrets,
