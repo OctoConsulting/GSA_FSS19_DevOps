@@ -530,7 +530,7 @@ public class ContractServiceImpl implements ContractService {
 				byrDollarLimit = new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt());
 				byrALT = cdfMasterFiltered.getD430_bm_cd_alt();
 			} else {
-				contractDetail.setResult(String.format(ContractConstants.JS004_CONTRACT_DATA, byrALT, filterReporting));
+				contractDetail.setResult(String.format(ContractConstants.JS006_CONTRACT_DATA, byrALT, filterReporting));
 				return contractDetail;
 			}
 
@@ -562,7 +562,7 @@ public class ContractServiceImpl implements ContractService {
 				byrDollarLimit = new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt());
 				byrALT = cdfMasterFiltered.getD430_bm_cd_alt();
 			} else {
-				contractDetail.setResult(String.format(ContractConstants.JS004_CONTRACT_DATA, byrALT, filterReporting));
+				contractDetail.setResult(String.format(ContractConstants.JS006_CONTRACT_DATA, byrALT, filterReporting));
 				return contractDetail;
 			}
 

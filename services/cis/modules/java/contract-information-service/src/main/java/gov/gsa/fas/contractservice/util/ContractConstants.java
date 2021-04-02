@@ -83,6 +83,7 @@ public class ContractConstants {
 	public static final String JS004_CONTRACT_DATA = "FAIL JS004: Buyer Code not defined for the Reporting Office : The Buyer code %1$s not defined in Reporting Office %2$s";
 	public static final String JS005_CONTRACT_DATA = "FAIL JS005: Buyer Dollar Limit exceeded:The Buyer/Supervisor %1$s has only $ %2$s and the PO Total Cost was %3$s";
 	public static final String JS000_CONTRACT_DATA = "FAIL JS000: Contract not found Contract %1$s is not a valid contract number";
+	public static final String JS006_CONTRACT_DATA = "FAIL JS006: Buyer Supervisor Code not defined for the Reporting Office :the Buyer/Supervisor code %1$s not loaded for Reporting Office %2$s";
 	
 	
 	public static final String JS007_INVALID_DATA_CONTRACT_NUMBER = "JS007_Invalid Contract Number - ";
