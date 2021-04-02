@@ -111,15 +111,16 @@ export class JenkinsConstruct extends Construct {
     });
     
     // need the public zone to create public SSL certs
-    const hostedZone = HostedZone.fromHostedZoneAttributes(this, "HostedZone", {
-      hostedZoneId: props.stackContext.hostedZoneId,
-      zoneName: props.stackContext.domainName
+    const hostedZone = HostedZone.fromLookup(this, 'HostedZone', {
+      domainName: props.stackContext.domainName,
+      privateZone: false
     });
 
-    const privateHostedZone = HostedZone.fromHostedZoneAttributes(this, "PrivateHostedZone", {
-      hostedZoneId: this.props.stackContext.privateHostedZoneId,
-      zoneName: this.props.stackContext.domainName
+    const privateHostedZone = HostedZone.fromLookup(this, 'PrivateHostedZone', {
+      domainName: props.stackContext.domainName,
+      privateZone: true,
     });
+
     this.artifactsBucket = this.createAritfactsS3Bucket();
     this.artifactsBucket.grantReadWrite(jenkinsWorkerTaskRole);
 
