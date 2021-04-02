@@ -1,10 +1,11 @@
 'use strict';
 
-import { NsnData, checkForExistingNsn } from '../model/nsn-data';
+import { NsnData } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { getSettings } from '../config';
 import { apiResponses } from '../model/responseAPI';
 import { DynamoDB } from 'aws-sdk';
+import { checkForExistingNsn } from '../util/nsn-data-util';
 
 export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     console.log('Updating the NSN data - ' + event);
@@ -69,14 +70,14 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     const nsnData: NsnData = {
         group_id: routing_id.length > 4 ? class_id : group_id,
         routing_id: routing_id.toUpperCase(),
-        owa: owa.toUpperCase(),
+        owa: !owa ? existingNsnData.Item?.owa : owa.toUpperCase(),
         is_civ_mgr,
         is_mil_mgr,
-        ric: !ric ? ric : ric.toUpperCase(),
-        type: updateNsnData.Item.type,
-        create_date: updateNsnData.Item.createDate,
-        created_by: updateNsnData.Item.createdBy,
-        update_date: new Date().getTime().toString(),
+        ric: !ric ? existingNsnData.Item?.ric : ric.toUpperCase(),
+        routing_id_category: existingNsnData.Item?.routing_id_category,
+        create_date: existingNsnData.Item?.create_date,
+        created_by: existingNsnData.Item?.created_by,
+        updated_date: new Date().getTime().toString(),
     };
 
     try {
