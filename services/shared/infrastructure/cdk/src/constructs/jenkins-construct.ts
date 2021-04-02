@@ -95,6 +95,7 @@ export class JenkinsConstruct extends Construct {
     const executionRole = this.createExecutionRole();
     const jenkinsLeaderTaskRole = this.createJenkinsLeaderTaskRole();
     const jenkinsWorkerTaskRole = this.createJenkinsWorkerTaskRole();
+    const jenkinsAdminWorkerTaskRole = this.createJenkinsAdminWorkerTaskRole();
     const logGroup = new LogGroup(this, "JenkinsLogGroup", {
       retention: (<any>RetentionDays)[this.props.stackContext.jenkinsLogRetention],
     });
@@ -162,10 +163,12 @@ export class JenkinsConstruct extends Construct {
             JENKINS_LINUX_WORKER_USE_PUBLIC_SUBNETS: "false",
             JENKINS_LINUX_WORKER_SUBNETS: subnets.map(s => s.subnetId).join(','),
             JENKINS_LINUX_WORKER_TASK_ROLE: jenkinsWorkerTaskRole.roleArn,
+            JENKINS_LINUX_ADMIN_WORKER_TASK_ROLE: jenkinsAdminWorkerTaskRole.roleArn,
             JENKINS_LINUX_WORKER_EXECUTION_ROLE: executionRole.roleArn,
             JENKINS_LINUX_WORKER_LOGS_GROUP: logGroup.logGroupName,
             COGNITO_ADMIN_GROUP: cognitoAdminGroup,
             SHORT_ENV: props.envParameters.shortEnv,
+            AWS_REGION: this.props.envParameters.region!,
             ARTIFACTS_BUCKET: this.artifactsBucket.bucketName
           },
           secrets,
@@ -238,6 +241,25 @@ export class JenkinsConstruct extends Construct {
     fargateService.service.connections.allowFrom(this.fileSystem, Port.tcp(2049));
     fargateService.service.connections.allowTo(this.fileSystem, Port.tcp(2049));
 
+    // Static task definition to be used by jenkins ecs admin workers
+    const jenkinsAdminWorkerTaskDef = new TaskDefinition(this, "JenkinsAdminWorkerTaskDef", {
+      compatibility: Compatibility.FARGATE,
+      cpu: '2048',
+      memoryMiB: '4096',
+      executionRole: executionRole,
+      taskRole: jenkinsAdminWorkerTaskRole,
+      family: 'ecsJenkinsStaticLinuxAdminWorker',
+      networkMode: NetworkMode.AWS_VPC,
+    });
+    new ContainerDefinition(this, "JenkinsAdminWorkerContainerDef", {
+      image: ContainerImage.fromRegistry('jenkins/inbound-agent'),
+      taskDefinition: jenkinsAdminWorkerTaskDef,
+      logging: new AwsLogDriver({
+        streamPrefix: 'jenkins-admin-worker'
+      })
+    });
+
+
     // Static task definition to be used by jenkins ecs workers
     const jenkinsWorkerTaskDef = new TaskDefinition(this, "JenkinsWorkerTaskDef", {
       compatibility: Compatibility.FARGATE,
@@ -307,6 +329,27 @@ export class JenkinsConstruct extends Construct {
       }
     ));
     return workerRole;
+  }
+  private createJenkinsAdminWorkerTaskRole(): Role {
+    const adminWorkerRole = new Role(this, "JenkinsAdminWorkerTaskRole", {
+      assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com'),
+    });
+    // this should only be limited to what needs to be deploy by cdk
+    adminWorkerRole.addManagedPolicy(
+      new ManagedPolicy(this, "JenkinsAdminWorkerPolicy", {
+        managedPolicyName: "JenkinsAdminWorkerPolicy",
+        statements: [
+          new PolicyStatement({
+            effect: Effect.ALLOW,
+            actions: [
+              "*"
+            ],
+            resources: ['*']
+          })
+        ]
+      }
+    ));
+    return adminWorkerRole;
   }
 
   private createJenkinsLeaderTaskRole(): Role {
