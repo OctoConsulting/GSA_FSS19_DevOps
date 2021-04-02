@@ -25,7 +25,7 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     if (routing_id.length < 4 && routing_id.length != 2) {
         return apiResponses._400({ message: 'Invalid routing Id, please check routing Id restrictions.' });
     }
-    if (routing_id.length > 4 && routing_id.length < 13) {
+    if (routing_id.length > 4 && routing_id.length < 14) {
         return apiResponses._400({ message: 'Invalid routing Id, Please Enter valid Routing ID.' });
     }
     if (routing_id.length > 15) {
