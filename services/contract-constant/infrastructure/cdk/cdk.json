@@ -1,0 +1,27 @@
+{
+    "app": "npx ts-node --prefer-ts-exts src/index.ts",
+    "context": {
+        "@aws-cdk/core:enableStackNameDuplicates": "true",
+        "aws-cdk:enableDiffNoFail": "true",
+        "@aws-cdk/core:stackRelativeExports": "true",
+        "@aws-cdk/aws-ecr-assets:dockerIgnoreSupport": true,
+        "@aws-cdk/aws-secretsmanager:parseOwnedSecretName": true,
+        "@aws-cdk/aws-kms:defaultKeyPolicies": true,
+        "@aws-cdk/aws-s3:grantWriteWithoutAcl": true,
+        "contract-const-api-dev": {
+            "artifactsBucket": "artifacts-902479997164-us-east-1-dev",
+            "vpc": "vpc-02130393994755be9",
+            "logRetentionInDays": 7,
+            "apiKeySecruity": false,
+            "enableEncryptionAtRest": true,
+            "xRayTracing": true
+        },
+        "contract-const-api-qa": {
+            "vpc": "vpc-02130393994755be9",
+            "logRetentionInDays": 30,
+            "apiKeySecruity": false,
+            "enableEncryptionAtRest": true,
+            "xRayTracing": true
+        }
+    }
+}
