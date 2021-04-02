@@ -11,7 +11,7 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         return apiResponses._400({ message: 'Routing id is needed to retrieve NSN data' });
     }
 
-    let { routing_id, pageSize, last_routing_id } = JSON.parse(event.body);
+    let { routing_id, pageSize, last_routing_id, recCount } = JSON.parse(event.body);
 
     let routingId = routing_id;
     console.log('routingId in GET - ' + routingId);
@@ -69,27 +69,20 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             // 1. when there is last evaluated key from the get query above and
             // 2. call to this api is without the paramter of last_routing_id
 
-            let paginationInfo =
-                classNsnData &&
-                classNsnData.Items &&
-                classNsnData.Items.length > 0 &&
-                classNsnData.LastEvaluatedKey &&
-                classNsnData.LastEvaluatedKey.routing_id.length == 4 &&
-                !last_routing_id
-                    ? await generatePaginationInfo(classParams, 'class')
-                    : null;
+            let paginationInfo = !recCount ? await generatePaginationInfo(classParams, 'class') : null;
+
+            if (paginationInfo && paginationInfo.itemCount <= classParams.Limit) {
+                classNsnData.LastEvaluatedKey = undefined;
+            }
 
             const classArr = classifyNsnData(classNsnData.Items, (item: NsnData) => item.routing_id_category, 'class');
 
             let nsnResponse = {
                 group: groupArr[0],
                 class: classArr && classArr.length > 0 ? classArr : null,
-                paginationInfo: paginationInfo,
+                paginationInfo: paginationInfo && paginationInfo.itemCount > classParams.Limit ? paginationInfo : null,
                 recordCount: paginationInfo && paginationInfo.itemCount ? paginationInfo.itemCount : 0,
-                last_routing_id:
-                    classNsnData.LastEvaluatedKey && classNsnData.LastEvaluatedKey.routing_id.length == 4
-                        ? classNsnData.LastEvaluatedKey.routing_id
-                        : null,
+                last_routing_id: classNsnData.LastEvaluatedKey ? classNsnData.LastEvaluatedKey.routing_id : null,
             };
 
             return apiResponses._200(nsnResponse);
@@ -113,11 +106,11 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             // Generate the pagination information only once
             // 1. when there is last evaluated key from the get query above and
             // 2. call to this api is without the paramter of last_routing_id
-            let paginationInfo =
-                nsnData.LastEvaluatedKey && nsnData.LastEvaluatedKey.routing_id.length > 4 && !last_routing_id
-                    ? await generatePaginationInfo(nsnParams, 'nsn')
-                    : null;
+            let paginationInfo = !recCount ? await generatePaginationInfo(nsnParams, 'nsn') : null;
 
+            if (paginationInfo && paginationInfo.itemCount <= nsnParams.Limit) {
+                nsnData.LastEvaluatedKey = undefined;
+            }
             let nsnArr = classifyNsnData(nsnData.Items, (item: NsnData) => item.routing_id_category, 'nsn');
 
             // Fetch class data
@@ -157,8 +150,13 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
                 group: groupArr && groupArr.length > 0 ? groupArr[0] : null,
                 class: classArr && classArr.length > 0 ? classArr : null,
                 nsn: nsnArr && nsnArr.length > 0 ? nsnArr : null,
-                paginationInfo: paginationInfo,
-                recordCount: paginationInfo && paginationInfo.itemCount ? paginationInfo.itemCount : 0,
+                paginationInfo: paginationInfo && paginationInfo.itemCount > nsnParams.Limit ? paginationInfo : null,
+                recordCount:
+                    paginationInfo && paginationInfo.itemCount
+                        ? paginationInfo.itemCount
+                        : classArr.length > 0
+                        ? classArr.length
+                        : 0,
                 last_routing_id: nsnData.LastEvaluatedKey ? nsnData.LastEvaluatedKey.routing_id : null,
             };
             return apiResponses._200(nsnResponse);
@@ -192,7 +190,7 @@ async function generatePaginationInfo(queryParams: any, searchType: string) {
         KeyConditionExpression: queryParams.KeyConditionExpression,
         ExpressionAttributeValues: queryParams.ExpressionAttributeValues,
         Limit: queryParams.Limit,
-        ExclusiveStartKey: queryParams.ExclusiveStartKey,
+        ExclusiveStartKey: queryParams.ExclusiveStart,
     };
     let next: boolean = false;
     do {
