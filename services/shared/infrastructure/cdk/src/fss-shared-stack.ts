@@ -33,6 +33,7 @@ export class FssSharedStack extends cdk.Stack {
         new EndpointsConstruct(this, 'endpoints', {
             envParameters,
             vpc: myVpc,
+            domainName: envParameters.domainName,
             isolatedSubnets: vpc.getIsolatedLambdaSubnets()
         });
 
