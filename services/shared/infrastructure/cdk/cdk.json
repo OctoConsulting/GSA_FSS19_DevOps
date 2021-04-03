@@ -87,8 +87,6 @@
                 }
             ],
             "domainName": "fss19-dev.fcs.gsa.gov",
-            "hostedZoneId": "Z01097173CROP4Z19PBV3",
-            "privateHostedZoneId": "Z02862103E4JZDDN2UEJZ",
             "cognitoAdminGroup": "admins",
             "jenkinsLogRetention": "ONE_WEEK"
         },
