@@ -56,18 +56,21 @@ public class NSNData {
 	}
 
 	public static void main(String[] args) {
-		Gson gson = new Gson();
-		String json = "[{\n" + 
-				"  \"routingId\": \"20\",\n" + 
-				"  \"isCivMgr\": \"Y\",\n" + 
-				"  \"isMilMgr\": \"N\",\n" + 
-				"  \"owa\":\"F\",\n" + 
-				"  \"ric\": \"SMS\",\n" + 
-				"  \"createdBy\": \"test\",\n" + 
-				"  \"createDate\": \"02/20/2021\"\n" + 
-				"}]";
-		NSNData[] data = gson.fromJson(json , NSNData[].class);
-		System.out.println("Data - "+data);
-		System.out.println("routingId - "+data[0].getRoutingId());
+//		Gson gson = new Gson();
+//		String json = "[{\n" + 
+//				"  \"routingId\": \"20\",\n" + 
+//				"  \"isCivMgr\": \"Y\",\n" + 
+//				"  \"isMilMgr\": \"N\",\n" + 
+//				"  \"owa\":\"F\",\n" + 
+//				"  \"ric\": \"SMS\",\n" + 
+//				"  \"createdBy\": \"test\",\n" + 
+//				"  \"createDate\": \"02/20/2021\"\n" + 
+//				"}]";
+//		NSNData[] data = gson.fromJson(json , NSNData[].class);
+//		System.out.println("Data - "+data);
+//		System.out.println("routingId - "+data[0].getRoutingId());
+		int i = 'Z';
+		System.out.println(i);
 	}
+	
 }
