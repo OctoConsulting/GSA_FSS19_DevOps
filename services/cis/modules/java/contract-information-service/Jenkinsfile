@@ -11,7 +11,7 @@ def updateLambdas() {
                 FUNCTION_NAME=''' + function + '''-${SHORT_ENV}
                 ~/aws lambda update-function-code --function-name ${FUNCTION_NAME} --s3-bucket "${ARTIFACTS_BUCKET}" --s3-key "${S3_PREFIX}" --s3-object-version "${S3_OBJECT_LATEST_VERSION}"
                 FUNCTION_VERSION=$(~/aws lambda publish-version --function-name ${FUNCTION_NAME} --query 'FunctionArn' --output text | cut -d: -f8)
-                ~/aws lambda update-alias --function-name ${FUNCTION_NAME} --name ${LAMBDA_ALIAS_NAME} --function-version "${FUNCTION_VERSION}"
+                ~/aws lambda update-alias --function-name ${FUNCTION_NAME} --name ${LAMBDA_ALIAS_NAME} --function-version "${FUNCTION_VERSION}" --routing-config AdditionalVersionWeights={}
                 # removing old version
                 #let FUNCTION_VERSION=FUNCTION_VERSION-1
                 #~/aws lambda delete-version --function-name ${FUNCTION_NAME}:${FUNCTION_VERSION} || true
