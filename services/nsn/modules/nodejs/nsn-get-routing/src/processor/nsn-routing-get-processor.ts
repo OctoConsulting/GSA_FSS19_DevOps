@@ -126,10 +126,7 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             let classNsnData = await getDocumentDbClient().query(classParams).promise();
             const classArr = classifyNsnData(classNsnData.Items, (item: NsnData) => item.routing_id_category, 'class');
 
-            if (
-                (routingId.length > 4 && (!nsnArr || nsnArr.length == 0)) ||
-                (routingId.length == 4 && (!classArr || classArr.length == 0))
-            ) {
+            if (routingId.length == 4 && (!classArr || classArr.length == 0) && (!nsnArr || nsnArr.length == 0)) {
                 return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
             }
 
