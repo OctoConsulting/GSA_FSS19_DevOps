@@ -11,7 +11,7 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         return apiResponses._400({ message: 'Routing id is needed to retrieve NSN data' });
     }
 
-    let { routing_id, pageSize, last_routing_id, recCount } = JSON.parse(event.body);
+    let { routing_id, pageSize, last_routing_id, recCount, desc } = JSON.parse(event.body);
 
     let routingId = routing_id;
     console.log('routingId in GET - ' + routingId);
@@ -61,6 +61,7 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
                 },
                 Limit: pageSize ? pageSize : 5,
                 ExclusiveStartKey: last_routing_id ? { routing_id: last_routing_id, group_id: groupId } : undefined,
+                ScanIndexForward: desc && desc.toUpperCase() === 'TRUE' ? false : true,
             };
 
             let classNsnData = await getDocumentDbClient().query(classParams).promise();
@@ -69,7 +70,9 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             // 1. when there is last evaluated key from the get query above and
             // 2. call to this api is without the paramter of last_routing_id
 
-            let paginationInfo = !recCount ? await generatePaginationInfo(classParams, 'class') : null;
+            let paginationInfo = classNsnData.LastEvaluatedKey
+                ? await generatePaginationInfo(classParams, 'class')
+                : null;
 
             if (paginationInfo && paginationInfo.itemCount <= classParams.Limit) {
                 classNsnData.LastEvaluatedKey = undefined;
@@ -99,6 +102,7 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
 
                 Limit: pageSize ? pageSize : 5,
                 ExclusiveStartKey: last_routing_id ? { routing_id: last_routing_id, group_id: classId } : undefined,
+                ScanIndexForward: desc && desc.toUpperCase() === 'TRUE' ? false : true,
             };
 
             nsnData = await getDocumentDbClient().query(nsnParams).promise();
@@ -106,7 +110,7 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             // Generate the pagination information only once
             // 1. when there is last evaluated key from the get query above and
             // 2. call to this api is without the paramter of last_routing_id
-            let paginationInfo = !recCount ? await generatePaginationInfo(nsnParams, 'nsn') : null;
+            let paginationInfo = nsnData.LastEvaluatedKey ? await generatePaginationInfo(nsnParams, 'nsn') : null;
 
             if (paginationInfo && paginationInfo.itemCount <= nsnParams.Limit) {
                 nsnData.LastEvaluatedKey = undefined;
@@ -188,6 +192,7 @@ async function generatePaginationInfo(queryParams: any, searchType: string) {
         ExpressionAttributeValues: queryParams.ExpressionAttributeValues,
         Limit: queryParams.Limit,
         ExclusiveStartKey: queryParams.ExclusiveStart,
+        ScanIndexForward: queryParams.ScanIndexForward,
     };
     let next: boolean = false;
     do {

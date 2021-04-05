@@ -28,8 +28,8 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     if (routing_id.length > 4 && routing_id.length < 13) {
         return apiResponses._400({ message: 'Invalid routing Id, Please Enter valid Routing ID.' });
     }
-    if (routing_id.length > 15) {
-        return apiResponses._400({ message: 'Routing id can not be more than 15 characters.' });
+    if (routing_id.length > 14) {
+        return apiResponses._400({ message: 'Routing id can not be more than 14 characters.' });
     }
     routing_id = routing_id.toUpperCase();
     //  let owaRegex = /^[A-X,Z,0-9]$/;
