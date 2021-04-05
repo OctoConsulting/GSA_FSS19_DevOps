@@ -1,15 +1,52 @@
 h1 {
     font-size: 1.5em;
 }
-
+h3 {
+    margin: 10px 0;
+}
 .usa-logo {
-	font-size:1.8rem
+	font-size: 1.8rem;
+}
+.usa-input {
+    max-width: 20em;
+}
+.usa-table caption {
+    font-size: 1.17em
 }
 .usa-section {
-    padding-bottom: 2rem;
-    padding-top: 2rem;
+    padding-bottom: 1rem;
+    padding-top: 1rem;
+}
+.usa-form-group {
+    margin-top: 0.5rem;
 }
 .usa-footer__secondary-section{
-  padding-bottom:0.5rem;
-  padding-top:1rem;
+  padding-bottom: 0.5rem;
+  padding-top: 1rem;
+}
+.nsn-field-label {
+    font-weight: 700;
+}
+.nsn-field-requirements {
+    font-size: 0.9em;
+    margin:5px 0;
+    display: inline-block;
+}
+.nsn-search {
+    border-right: 1px solid #565c65;
+    border-radius: .25rem;
+    height: 2.2rem;
+}
+.nsn-search[type=submit] {
+    border-radius: .25rem;
+    height: 2.2rem;
+    margin: 0 10px;
+}
+.main-content {
+    min-height:calc(100vh - 263px)
+}
+@media (max-width: 63.99em) {
+    .main-content {
+        min-height:calc(100vh - 232px)
+    }
 }
