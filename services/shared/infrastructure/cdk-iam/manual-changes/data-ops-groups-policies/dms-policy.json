@@ -1,0 +1,26 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "Stmt1617633354000",
+            "Effect": "Allow",
+            "Action": [
+                "dms:CreateEventSubscription",
+                "dms:CreateReplicationInstance",
+                "dms:CreateReplicationTask",
+                "dms:DeleteReplicationInstance",
+                "dms:DeleteReplicationTask",
+                "dms:Describe*",
+                "dms:ListTagsForResource",
+                "dms:ModifyEventSubscription",
+                "dms:ModifyReplicationInstance",
+                "dms:ModifyReplicationTask",
+                "dms:RebootReplicationInstance",
+                "dms:StartReplicationTask",
+                "dms:StopReplicationTask",
+                "dms:TestConnection"
+            ],
+            "Resource": ["*"]
+        }
+    ]
+}

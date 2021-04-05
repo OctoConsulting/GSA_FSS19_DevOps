@@ -1,0 +1,21 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "Stmt1617635065000",
+            "Effect": "Allow",
+            "Action": [
+                "rds:CreateDBCluster",
+                "rds:CreateDBInstance",
+                "rds:CreateDBParameterGroup",
+                "rds:CreateEventSubscription",
+                "rds:DeleteDBCluster",
+                "rds:DeleteDBInstance",
+                "rds:Describe*",
+                "rds:List*",
+                "rds:ModifyDBCluster"
+            ],
+            "Resource": ["*"]
+        }
+    ]
+}
