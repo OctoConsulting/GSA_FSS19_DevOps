@@ -5,6 +5,7 @@ import { EndpointsConstructParms } from '../models/endpoints-construct-parms';
 import { Endpoints } from '../models/endpoints';
 import * as route53Targets from '@aws-cdk/aws-route53-targets';
 import * as acm from '@aws-cdk/aws-certificatemanager';
+import { CfnResolverEndpoint, CfnResolverRule } from '@aws-cdk/aws-route53resolver';
 
 export class EndpointsConstruct extends cdk.Construct {
     private props: EndpointsConstructParms;
@@ -17,6 +18,7 @@ export class EndpointsConstruct extends cdk.Construct {
          */
         this.setDynamoDbEndpoint();
         this.setApiGatewayEndpoint();
+        this.setRoute53ResolverEndpoint();
     }
 
     private setDynamoDbEndpoint() {
@@ -27,6 +29,30 @@ export class EndpointsConstruct extends cdk.Construct {
                     subnets: this.props.isolatedSubnets,
                 },
             ],
+        });
+    }
+    private setRoute53ResolverEndpoint() {
+        const route53ResolverEndpoint = new CfnResolverEndpoint(this, 'route53-resolver-endpoint', {
+            direction: 'OUTBOUND',
+            ipAddresses: this.props.isolatedSubnets.map((s) => {
+                return {
+                    subnetId: s.subnetId,
+                };
+            }),
+            securityGroupIds: [
+                new ec2.SecurityGroup(this, 'route53-resolver-sg', {
+                    // change to limit to outbound 53 tcp/udp later
+                    allowAllOutbound: true,
+                    vpc: this.props.vpc,
+                }).securityGroupId,
+            ],
+        });
+
+        const route53Rule = new CfnResolverRule(this, 'route53-resolver-outbound', {
+            domainName: 'gsa.gov',
+            resolverEndpointId: route53ResolverEndpoint.attrResolverEndpointId,
+            ruleType: 'FORWARD',
+            targetIps: [{ ip: '159.142.136.220' }, { ip: '159.142.69.100' }],
         });
     }
 
