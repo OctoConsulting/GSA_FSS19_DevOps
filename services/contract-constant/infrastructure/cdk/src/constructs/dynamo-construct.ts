@@ -4,7 +4,7 @@ import * as dynamodb from '@aws-cdk/aws-dynamodb';
 import * as kms from '@aws-cdk/aws-kms';
 
 export class DynamoConstruct extends cdk.Construct {
-    private nsnTable: dynamodb.Table;
+    private table: dynamodb.Table;
     private props: DynamoConstructParms;
 
     constructor(parent: cdk.Construct, id: string, props: DynamoConstructParms) {
@@ -26,7 +26,7 @@ export class DynamoConstruct extends cdk.Construct {
     }
 
     private createMainTable() {
-        this.nsnTable = new dynamodb.Table(this, 'dynamodb-table', {
+        this.table = new dynamodb.Table(this, 'dynamodb-table', {
             tableName: `${this.props.tablePrefix}-data-${this.props.shortEnv}`,
             partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
             sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
@@ -41,7 +41,7 @@ export class DynamoConstruct extends cdk.Construct {
         if (this.props.enableEncryptionAtRest) {
             new kms.Alias(this, `${this.props.tablePrefix}-kms-key-alias`, {
                 aliasName: `fss19/dynamodb/atrest/${this.props.tablePrefix.replace('-', '')}`,
-                targetKey: this.nsnTable.encryptionKey!,
+                targetKey: this.table.encryptionKey!,
                 removalPolicy: cdk.RemovalPolicy.DESTROY,
             });
         }
@@ -49,20 +49,20 @@ export class DynamoConstruct extends cdk.Construct {
 
     private setOutputs() {
         new cdk.CfnOutput(this, 'table-name-output', {
-            value: this.nsnTable.tableName,
+            value: this.table.tableName,
             description: `${this.props.tablePrefix} DynamoDB table name`,
         });
         new cdk.CfnOutput(this, 'table-arn-output', {
-            value: this.nsnTable.tableArn,
+            value: this.table.tableArn,
             description: `${this.props.tablePrefix} DynamoDB table Arn`,
         });
         new cdk.CfnOutput(this, 'table-streams-arn-output', {
-            value: this.nsnTable.tableStreamArn!,
+            value: this.table.tableStreamArn!,
             description: `${this.props.tablePrefix} DynamoDB table Arn`,
         });
     }
 
-    getNsnTable(): dynamodb.Table {
-        return this.nsnTable;
+    getTable(): dynamodb.Table {
+        return this.table;
     }
 }

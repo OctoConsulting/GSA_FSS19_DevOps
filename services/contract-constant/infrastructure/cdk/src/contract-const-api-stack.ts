@@ -22,7 +22,7 @@ export class ContractConstApiStack extends cdk.Stack {
         const crossStackImporter = new CrossStackImporter(this, 'corss-stack-imports', envParameters);
 
         const lambdas = new AllLambdasConstruct(this, 'lambdas', {
-            contractConstTable: dynamoDbConstruct.getNsnTable(),
+            contractConstTable: dynamoDbConstruct.getTable(),
             shortEnv: envParameters.shortEnv,
             vpc: envParameters.vpc,
             xRayTracing: true,

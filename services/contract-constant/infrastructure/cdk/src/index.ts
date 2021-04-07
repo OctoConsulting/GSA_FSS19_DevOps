@@ -12,7 +12,7 @@ const { AWS_ACCOUNT, AWS_REGION, SHORT_ENV } = process.env;
 const env = { account: AWS_ACCOUNT, region: AWS_REGION };
 
 /**
- * NSN API Statck
+ * Contract Constant API Statck
  */
 const nsnApiStack = new ContractConstApiStack(app, 'contract-const-api', {
     env,
