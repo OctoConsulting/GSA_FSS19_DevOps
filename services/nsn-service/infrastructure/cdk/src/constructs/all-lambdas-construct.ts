@@ -94,7 +94,7 @@ export class AllLambdasConstruct extends cdk.Construct {
             artifactVersion: artifactVersion,
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
-                TABLE_NAME: this.props.contractConstTable.tableName,
+                TABLE_NAME: this.props.dynamoTable.tableName,
             },
             handler: handler,
             type: LambdaConstructProps.LambdaTypeEnum.NODEJS,
@@ -104,8 +104,8 @@ export class AllLambdasConstruct extends cdk.Construct {
         });
 
         writeAccessToDynamo
-            ? this.props.contractConstTable.grantReadWriteData(lambdaFun.lambdaFunction)
-            : this.props.contractConstTable.grantReadData(lambdaFun.lambdaFunction);
+            ? this.props.dynamoTable.grantReadWriteData(lambdaFun.lambdaFunction)
+            : this.props.dynamoTable.grantReadData(lambdaFun.lambdaFunction);
         return lambdaFun.alias;
     }
 

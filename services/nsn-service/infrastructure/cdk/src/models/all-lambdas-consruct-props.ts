@@ -6,7 +6,7 @@ export interface AllLambdasConstructParms {
     artifactBucket: string;
     logRetentionInDays?: number;
     sharedArtifactPath?: string;
-    contractConstTable: dynamodb.Table;
+    dynamoTable: dynamodb.Table;
     xRayTracing: boolean;
     lambdaFuns: LambdaFunRequest[];
 }

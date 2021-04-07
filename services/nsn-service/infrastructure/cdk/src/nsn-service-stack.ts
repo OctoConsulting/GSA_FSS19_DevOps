@@ -23,7 +23,7 @@ export class NsnServiceStack extends cdk.Stack {
         const crossStackImporter = new CrossStackImporter(this, 'corss-stack-imports', envParameters);
 
         const lambdas = new AllLambdasConstruct(this, 'lambdas', {
-            contractConstTable: dynamoDbConstruct.getNsnTable(),
+            dynamoTable: dynamoDbConstruct.getNsnTable(),
             shortEnv: envParameters.shortEnv,
             vpc: envParameters.vpc,
             xRayTracing: true,
