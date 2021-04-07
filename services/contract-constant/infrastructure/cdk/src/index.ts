@@ -14,9 +14,9 @@ const env = { account: AWS_ACCOUNT, region: AWS_REGION };
 /**
  * Contract Constant API Statck
  */
-const nsnApiStack = new ContractConstApiStack(app, 'contract-const-api', {
+const stack = new ContractConstApiStack(app, 'contract-const-api', {
     env,
     stackName: `contract-const-api-${SHORT_ENV}`,
 });
-cdk.Tags.of(nsnApiStack).add('Env', SHORT_ENV.toUpperCase());
-cdk.Tags.of(nsnApiStack).add('ApplicationID', 'contract-const-api');
+cdk.Tags.of(stack).add('Env', SHORT_ENV.toUpperCase());
+cdk.Tags.of(stack).add('ApplicationID', 'contract-const-api');
