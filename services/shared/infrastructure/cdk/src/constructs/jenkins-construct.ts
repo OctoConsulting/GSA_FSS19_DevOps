@@ -254,13 +254,29 @@ export class JenkinsConstruct extends Construct {
       networkMode: NetworkMode.AWS_VPC,
     });
     new ContainerDefinition(this, "JenkinsAdminWorkerContainerDef", {
-      image: ContainerImage.fromRegistry('jenkins/inbound-agent'),
+      image: ContainerImage.fromAsset('src/jenkins/docker/jenkinsWorker'),
       taskDefinition: jenkinsAdminWorkerTaskDef,
       logging: new AwsLogDriver({
         streamPrefix: 'jenkins-admin-worker'
       })
     });
 
+    const postgresContainerDef = new ContainerDefinition(this, "JenkinsAdminWorkerPostgresSidecarDef", {
+      image: ContainerImage.fromRegistry('postgres'),
+      taskDefinition: jenkinsAdminWorkerTaskDef,
+      logging: new AwsLogDriver({
+        streamPrefix: 'jenkins-admin-postgres-sidecar'
+      }),
+      environment: {
+        POSTGRES_DB: 'baur',
+        POSTGRES_HOST_AUTH_METHOD: 'trust'
+      }
+    });
+
+    postgresContainerDef.addPortMappings({
+      containerPort: 5432,
+      hostPort: 5432,
+    });
 
     // Static task definition to be used by jenkins ecs workers
     const jenkinsWorkerTaskDef = new TaskDefinition(this, "JenkinsWorkerTaskDef", {
@@ -273,7 +289,7 @@ export class JenkinsConstruct extends Construct {
       networkMode: NetworkMode.AWS_VPC,
     });
     new ContainerDefinition(this, "JenkinsWorkerContainerDef", {
-      image: ContainerImage.fromRegistry('jenkins/inbound-agent'),
+      image: ContainerImage.fromAsset('src/jenkins/docker/jenkinsWorker'),
       taskDefinition: jenkinsWorkerTaskDef,
       logging: new AwsLogDriver({
         streamPrefix: 'jenkins-worker'
