@@ -171,6 +171,9 @@ jobs:
               }
           }
         }
+        triggers {
+            scm('@daily')
+        }        
         steps {
           jobDsl {
             targets 'services/shared/infrastructure/cdk/src/jenkins/jobs/**/*.groovy'
