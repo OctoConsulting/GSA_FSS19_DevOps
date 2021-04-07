@@ -5,7 +5,7 @@ import { EndpointsConstructParms } from '../models/endpoints-construct-parms';
 import { Endpoints } from '../models/endpoints';
 import * as route53Targets from '@aws-cdk/aws-route53-targets';
 import * as acm from '@aws-cdk/aws-certificatemanager';
-import { CfnResolverEndpoint, CfnResolverRule } from '@aws-cdk/aws-route53resolver';
+import { CfnResolverEndpoint, CfnResolverRule, CfnResolverRuleAssociation } from '@aws-cdk/aws-route53resolver';
 
 export class EndpointsConstruct extends cdk.Construct {
     private props: EndpointsConstructParms;
@@ -34,7 +34,7 @@ export class EndpointsConstruct extends cdk.Construct {
     private setRoute53ResolverEndpoint() {
         const route53ResolverEndpoint = new CfnResolverEndpoint(this, 'route53-resolver-endpoint', {
             direction: 'OUTBOUND',
-            ipAddresses: this.props.isolatedSubnets.map((s) => {
+            ipAddresses: this.props.route53IsolatedResolverSubnets.map((s) => {
                 return {
                     subnetId: s.subnetId,
                 };
@@ -53,6 +53,11 @@ export class EndpointsConstruct extends cdk.Construct {
             resolverEndpointId: route53ResolverEndpoint.attrResolverEndpointId,
             ruleType: 'FORWARD',
             targetIps: [{ ip: '159.142.136.220' }, { ip: '159.142.69.100' }],
+        });
+
+        new CfnResolverRuleAssociation(this, 'gsa-gov-rule-association', {
+            vpcId: this.props.vpc.vpcId,
+            resolverRuleId: route53Rule.attrResolverRuleId,
         });
     }
 

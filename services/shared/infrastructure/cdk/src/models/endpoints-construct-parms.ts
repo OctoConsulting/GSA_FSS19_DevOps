@@ -6,4 +6,5 @@ export interface EndpointsConstructParms {
     vpc: IVpc;
     domainName: string;
     isolatedSubnets: ISubnet[];
+    route53IsolatedResolverSubnets: ISubnet[];
 }
