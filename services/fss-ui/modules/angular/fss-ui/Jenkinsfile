@@ -1,12 +1,11 @@
 pipeline {
     environment {
-        APP_DIR="services/cis/infrastructure/cdk/"
+        APP_DIR="services/fss-ui/modules/angular/fss-ui"
         SHORT_ENV = "${env.SHORT_ENV}"
-        AWS_REGION = "${env.AWS_REGION}"
-        AWS_ACCOUNT = "${env.AWS_ACCOUNT}"
+        S3_BUCKET = "fss-ui-${SHORT_ENV}.fss19-${SHORT_ENV}.fcs.gsa.gov"
     }
     agent {
-        label "linux-admin"
+        label "linux"
     }
 
     tools {
@@ -14,30 +13,31 @@ pipeline {
     }
 
     stages {
-        stage('Install:baur') {
+        stage('Install:awscli') {
             steps {
                 sh '''
-                # install monorepo deployments tool
+                    curl https://s3.amazonaws.com/aws-cli/awscli-bundle.zip -o awscli-bundle.zip
+                    unzip awscli-bundle.zip
+                    ./awscli-bundle/install -b ~/aws
                 '''
             }
         }
-        stage('Install') {
+        stage('Build') {
             steps {
                 git 'https://github.com/OctoConsulting/GSA_FSS19_DevOps'
                 sh '''
                     npm config set prefix '~/.local/'
-                    npm install -g cdk@1.87.1
                     cd "${APP_DIR}"
                     npm install
+                    npm run build
                 '''
             }
         }
-        stage('Deploy') {
+        stage('Upload:s3') {
             steps {
                 sh '''
-                    cd "${APP_DIR}"
-                    export SHORT_ENV="${SHORT_ENV}" AWS_ACCOUNT="${AWS_ACCOUNT}" AWS_REGION="${AWS_REGION}"
-                    ~/.local/bin/cdk deploy
+                cd "${APP_DIR}"
+                aws s3 sync dist/fss-ui s3://${S3_BUCKET}
                 '''
             }
 

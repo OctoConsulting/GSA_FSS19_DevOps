@@ -5,8 +5,11 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { apiResponses, response } from '../model/responseAPI';
 import { getSettings } from '../config';
 import { int } from 'aws-sdk/clients/datapipeline';
+import { checkForExistingNsn } from '../util/nsn-data-util';
 
 export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    const queryStringParam = event.queryStringParameters;
+    console.log(queryStringParam?.validate);
     if (!event.body) {
         return apiResponses._400({ message: 'Routing id is needed to retrieve NSN data' });
     }
@@ -20,6 +23,16 @@ export const getNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             message: 'Please enter valid Group , Valid Class or 4 or more characters to find NSNs',
         });
     }
+
+    if(queryStringParam?.validate){
+        console.log("check existing value for routing id : " + routing_id)
+        if ((await checkForExistingNsn(routing_id))) {
+            return apiResponses._400({ message: 'This record already exists. Please enter a different NSN, Class or Group Number or <click here> to search existing record.'});
+        } else {
+            return apiResponses._200({ message: 'This routing id is available.'});
+        }
+    }
+
     let groupId = Number(routingId?.substring(0, 2));
     console.log('Group id in GET - ' + groupId);
     if (isNaN(groupId)) {
