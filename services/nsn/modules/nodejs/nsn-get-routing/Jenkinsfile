@@ -1,0 +1,47 @@
+pipeline {
+    environment {
+        APP_DIR="services/nsn/modules/nodejs/nsn-get-routing"
+        S3_PREFIX="services/nsn/nsn-get-routing/"
+        SHORT_ENV = "${env.SHORT_ENV}"
+        ARTIFACTS_BUCKET = "${env.ARTIFACTS_BUCKET}"
+    }
+    agent {
+        label "linux"
+    }
+
+    tools {
+        nodejs "node15"
+    }
+
+    stages {
+        stage('Install:awscli') {
+            steps {
+                sh '''
+                    curl https://s3.amazonaws.com/aws-cli/awscli-bundle.zip -o awscli-bundle.zip
+                    unzip awscli-bundle.zip
+                    ./awscli-bundle/install -b ~/aws
+                '''
+            }
+        }
+        stage('Build') {
+            steps {
+                git 'https://github.com/OctoConsulting/GSA_FSS19_DevOps'
+                sh '''
+                    npm config set prefix '~/.local/'
+                    cd "${APP_DIR}"
+                    npm install
+                    npm run build-prod
+                '''
+            }
+        }
+        stage('Upload:s3') {
+            steps {
+                sh '''
+                cd "${APP_DIR}"
+                ~/aws s3 cp dist/nsn-get-routing/index.zip s3://${ARTIFACTS_BUCKET}/${S3_PREFIX}
+                '''
+            }
+
+        }
+    }
+}
