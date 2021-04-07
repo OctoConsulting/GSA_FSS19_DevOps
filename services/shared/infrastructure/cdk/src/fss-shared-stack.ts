@@ -1,4 +1,4 @@
-import { IVpc, Vpc} from '@aws-cdk/aws-ec2';
+import { IVpc, Vpc } from '@aws-cdk/aws-ec2';
 import * as cdk from '@aws-cdk/core';
 import { EndpointsConstruct } from './constructs/endpoints-construct';
 import { VpcConstruct } from './constructs/vpc-construct';
@@ -16,30 +16,30 @@ export class FssSharedStack extends cdk.Stack {
         const envParameters: EnvParameters = new EnvHelper().getEnvironmentParams(stackContext, props!);
 
         // ===== make sure cdk.context.json is populated first ======
-        const myVpc:IVpc = Vpc.fromLookup(this, 'vpc-setup-lookup', {
-            vpcId: envParameters.vpcId
+        const myVpc: IVpc = Vpc.fromLookup(this, 'vpc-setup-lookup', {
+            vpcId: envParameters.vpcId,
         });
-        if (!existsSync('cdk.context.json'))
-            return;
+        if (!existsSync('cdk.context.json')) return;
         // ==========================================================
 
         const vpc = new VpcConstruct(this, 'vpc', {
             envParameters,
             availabilityZones: this.availabilityZones,
             vpc: myVpc,
-            stackContext: stackContext
+            stackContext: stackContext,
         });
 
         new EndpointsConstruct(this, 'endpoints', {
             envParameters,
             vpc: myVpc,
             domainName: envParameters.domainName,
-            isolatedSubnets: vpc.getIsolatedLambdaSubnets()
+            isolatedSubnets: vpc.getIsolatedLambdaSubnets(),
+            route53IsolatedResolverSubnets: vpc.getIsolatedRoute53ResolverSubnets(),
         });
 
         const cognito = new CognitoConstruct(this, 'cognito', {
             envParameters,
-            stackContext
+            stackContext,
         });
 
         new JenkinsConstruct(this, 'jenkins', {
@@ -47,7 +47,7 @@ export class FssSharedStack extends cdk.Stack {
             envParameters,
             stackContext,
             ciCdSubnets: vpc.getPrivateCICDSubnets(),
-            cognitoUserPoolSecretArn: cognito.getCognitoUserPoolSecretArn()
+            cognitoUserPoolSecretArn: cognito.getCognitoUserPoolSecretArn(),
         });
     }
 }
