@@ -37,7 +37,7 @@ pipeline {
             steps {
                 sh '''
                 cd "${APP_DIR}"
-                ~/aws s3 cp dist/fss-ui s3://${S3_BUCKET} --recursive
+                ~/aws s3 sync dist/fss-ui s3://${S3_BUCKET}
                 '''
             }
 

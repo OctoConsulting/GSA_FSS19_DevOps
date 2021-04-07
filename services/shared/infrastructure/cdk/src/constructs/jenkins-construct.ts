@@ -8,7 +8,7 @@ import {
     LifecyclePolicy,
     PerformanceMode,
     ThroughputMode,
-    CfnFileSystem
+    CfnFileSystem,
 } from '@aws-cdk/aws-efs';
 import { Port, SecurityGroup } from '@aws-cdk/aws-ec2';
 import {
@@ -23,14 +23,14 @@ import {
     ContainerDefinition,
     AwsLogDriver,
     CfnService,
-    CfnCluster
+    CfnCluster,
 } from '@aws-cdk/aws-ecs';
 import { ApplicationLoadBalancedFargateService } from '@aws-cdk/aws-ecs-patterns';
 import { Effect, ManagedPolicy, PolicyStatement, Role, ServicePrincipal } from '@aws-cdk/aws-iam';
 import { LogGroup, RetentionDays } from '@aws-cdk/aws-logs';
 import { Secret } from '@aws-cdk/aws-secretsmanager';
 import { DnsRecordType } from '@aws-cdk/aws-servicediscovery';
-import { Construct, Duration } from '@aws-cdk/core';
+import { CfnOutput, Construct, Duration } from '@aws-cdk/core';
 import { HostedZone } from '@aws-cdk/aws-route53';
 import { CertificateValidation, Certificate } from '@aws-cdk/aws-certificatemanager';
 import { Key } from '@aws-cdk/aws-kms';
@@ -51,10 +51,10 @@ export class JenkinsConstruct extends Construct {
         const subnets = this.props.ciCdSubnets;
 
         const leaderSecurityGroup = new SecurityGroup(this, 'LeaderSecurityGroup', {
-            vpc
+            vpc,
         });
         const workerSecurityGroup = new SecurityGroup(this, 'WorkerSecurityGroup', {
-            vpc
+            vpc,
         });
 
         leaderSecurityGroup.connections.allowFrom(workerSecurityGroup, Port.allTraffic());
@@ -67,28 +67,28 @@ export class JenkinsConstruct extends Construct {
         const jenkinsWorkerTaskRole = this.createJenkinsWorkerTaskRole();
         const jenkinsAdminWorkerTaskRole = this.createJenkinsAdminWorkerTaskRole();
         const logGroup = new LogGroup(this, 'JenkinsLogGroup', {
-            retention: (<any>RetentionDays)[this.props.stackContext.jenkinsLogRetention]
+            retention: (<any>RetentionDays)[this.props.stackContext.jenkinsLogRetention],
         });
 
         const secrets = this.createSecrets({
             githubTokenSecretArn: props.stackContext.githubTokenSecretArn,
-            cognitoUserPoolSecretArn: props.cognitoUserPoolSecretArn
+            cognitoUserPoolSecretArn: props.cognitoUserPoolSecretArn,
         });
 
         const cluster = this.createCluster({
             vpc: vpc,
-            defaultNamespace: `jenkins.${props.envParameters.shortEnv}`
+            defaultNamespace: `jenkins.${props.envParameters.shortEnv}`,
         });
 
         // need the public zone to create public SSL certs
         const hostedZone = HostedZone.fromLookup(this, 'HostedZone', {
             domainName: props.stackContext.domainName,
-            privateZone: false
+            privateZone: false,
         });
 
         const privateHostedZone = HostedZone.fromLookup(this, 'PrivateHostedZone', {
             domainName: props.stackContext.domainName,
-            privateZone: true
+            privateZone: true,
         });
 
         this.artifactsBucket = this.createAritfactsS3Bucket();
@@ -100,11 +100,11 @@ export class JenkinsConstruct extends Construct {
             domainName: jenkinsDomainName,
             certificate: new Certificate(this, 'Certificate', {
                 domainName: jenkinsDomainName,
-                validation: CertificateValidation.fromDns(hostedZone)
+                validation: CertificateValidation.fromDns(hostedZone),
             }),
             cluster,
             taskSubnets: vpc.selectSubnets({
-                subnets: this.props.ciCdSubnets
+                subnets: this.props.ciCdSubnets,
             }),
             platformVersion: FargatePlatformVersion.VERSION1_4,
             cpu: 2048,
@@ -119,7 +119,7 @@ export class JenkinsConstruct extends Construct {
                 taskRole: jenkinsLeaderTaskRole,
                 logDriver: LogDriver.awsLogs({
                     logGroup,
-                    streamPrefix: 'jenkins-leader'
+                    streamPrefix: 'jenkins-leader',
                 }),
                 environment: {
                     GITHUB_REPO_OWNER: props.stackContext.githubRepoOwner,
@@ -139,15 +139,15 @@ export class JenkinsConstruct extends Construct {
                     SHORT_ENV: props.envParameters.shortEnv,
                     AWS_REGION: this.props.envParameters.region!,
                     AWS_ACCOUNT: this.props.envParameters.account!,
-                    ARTIFACTS_BUCKET: this.artifactsBucket.bucketName
+                    ARTIFACTS_BUCKET: this.artifactsBucket.bucketName,
                 },
-                secrets
+                secrets,
             },
             publicLoadBalancer: false,
             cloudMapOptions: {
                 name: 'leader',
-                dnsRecordType: DnsRecordType.A
-            }
+                dnsRecordType: DnsRecordType.A,
+            },
         });
         // Allow support for ECS exec troubleshooting feature
         const execKmsKey = new Key(this, 'ExecKmsKey');
@@ -163,9 +163,9 @@ export class JenkinsConstruct extends Construct {
             LogConfiguration: {
                 CloudWatchLogGroupName: execLogGroup.logGroupName,
                 S3BucketName: execBucket.bucketName,
-                S3KeyPrefix: 'exec-output'
+                S3KeyPrefix: 'exec-output',
             },
-            Logging: 'OVERRIDE'
+            Logging: 'OVERRIDE',
         });
         const CfnService = fargateService.service.node.findChild('Service') as CfnService;
         CfnService.addPropertyOverride('EnableExecuteCommand', true);
@@ -182,7 +182,7 @@ export class JenkinsConstruct extends Construct {
             path: '/login',
             timeout: Duration.seconds(5),
             unhealthyThresholdCount: 10,
-            interval: Duration.seconds(10)
+            interval: Duration.seconds(10),
         });
         fargateService.targetGroup.setAttribute('deregistration_delay.timeout_seconds', '30');
 
@@ -192,20 +192,20 @@ export class JenkinsConstruct extends Construct {
                 fileSystemId: this.fileSystem.fileSystemId,
                 transitEncryption: 'ENABLED',
                 authorizationConfig: {
-                    accessPointId: this.accessPoint.accessPointId
-                }
-            }
+                    accessPointId: this.accessPoint.accessPointId,
+                },
+            },
         });
 
         fargateService.service.taskDefinition.defaultContainer?.addPortMappings({
             containerPort: 50000,
-            hostPort: 50000
+            hostPort: 50000,
         });
 
         fargateService.service.taskDefinition.defaultContainer?.addMountPoints({
             containerPath: '/var/jenkins_home',
             readOnly: false,
-            sourceVolume: 'efs'
+            sourceVolume: 'efs',
         });
 
         fargateService.service.connections.allowFrom(this.fileSystem, Port.tcp(2049));
@@ -219,31 +219,31 @@ export class JenkinsConstruct extends Construct {
             executionRole: executionRole,
             taskRole: jenkinsAdminWorkerTaskRole,
             family: 'ecsJenkinsStaticLinuxAdminWorker',
-            networkMode: NetworkMode.AWS_VPC
+            networkMode: NetworkMode.AWS_VPC,
         });
         new ContainerDefinition(this, 'JenkinsAdminWorkerContainerDef', {
             image: ContainerImage.fromAsset('src/jenkins/docker/jenkinsWorker'),
             taskDefinition: jenkinsAdminWorkerTaskDef,
             logging: new AwsLogDriver({
-                streamPrefix: 'jenkins-admin-worker'
-            })
+                streamPrefix: 'jenkins-admin-worker',
+            }),
         });
 
         const postgresContainerDef = new ContainerDefinition(this, 'JenkinsAdminWorkerPostgresSidecarDef', {
             image: ContainerImage.fromRegistry('postgres'),
             taskDefinition: jenkinsAdminWorkerTaskDef,
             logging: new AwsLogDriver({
-                streamPrefix: 'jenkins-admin-postgres-sidecar'
+                streamPrefix: 'jenkins-admin-postgres-sidecar',
             }),
             environment: {
                 POSTGRES_DB: 'baur',
-                POSTGRES_HOST_AUTH_METHOD: 'trust'
-            }
+                POSTGRES_HOST_AUTH_METHOD: 'trust',
+            },
         });
 
         postgresContainerDef.addPortMappings({
             containerPort: 5432,
-            hostPort: 5432
+            hostPort: 5432,
         });
 
         // Static task definition to be used by jenkins ecs workers
@@ -254,21 +254,27 @@ export class JenkinsConstruct extends Construct {
             executionRole: executionRole,
             taskRole: jenkinsWorkerTaskRole,
             family: 'ecsJenkinsStaticLinuxWorker',
-            networkMode: NetworkMode.AWS_VPC
+            networkMode: NetworkMode.AWS_VPC,
         });
         new ContainerDefinition(this, 'JenkinsWorkerContainerDef', {
             image: ContainerImage.fromAsset('src/jenkins/docker/jenkinsWorker'),
             taskDefinition: jenkinsWorkerTaskDef,
             logging: new AwsLogDriver({
-                streamPrefix: 'jenkins-worker'
-            })
+                streamPrefix: 'jenkins-worker',
+            }),
+        });
+
+        // this will be used by other stacks to add permissions to different aws services for this role
+        new CfnOutput(this, 'jenkinsWorkerRoleExport', {
+            value: jenkinsWorkerTaskRole.roleArn,
+            exportName: 'jenkins-worker-role-arn',
         });
     }
 
     private createSecrets({ githubTokenSecretArn, cognitoUserPoolSecretArn }: CreateSecretsProps) {
         const jenkinsAdminPassword = new Secret(this, 'jenkinsSecret', {
             secretName: 'JenkinsAdminSecret',
-            description: 'Jenkins Admin Password'
+            description: 'Jenkins Admin Password',
         });
         const githubSecret = Secret.fromSecretCompleteArn(this, 'GithubToken', githubTokenSecretArn);
         const cognitoSecret = Secret.fromSecretCompleteArn(this, 'CognitoSecret', cognitoUserPoolSecretArn);
@@ -277,13 +283,13 @@ export class JenkinsConstruct extends Construct {
             GITHUB_TOKEN: EcsSecret.fromSecretsManager(githubSecret, 'github_token'),
             JENKINS_ADMIN_PASSWORD: EcsSecret.fromSecretsManager(jenkinsAdminPassword),
             COGNITO_CLIENT_ID: EcsSecret.fromSecretsManager(cognitoSecret, 'userPoolClientId'),
-            COGNITO_CLIENT_SECRET: EcsSecret.fromSecretsManager(cognitoSecret, 'userPoolClientSecret')
+            COGNITO_CLIENT_SECRET: EcsSecret.fromSecretsManager(cognitoSecret, 'userPoolClientSecret'),
         };
     }
 
     private createJenkinsWorkerTaskRole(): Role {
         const workerRole = new Role(this, 'JenkinsWorkerTaskRole', {
-            assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com')
+            assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com'),
         });
         // TODO: This need to be replaced with Lambda execute access
         // for each lambda separately for more granular security.
@@ -294,16 +300,16 @@ export class JenkinsConstruct extends Construct {
                     new PolicyStatement({
                         effect: Effect.ALLOW,
                         actions: ['lambda:UpdateFunctionCode', 'lambda:PublishVersion', 'lambda:UpdateAlias'],
-                        resources: ['*']
-                    })
-                ]
+                        resources: ['*'],
+                    }),
+                ],
             })
         );
         return workerRole;
     }
     private createJenkinsAdminWorkerTaskRole(): Role {
         const adminWorkerRole = new Role(this, 'JenkinsAdminWorkerTaskRole', {
-            assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com')
+            assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com'),
         });
         // this should only be limited to what needs to be deploy by cdk
         adminWorkerRole.addManagedPolicy(
@@ -313,9 +319,9 @@ export class JenkinsConstruct extends Construct {
                     new PolicyStatement({
                         effect: Effect.ALLOW,
                         actions: ['*'],
-                        resources: ['*']
-                    })
-                ]
+                        resources: ['*'],
+                    }),
+                ],
             })
         );
         return adminWorkerRole;
@@ -323,7 +329,7 @@ export class JenkinsConstruct extends Construct {
 
     private createJenkinsLeaderTaskRole(): Role {
         const taskRole = new Role(this, 'JenkinsLeaderTaskRole', {
-            assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com')
+            assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com'),
         });
 
         taskRole.addManagedPolicy(
@@ -352,11 +358,11 @@ export class JenkinsConstruct extends Construct {
                             'ec2:DescribeSubnets',
                             'ec2:GetPasswordData',
                             'iam:ListInstanceProfilesForRole',
-                            'iam:PassRole'
+                            'iam:PassRole',
                         ],
-                        resources: ['*']
-                    })
-                ]
+                        resources: ['*'],
+                    }),
+                ],
             })
         );
 
@@ -381,11 +387,11 @@ export class JenkinsConstruct extends Construct {
                             'ssmmessages:CreateControlChannel',
                             'ssmmessages:CreateDataChannel',
                             'ssmmessages:OpenControlChannel',
-                            'ssmmessages:OpenDataChannel'
+                            'ssmmessages:OpenDataChannel',
                         ],
-                        resources: ['*']
-                    })
-                ]
+                        resources: ['*'],
+                    }),
+                ],
             })
         );
 
@@ -395,7 +401,7 @@ export class JenkinsConstruct extends Construct {
     private createExecutionRole(): Role {
         const executionRole = new Role(this, 'ExecutionRole', {
             roleName: 'ExecutionRole',
-            assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com')
+            assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com'),
         });
 
         executionRole.addManagedPolicy(
@@ -409,8 +415,8 @@ export class JenkinsConstruct extends Construct {
         return new Cluster(this, 'Cluster', {
             vpc,
             defaultCloudMapNamespace: {
-                name: defaultNamespace
-            }
+                name: defaultNamespace,
+            },
         });
     }
 
@@ -422,8 +428,8 @@ export class JenkinsConstruct extends Construct {
             performanceMode: PerformanceMode.GENERAL_PURPOSE,
             throughputMode: ThroughputMode.BURSTING,
             vpcSubnets: this.props.vpc.selectSubnets({
-                subnets: this.props.ciCdSubnets
-            })
+                subnets: this.props.ciCdSubnets,
+            }),
         });
 
         // Create a custom KMS key to encrypt the EFS Volume
@@ -436,18 +442,18 @@ export class JenkinsConstruct extends Construct {
             createAcl: {
                 ownerGid: '1000',
                 ownerUid: '1000',
-                permissions: '0755'
+                permissions: '0755',
             },
             posixUser: {
                 uid: '1000',
-                gid: '1000'
-            }
+                gid: '1000',
+            },
         });
         return fileSystem;
     }
     private createAritfactsS3Bucket() {
         const kmsKey = new Key(this, 'ArtifactsBucketKmsKey', {
-            enableKeyRotation: true
+            enableKeyRotation: true,
         });
         return new Bucket(this, 'ArtifactsBucket', {
             bucketName: `artifacts-${this.props.envParameters.account}-${this.props.envParameters.region}-${this.props.envParameters.shortEnv}`,
@@ -456,9 +462,9 @@ export class JenkinsConstruct extends Construct {
             versioned: true,
             lifecycleRules: [
                 {
-                    noncurrentVersionExpiration: Duration.days(30)
-                }
-            ]
+                    noncurrentVersionExpiration: Duration.days(30),
+                },
+            ],
         });
     }
 }
