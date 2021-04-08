@@ -21,3 +21,4 @@ services/nsn/.project
 *.dll
 services/nsn/modules/nodejs/nsn-get-routing/.dynamodb/*
 **/*.d.ts
+services/entity-management/modules/nodejs/entity-data/.dynamodb/*
