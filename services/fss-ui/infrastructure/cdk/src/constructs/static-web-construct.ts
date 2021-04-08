@@ -5,6 +5,7 @@ import * as origins from '@aws-cdk/aws-cloudfront-origins';
 import * as route53Targets from '@aws-cdk/aws-route53-targets';
 import * as acm from '@aws-cdk/aws-certificatemanager';
 import * as route53 from '@aws-cdk/aws-route53';
+import * as iam from '@aws-cdk/aws-iam';
 
 import { StaticWebConstructProps } from '../models/static-web-construct-props';
 
@@ -17,6 +18,14 @@ export class StaticWebConstruct extends cdk.Construct {
             bucketName: `fss-ui-${props.shortEnv}.${props.domainSuffix}`,
             blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
         });
+
+        // Allow jenkins worker to read and write into the s3 bucket for deployments
+        const jenkinsWorkerTaskRole = iam.Role.fromRoleArn(
+            this,
+            'jenkins-role-import',
+            cdk.Fn.importValue('jenkins-worker-role-arn')
+        );
+        myBucket.grantReadWrite(jenkinsWorkerTaskRole);
 
         const domainName = `fss-ui-${props.shortEnv}.${props.domainSuffix}`;
         const hostedZone = route53.HostedZone.fromLookup(this, 'cloudfront-hosted-zone-lookup', {
