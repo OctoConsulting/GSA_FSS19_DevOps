@@ -23,7 +23,7 @@ export class NsnApiStack extends cdk.Stack {
         const lambdas = new NsnLambdasConstruct(this, 'lambdas', {
             nsnTable: dynamoDbConstruct.getNsnTable(),
             shortEnv: envParameters.shortEnv,
-            vpc: envParameters.vpc,
+            vpc: crossStackImporter.getCrossStackImports().vpc,
             xRayTracing: true,
             artifactBucket: envParameters.artifactsBucket,
             artifactKey: constants.NSN_ROUTING_LAMBDA_ZIP_PATH,

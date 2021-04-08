@@ -34,6 +34,7 @@
         "@aws-cdk/aws-servicediscovery": "1.87.1",
         "@aws-cdk/aws-ecs-patterns": "1.87.1",
         "@aws-cdk/aws-route53resolver": "1.87.1",
+        "@aws-cdk/aws-rds": "1.87.1",
         "fs": "0.0.1-security",
         "source-map-support": "0.5.16"
     }

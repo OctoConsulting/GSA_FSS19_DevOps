@@ -7,6 +7,7 @@ import { EnvParameters } from './models/env-parms';
 import { existsSync } from 'fs';
 import { CognitoConstruct } from './constructs/cognito-userpool-construct';
 import { JenkinsConstruct } from './constructs/jenkins-construct';
+import { AuroraMysqlConstruct } from './constructs/aurora-mysql-construct';
 
 export class FssSharedStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -48,6 +49,13 @@ export class FssSharedStack extends cdk.Stack {
             stackContext,
             ciCdSubnets: vpc.getPrivateCICDSubnets(),
             cognitoUserPoolSecretArn: cognito.getCognitoUserPoolSecretArn(),
+        });
+
+        new AuroraMysqlConstruct(this, 'aurora-mysql', {
+            shortEnv: envParameters.shortEnv,
+            isolatedSubnets: vpc.getIsolatedAuroraSubnets(),
+            vpc: myVpc,
+            stackContext,
         });
     }
 }

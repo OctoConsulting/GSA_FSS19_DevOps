@@ -156,6 +156,10 @@ export class VpcConstruct extends cdk.Construct {
         return this.selectSubnetObjectsByName('IsolatedDnsResolvers');
     }
 
+    public getIsolatedAuroraSubnets() {
+        return this.selectSubnetObjectsByName('IsolatedNsnAurora');
+    }
+
     private selectSubnetObjectsByName(groupName: string) {
         const allSubnets = [...this.publicSubnets, ...this.privateSubnets, ...this.isolatedSubnets];
         const subnets = allSubnets.filter((s) => subnetGroupNameFromConstructId(s) === groupName);
