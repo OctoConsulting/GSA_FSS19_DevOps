@@ -122,7 +122,12 @@ export class ApiGatewayConstruct extends cdk.Construct {
 
         this.apiRole.addToPolicy(
             new iam.PolicyStatement({
-                resources: ['*'],
+                resources: [
+                    this.props.lambdaFunctions.deleteRoutingLambda!.functionArn,
+                    this.props.lambdaFunctions.getRoutingLambda!.functionArn,
+                    this.props.lambdaFunctions.postRoutingLambda!.functionArn,
+                    this.props.lambdaFunctions.putRoutingLambda!.functionArn,
+                ],
                 actions: ['lambda:InvokeFunction'],
             })
         );
