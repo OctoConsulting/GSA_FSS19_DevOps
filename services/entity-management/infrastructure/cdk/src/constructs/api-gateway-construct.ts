@@ -43,6 +43,7 @@ export class ApiGatewayConstruct extends cdk.Construct {
                 loggingLevel: apigw.MethodLoggingLevel.INFO,
                 dataTraceEnabled: true,
             },
+            cloudWatchRole: false,
             policy: this.getApiGatewayResourcePolicy(),
             endpointConfiguration: {
                 types: [apigw.EndpointType.PRIVATE],

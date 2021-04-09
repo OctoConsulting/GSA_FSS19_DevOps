@@ -95,6 +95,7 @@ export class ContractApiGatewayConstruct extends cdk.Construct {
         this.restApi = new apigw.RestApi(this, 'my-rest-api', {
             description: `${constants.API_PREFIX}-${this.props.envParameters.shortEnv}`,
             restApiName: `${constants.API_PREFIX}-${this.props.envParameters.shortEnv}`,
+            cloudWatchRole: false,
             deployOptions: {
                 stageName: `${this.props.envParameters.shortEnv}`,
                 loggingLevel: apigw.MethodLoggingLevel.INFO,
