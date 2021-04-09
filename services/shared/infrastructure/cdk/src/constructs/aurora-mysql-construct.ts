@@ -3,23 +3,19 @@ import * as ec2 from '@aws-cdk/aws-ec2';
 import * as cdk from '@aws-cdk/core';
 import * as kms from '@aws-cdk/aws-kms';
 import { AuroraMysqlParms } from '../models/aurora-mysql-construct-parms';
-import { Role, AccountPrincipal } from '@aws-cdk/aws-iam';
+import * as iam from '@aws-cdk/aws-iam';
 import { Secret } from '@aws-cdk/aws-secretsmanager';
+import { CfnInstance } from '@aws-cdk/aws-ec2';
 
 export class AuroraMysqlConstruct extends cdk.Construct {
     private props: AuroraMysqlParms;
+    proxy: rds.DatabaseProxy;
 
     constructor(parent: cdk.Construct, id: string, props: AuroraMysqlParms) {
         super(parent, id);
         this.props = props;
-        this.createAuroraCluster();
-    }
-
-    private createAuroraCluster() {
-        /**
-         * Create Cluster
-         */
         this.createCluster();
+        this.generateCfnOutputs();
     }
 
     private createCluster() {
@@ -52,7 +48,7 @@ export class AuroraMysqlConstruct extends cdk.Construct {
                 // optional , defaults to t3.medium
                 instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE2, ec2.InstanceSize.SMALL),
                 vpcSubnets: this.props.vpc.selectSubnets({
-                    subnets: this.props.isolatedSubnets,
+                    subnetGroupName: 'IsolatedNsnAurora',
                 }),
                 vpc: this.props.vpc,
             },
@@ -65,34 +61,26 @@ export class AuroraMysqlConstruct extends cdk.Construct {
         const cfnCluster = cluster.node.defaultChild as rds.CfnDBCluster;
         cfnCluster.addPropertyOverride('EnableIAMDatabaseAuthentication', true);
 
-        // // Use for performance enhacement through connection pooling
-        // const proxy = new rds.DatabaseProxy(this, 'Proxy', {
-        //     proxyTarget: rds.ProxyTarget.fromCluster(cluster),
-        //     secrets: [cluster.secret!],
-        //     vpc: this.props.vpc,
-        //     iamAuth: true,
-        // });
+        // Use for performance enhacement through connection pooling
+        // as well as better scaling and security management
+        this.proxy = new rds.DatabaseProxy(this, 'Proxy', {
+            proxyTarget: rds.ProxyTarget.fromCluster(cluster),
+            secrets: [cluster.secret!],
+            vpc: this.props.vpc,
+            iamAuth: true,
+        });
 
-        // cluster.connections.allowDefaultPortFrom(proxy);
-
-        // for the mean time allowing all vpc connections
+        // for the meantime allowing all vpc connections
         const ranges: string[] = params.allowFrom;
         ranges.push(this.props.vpc.vpcCidrBlock);
         for (let range of ranges) {
-            cluster.connections.allowFrom(ec2.Peer.ipv4(range), ec2.Port.tcp(3306));
+            this.proxy.connections.allowFrom(ec2.Peer.ipv4(range), ec2.Port.tcp(3306));
         }
+    }
 
-        new cdk.CfnOutput(this, 'AuroraMysqlEndpoint', {
-            value: cluster.clusterEndpoint.hostname,
-            exportName: 'aurora-mysql-endpoint',
+    private generateCfnOutputs() {
+        new cdk.CfnOutput(this, 'AuroraMysqlProxyEndpoint', {
+            value: this.proxy.endpoint,
         });
-
-        new cdk.CfnOutput(this, 'AuroraMysqlIdentifier', {
-            value: cluster.clusterIdentifier,
-            exportName: 'aurora-mysql-identifier',
-        });
-
-        //const role = new Role(this, 'DBProxyRole', { assumedBy: new AccountPrincipal('') });
-        //proxy.grantConnect(role, 'admin'); // Grant the role connection access to the DB Proxy for database user 'admin'.
     }
 }

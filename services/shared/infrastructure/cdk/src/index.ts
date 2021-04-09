@@ -3,6 +3,7 @@ import 'source-map-support/register';
 import * as cdk from '@aws-cdk/core';
 import { FssSharedStack } from './fss-shared-stack';
 import { FssMiscStack } from './fss-misc-stack';
+import { FssDatabaseStack } from './fss-database-stack';
 
 const app = new cdk.App();
 
@@ -17,5 +18,13 @@ cdk.Tags.of(fssSharedStack).add('Env', SHORT_ENV.toUpperCase());
 cdk.Tags.of(fssSharedStack).add('ApplicationID', 'fss');
 
 const fssMiscStack = new FssMiscStack(app, 'fss-misc', { env, stackName: `fss-misc-${SHORT_ENV}` });
-cdk.Tags.of(fssSharedStack).add('Env', SHORT_ENV.toUpperCase());
-cdk.Tags.of(fssSharedStack).add('ApplicationID', 'fss-misc');
+cdk.Tags.of(fssMiscStack).add('Env', SHORT_ENV.toUpperCase());
+cdk.Tags.of(fssMiscStack).add('ApplicationID', 'fss-misc');
+
+const fssDatabaseStack = new FssDatabaseStack(app, 'fss-database', {
+    env,
+    stackName: `fss-database-${SHORT_ENV}`,
+    vpc: fssSharedStack.vpc,
+});
+cdk.Tags.of(fssDatabaseStack).add('Env', SHORT_ENV.toUpperCase());
+cdk.Tags.of(fssDatabaseStack).add('ApplicationID', 'fss-database');

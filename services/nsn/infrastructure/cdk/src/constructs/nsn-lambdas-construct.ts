@@ -79,6 +79,7 @@ export class NsnLambdasConstruct extends cdk.Construct {
         writeAccessToDynamo
             ? this.props.nsnTable.grantReadWriteData(lambdaFun.lambdaFunction)
             : this.props.nsnTable.grantReadData(lambdaFun.lambdaFunction);
+
         return lambdaFun.alias;
     }
 

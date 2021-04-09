@@ -8,12 +8,15 @@
         "@aws-cdk/aws-secretsmanager:parseOwnedSecretName": true,
         "@aws-cdk/aws-kms:defaultKeyPolicies": true,
         "@aws-cdk/aws-s3:grantWriteWithoutAcl": true,
-        "fss-shared-dev": {
+        "fss-database-dev": {
             "auroraMysql": {
                 "allowFrom": ["172.28.124.0/23"],
                 "instanceCount": 1,
                 "backupRetentionDays": 7
-            },
+            }
+        },
+        "fss-common-dev": {},
+        "fss-shared-dev": {
             "githubRepoOwner": "octoConsulting",
             "githubRepo": "GSA_FSS19_DevOps",
             "githubTokenSecretArn": "arn:aws:secretsmanager:us-east-1:902479997164:secret:github_token-pNuenM",
@@ -30,7 +33,6 @@
                 "192.168.0.0/16",
                 "206.137.126.0/24"
             ],
-            "addonRoutesVgw": "vgw-088b7aba402f16f23",
             "extendedSubnetConfiguration": [
                 {
                     "subnetConfiguration": {

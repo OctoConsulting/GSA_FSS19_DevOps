@@ -3,6 +3,5 @@ import { ISubnet, IVpc } from '@aws-cdk/aws-ec2';
 export interface AuroraMysqlParms {
     shortEnv: string;
     vpc: IVpc;
-    isolatedSubnets: ISubnet[];
     stackContext: any;
 }
