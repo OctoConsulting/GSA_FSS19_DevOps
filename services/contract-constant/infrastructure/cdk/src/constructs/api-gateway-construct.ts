@@ -123,7 +123,12 @@ export class ApiGatewayConstruct extends cdk.Construct {
 
         this.apiRole.addToPolicy(
             new iam.PolicyStatement({
-                resources: ['*'],
+                resources: [
+                    this.props.lambdaFunctions.getContractAcoOfficeAddressDetailsLambda.functionArn,
+                    this.props.lambdaFunctions.getContractBuyerLambda.functionArn,
+                    this.props.lambdaFunctions.getContractNotesLambda.functionArn,
+                    this.props.lambdaFunctions.getContractVendorAddressDetailsLambda.functionArn,
+                ],
                 actions: ['lambda:InvokeFunction'],
             })
         );
