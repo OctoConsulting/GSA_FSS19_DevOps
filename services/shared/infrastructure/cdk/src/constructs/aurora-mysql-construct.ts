@@ -27,8 +27,24 @@ export class AuroraMysqlConstruct extends cdk.Construct {
         const key = new kms.Key(this, 'AuroraKmsKey', {
             enableKeyRotation: true,
         });
+
+        const secretKey = new kms.Key(this, 'SecretKmsKey', {
+            enableKeyRotation: true,
+        });
+
+        const masterSecret = new Secret(this, 'AuroraClusterMasterSecret', {
+            encryptionKey: secretKey,
+            generateSecretString: {
+                excludePunctuation: true,
+                secretStringTemplate: JSON.stringify({
+                    username: 'admin',
+                }),
+                generateStringKey: 'password',
+            },
+        });
+
         const cluster = new rds.DatabaseCluster(this, 'Database', {
-            credentials: rds.Credentials.fromSecret(new Secret(this, 'AuroraClusterMasterSecret')),
+            credentials: rds.Credentials.fromSecret(masterSecret),
             engine: rds.DatabaseClusterEngine.auroraMysql({ version: rds.AuroraMysqlEngineVersion.VER_2_08_1 }),
             storageEncrypted: true,
             storageEncryptionKey: key,
@@ -45,27 +61,35 @@ export class AuroraMysqlConstruct extends cdk.Construct {
                 retention: cdk.Duration.days(params.backupRetentionDays),
             },
         });
-        console.log();
+        // Allow IAM authentication
+        const cfnCluster = cluster.node.defaultChild as rds.CfnDBCluster;
+        cfnCluster.addPropertyOverride('EnableIAMDatabaseAuthentication', true);
 
-        const proxy = new rds.DatabaseProxy(this, 'Proxy', {
-            proxyTarget: rds.ProxyTarget.fromCluster(cluster),
-            secrets: [cluster.secret!],
-            vpc: this.props.vpc,
-            iamAuth: true,
-        });
+        // // Use for performance enhacement through connection pooling
+        // const proxy = new rds.DatabaseProxy(this, 'Proxy', {
+        //     proxyTarget: rds.ProxyTarget.fromCluster(cluster),
+        //     secrets: [cluster.secret!],
+        //     vpc: this.props.vpc,
+        //     iamAuth: true,
+        // });
 
-        cluster.connections.allowDefaultPortFrom(proxy);
+        // cluster.connections.allowDefaultPortFrom(proxy);
 
         // for the mean time allowing all vpc connections
         const ranges: string[] = params.allowFrom;
         ranges.push(this.props.vpc.vpcCidrBlock);
         for (let range of ranges) {
-            proxy.connections.allowFrom(ec2.Peer.ipv4(range), ec2.Port.tcp(3306));
+            cluster.connections.allowFrom(ec2.Peer.ipv4(range), ec2.Port.tcp(3306));
         }
 
-        new cdk.CfnOutput(this, 'ProxyEndpoint', {
-            value: proxy.endpoint,
-            exportName: 'aurora-mysql-proxy',
+        new cdk.CfnOutput(this, 'AuroraMysqlEndpoint', {
+            value: cluster.clusterEndpoint.hostname,
+            exportName: 'aurora-mysql-endpoint',
+        });
+
+        new cdk.CfnOutput(this, 'AuroraMysqlIdentifier', {
+            value: cluster.clusterIdentifier,
+            exportName: 'aurora-mysql-identifier',
         });
 
         //const role = new Role(this, 'DBProxyRole', { assumedBy: new AccountPrincipal('') });
