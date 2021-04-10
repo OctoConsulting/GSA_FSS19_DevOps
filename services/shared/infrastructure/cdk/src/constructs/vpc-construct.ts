@@ -130,7 +130,7 @@ export class VpcConstruct extends cdk.Construct {
             let j = 1;
             for (const cidr of this.props.stackContext.addonRoutesCidrs!)
                 sub.addRoute(`InternalRoute${j++}`, {
-                    routerId: this.props.stackContext.addonRoutesVgw!,
+                    routerId: this.props.vpc.vpnGatewayId!,
                     routerType: ec2.RouterType.GATEWAY,
                     destinationCidrBlock: cidr,
                 });

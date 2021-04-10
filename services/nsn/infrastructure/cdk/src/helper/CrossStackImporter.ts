@@ -8,10 +8,10 @@ export class CrossStackImporter extends cdk.Construct {
 
     constructor(parent: cdk.Construct, id: string, props: EnvParameters) {
         super(parent, id);
-        this.crossStackImports = this.getCrossStackRefs(props.shortEnv);
+        this.crossStackImports = this.getCrossStackRefs(props);
     }
 
-    private getCrossStackRefs(shortEnv: string) {
+    private getCrossStackRefs(props: EnvParameters) {
         const apiGatewayVpcEndpoint = ec2.InterfaceVpcEndpoint.fromInterfaceVpcEndpointAttributes(
             this,
             'api-gateway-vpc-endpoint',
@@ -20,8 +20,14 @@ export class CrossStackImporter extends cdk.Construct {
                 port: 443,
             }
         );
+
+        const vpc = ec2.Vpc.fromLookup(this, 'myVpc', {
+            vpcId: props.vpc,
+        });
+
         return {
             apiGatewayVpcEndpoint,
+            vpc,
         };
     }
 

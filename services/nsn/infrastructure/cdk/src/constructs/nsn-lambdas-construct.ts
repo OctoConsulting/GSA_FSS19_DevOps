@@ -28,9 +28,7 @@ export class NsnLambdasConstruct extends cdk.Construct {
     }
 
     private buildPreRequisites() {
-        this.vpc = ec2.Vpc.fromLookup(this, 'myVpc', {
-            vpcId: this.props.vpc,
-        });
+        this.vpc = this.props.vpc;
 
         this.securityGroup = new ec2.SecurityGroup(this, 'sg', {
             securityGroupName: `${constants.API_PREFIX}-${this.props.shortEnv}`,
@@ -81,6 +79,7 @@ export class NsnLambdasConstruct extends cdk.Construct {
         writeAccessToDynamo
             ? this.props.nsnTable.grantReadWriteData(lambdaFun.lambdaFunction)
             : this.props.nsnTable.grantReadData(lambdaFun.lambdaFunction);
+
         return lambdaFun.alias;
     }
 
