@@ -7,14 +7,13 @@ import { EntiyData } from '../model/entity-data'
 
 export const getEntityData = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     const queryStringParam = event.queryStringParameters;
-    console.log(queryStringParam?.validate);
-    if (!event.body) {
+    console.log(event.pathParameters?"EntityId:"+event.pathParameters["entityid"]:"EntityId is Blank");
+    
+    if (!event.pathParameters ||!event.pathParameters["entityid"]) {
         return apiResponses._400({ message: 'Entity ID is needed to retrieve Entity data' });
     }
 
-    let { entity_id} = JSON.parse(event.body);
-
-    let entityId = entity_id;
+    let entityId = event.pathParameters["entityid"];
     
     if (!entityId || entityId.trim().length < 1) {
         return apiResponses._400({

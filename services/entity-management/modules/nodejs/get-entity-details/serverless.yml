@@ -55,8 +55,8 @@ functions:
     handler: getEntityData
     events:
       - http:
-          path: /entity-data/v1/details
-          method: POST
+          path: /entitymanagement/v1/details/{entityid}
+          method: GET
   test:
     handler: test
     events:
