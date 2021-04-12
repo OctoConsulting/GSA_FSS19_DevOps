@@ -1,8 +1,8 @@
 {
-    "name": "entity-data",
+    "name": "get-entity-details",
     "version": "1.0.0",
     "description": "Get Entity data Lambda",
-    "main": "dist/entity-data/service/index.js",
+    "main": "dist/get-entity-details/service/index.js",
     "directories": {
         "test": "test"
     },
