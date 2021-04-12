@@ -68,6 +68,10 @@ export class AuroraMysqlConstruct extends cdk.Construct {
             secrets: [cluster.secret!],
             vpc: this.props.vpc,
             iamAuth: true,
+            vpcSubnets: this.props.vpc.selectSubnets({
+                subnetGroupName: 'IsolatedNsnAurora',
+            }),
+            dbProxyName: `fss-nsn-${this.props.shortEnv}`,
         });
 
         // for the meantime allowing all vpc connections
