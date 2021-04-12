@@ -26,7 +26,7 @@ export const getEntityData = async (event: APIGatewayProxyEvent): Promise<APIGat
     try {
             let entityParams = {
                 TableName: getSettings().TABLE_NAME,
-                KeyConditionExpression: 'PK = :entityId and SK = :address',
+                KeyConditionExpression: 'pk = :entityId and sk = :address',
                 ExpressionAttributeValues: {
                     ':entityId': entityId,
                     ':address': 'address',
