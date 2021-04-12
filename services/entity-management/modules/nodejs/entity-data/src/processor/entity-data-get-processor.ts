@@ -3,6 +3,7 @@ import { DynamoDB } from 'aws-sdk';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { apiResponses, response } from '../model/responseAPI';
 import { getSettings } from '../config';
+import { EntiyData } from '../model/entity-data'
 
 export const getEntityData = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     const queryStringParam = event.queryStringParameters;
@@ -22,7 +23,7 @@ export const getEntityData = async (event: APIGatewayProxyEvent): Promise<APIGat
     }
 
     let entityData;
-
+    let entityResponse : EntiyData[]=[];
     try {
             let entityParams = {
                 TableName: getSettings().TABLE_NAME,
@@ -37,13 +38,9 @@ export const getEntityData = async (event: APIGatewayProxyEvent): Promise<APIGat
             if (!entityData.Items || entityData.Items.length == 0) {
                 return apiResponses._404({ message: 'No Entity Data found for entity id - ' + entityId });
             }
-
-
-            let entityResponse = {
-               
-            };
-
-            return apiResponses._200(entityResponse);
+            
+            const entityClass: EntiyData = JSON.parse(entityData.Items[0].details);
+            return apiResponses._200(entityClass);
         
         
     } catch (err) {

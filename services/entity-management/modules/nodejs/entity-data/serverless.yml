@@ -55,7 +55,7 @@ functions:
     handler: getEntityData
     events:
       - http:
-          path: /nsnrouting/v1/details/paginated
+          path: /entity-data/v1/details
           method: POST
   test:
     handler: test

@@ -7,7 +7,12 @@
 ```
 npm install -g lambda-local
 
-lambda-local -l dist/nsn-get-routing/index.js -h handler -e test/samples/sample-request.js -t 15
+execute the following commands before deploy
+npm install serverless-dynamodb-local
+serverless dynamodb install
+
+sls offline start --location .
+
 ```
 
 ## Build
