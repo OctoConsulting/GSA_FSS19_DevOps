@@ -12,6 +12,7 @@ export const getEntityData = async (event: APIGatewayProxyEvent): Promise<APIGat
     if (!event.pathParameters ||!event.pathParameters["entityid"]) {
         return apiResponses._400({ message: 'Entity ID is needed to retrieve Entity data' });
     }
+    
 
     let entityId = event.pathParameters["entityid"];
     
@@ -34,6 +35,8 @@ export const getEntityData = async (event: APIGatewayProxyEvent): Promise<APIGat
             };
 
             entityData = await getDocumentDbClient().query(entityParams).promise();
+
+            console.log(JSON.stringify(entityData));
             if (!entityData.Items || entityData.Items.length == 0) {
                 return apiResponses._404({ message: 'No Entity Data found for entity id - ' + entityId });
             }
