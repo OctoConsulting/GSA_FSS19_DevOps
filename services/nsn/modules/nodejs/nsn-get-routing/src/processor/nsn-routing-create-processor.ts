@@ -2,7 +2,7 @@
 
 import { NsnData } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { dynamoDocumentClient, getSettings } from '../config';
+import { getDBSettings } from '../config';
 import { apiResponses } from '../model/responseAPI';
 import { DynamoDB } from 'aws-sdk';
 import { checkForExistingNsn } from '../util/nsn-data-util';
@@ -57,26 +57,39 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
     console.log('6');
 
-    const nsnData: NsnData = {
-        group_id: routing_id.length > 4 ? classId : group_id,
-        routing_id: routing_id.toUpperCase(),
-        owa: owa.toUpperCase(),
-        is_civ_mgr,
-        is_mil_mgr,
-        ric: !ric ? ric : ric.toUpperCase(),
-        routing_id_category: routing_id.length == 2 ? 'group' : routing_id.length == 4 ? 'class' : 'nsn',
-        created_by: created_by.toUpperCase(),
-        create_date: new Date().getTime().toString(),
-        updated_date: new Date().getTime().toString(),
-    };
+    let insertQuery =
+        'Insert into ' +
+        getDBSettings().TABLE_NAME +
+        '( routing_id,  owa, is_civ_mgr, is_mil_mgr, ric, routing_id_category, updated_date, created_by, created_date ) ' +
+        ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
     console.log('7');
+    let now: Date = new Date();
     try {
-        console.log('8');
-        const model = { TableName: getSettings().TABLE_NAME, Item: nsnData };
-        console.log('9');
-        await getDocumentDbClient().put(model).promise();
-        console.log('10 ' + model.Item);
-        return apiResponses._201(model.Item);
+        getDBSettings().CONNECTION_POOL.query(insertQuery, [
+            routing_id,
+            owa,
+            is_civ_mgr === 'Y' ? 1 : 0,
+            is_mil_mgr === 'Y' ? 1 : 0,
+            ric,
+            routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
+            now,
+            created_by,
+            now,
+        ]);
+
+        const nsnData: NsnData = {
+            routing_id: routing_id.toUpperCase(),
+            owa: owa,
+            is_civ_mgr,
+            is_mil_mgr,
+            ric: ric,
+            routing_id_category: routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
+            updated_date: now,
+            created_by: created_by,
+            create_date: now,
+        };
+
+        return apiResponses._201(nsnData);
     } catch (err) {
         console.log('Error ---- ' + err);
         return apiResponses._500({ message: 'Error creating NSN record' });

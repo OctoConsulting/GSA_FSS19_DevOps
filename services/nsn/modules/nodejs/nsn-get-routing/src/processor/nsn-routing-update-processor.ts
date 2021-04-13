@@ -2,7 +2,7 @@
 
 import { NsnData } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { getSettings } from '../config';
+import { getDBSettings } from '../config';
 import { apiResponses } from '../model/responseAPI';
 import { DynamoDB } from 'aws-sdk';
 import { checkForExistingNsn } from '../util/nsn-data-util';
@@ -13,7 +13,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         return apiResponses._400({ message: 'No routing data provided to update NSN routing record.' });
     }
 
-    let { routing_id, owa, is_civ_mgr, is_mil_mgr, ric, created_by } = JSON.parse(event.body);
+    let { routing_id, owa, is_civ_mgr, is_mil_mgr, ric, updated_by } = JSON.parse(event.body);
 
     if (!routing_id) {
         return apiResponses._400({ message: 'Routing NSN number is mandatory to update NSN record' });
@@ -31,18 +31,6 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     let group_id = Number(routing_id.substring(0, 2));
     let class_id = routing_id.length >= 4 ? Number(routing_id.substring(0, 4)) : 0;
 
-    console.log('Routing ID - ' + routing_id);
-
-    var params = {
-        TableName: getSettings().TABLE_NAME,
-        Key: {
-            group_id: routing_id.length > 4 ? class_id : group_id,
-            routing_id: routing_id,
-        },
-    };
-    let existingNsnData = await getDocumentDbClient().get(params).promise();
-    console.log('putNsn flow existingNsnData :: ' + existingNsnData);
-
     //  let owaRegex = /^[A-X,Z,0-9]$/;
     const owaAllowedVal = ['F', 'M', 'N', 'P'];
     //  if (!owa || !owaRegex.test(owa)) {
@@ -59,31 +47,48 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         return apiResponses._400({ message: 'Routing identifier code is mandatory.' });
     }
 
-    console.log('Fetching data from dynamoDB for update...');
-    const updateNsnData = await getDocumentDbClient().get(params).promise();
-    console.log('Data fetched from DB  to update - ' + updateNsnData.Item);
+    let select_query = 'SELECT * FROM ' + getDBSettings().TABLE_NAME + " where routing_id = '" + routing_id + "'";
+    let result = await getDBSettings().CONNECTION_POOL.query(select_query);
+    let existingNsnData: any;
 
-    if (updateNsnData.Item == null) {
+    result.forEach((row: any) => {
+        existingNsnData = row ? row[0] : undefined;
+    });
+
+    //let existingNsnData = await getDocumentDbClient().get(params).promise();
+
+    if (!existingNsnData) {
         return apiResponses._404({ message: 'No NSN Data found for update for routing_id - ' + routing_id });
     }
 
     const nsnData: NsnData = {
-        group_id: routing_id.length > 4 ? class_id : group_id,
         routing_id: routing_id.toUpperCase(),
-        owa: !owa ? existingNsnData.Item?.owa : owa.toUpperCase(),
+        owa: !owa ? existingNsnData.owa : owa.toUpperCase(),
         is_civ_mgr,
         is_mil_mgr,
-        ric: !ric ? existingNsnData.Item?.ric : ric.toUpperCase(),
-        routing_id_category: existingNsnData.Item?.routing_id_category,
-        create_date: existingNsnData.Item?.create_date,
-        created_by: existingNsnData.Item?.created_by,
-        updated_date: new Date().getTime().toString(),
+        ric: !ric ? existingNsnData.ric : ric.toUpperCase(),
+        routing_id_category: existingNsnData.routing_id_category,
+        create_date: existingNsnData.create_date,
+        created_by: existingNsnData.created_by,
+        updated_date: new Date(),
     };
 
     try {
-        const model = { TableName: getSettings().TABLE_NAME, Item: nsnData };
-        await getDocumentDbClient().put(model).promise();
-        return apiResponses._200(model.Item);
+        let update_query =
+            'UPDATE ' +
+            getDBSettings().TABLE_NAME +
+            ' SET owa = ?, is_civ_mgr = ?, is_mil_mgr = ?, ric = ?, updated_date = ?, updated_by = ? ' +
+            ' WHERE routing_id = ?';
+        getDBSettings().CONNECTION_POOL.query(update_query, [
+            owa,
+            is_civ_mgr === 'Y' ? 1 : 0,
+            is_mil_mgr === 'Y' ? 1 : 0,
+            ric,
+            new Date(),
+            updated_by,
+            routing_id,
+        ]);
+        return apiResponses._200(nsnData);
     } catch (err) {
         console.log('Error while updating - ' + err);
         return apiResponses._500({ message: 'Error updating NSN record for routing ID - ' + routing_id });
