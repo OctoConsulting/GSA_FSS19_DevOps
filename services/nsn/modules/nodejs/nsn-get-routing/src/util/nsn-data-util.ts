@@ -16,9 +16,3 @@ export async function checkForExistingNsn(routing_id: string) {
     console.log('Got routing_id in checkForExistingNsn = ' + recordCount);
     return recordCount == 1 ? true : false;
 }
-
-export const NSN_CONSTANTS = {
-    GROUP: "'GROUP'",
-    CLASS: "'CLASS'",
-    NSN: "'NSN'",
-};
