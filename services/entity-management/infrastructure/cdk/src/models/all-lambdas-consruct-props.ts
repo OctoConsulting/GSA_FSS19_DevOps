@@ -5,6 +5,7 @@ export interface AllLambdasConstructParms {
     vpc: string;
     artifactBucket: string;
     logRetentionInDays?: number;
+    logLevel: string;
     sharedArtifactPath?: string;
     dynamoTable: dynamodb.Table;
     xRayTracing: boolean;

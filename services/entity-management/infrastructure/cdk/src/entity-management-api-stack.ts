@@ -26,12 +26,14 @@ export class EntityManagementApiStack extends cdk.Stack {
             shortEnv: envParameters.shortEnv,
             vpc: envParameters.vpc,
             xRayTracing: true,
+            logLevel: envParameters.logLevel,
             artifactBucket: envParameters.artifactsBucket,
             logRetentionInDays: 30,
             lambdaFuns: [
                 {
                     artifactPath: `${constants.LAMBDA_ARTIFACT_PATH_PREFIX}/${constants.FUNCTION_NAMES.GET_ENTITY_DETAILS}/index.zip`,
                     name: `${constants.FUNCTION_NAMES.GET_ENTITY_DETAILS}`,
+                    handler: 'index.getEntityData',
                 },
             ],
         });

@@ -3,6 +3,7 @@ export interface EnvParameters {
     vpc: string;
     domainSuffix?: string;
     artifactsBucket: string;
+    logLevel: string;
     certArn?: string;
     enableEncryptionAtRest: boolean;
     logRetentionInDays: number;

@@ -94,6 +94,7 @@ export class AllLambdasConstruct extends cdk.Construct {
             artifactVersion: artifactVersion,
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
+                LOG_LEVEL: this.props.logLevel,
                 TABLE_NAME: this.props.dynamoTable.tableName,
             },
             handler: handler,
