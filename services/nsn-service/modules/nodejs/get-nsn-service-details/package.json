@@ -2,7 +2,7 @@
     "name": "nsn-data",
     "version": "1.0.0",
     "description": "Get NSN data Lambda",
-    "main": "dist/get-nsn-service-details/service/index.js",
+    "main": "index.js",
     "directories": {
         "test": "test"
     },
