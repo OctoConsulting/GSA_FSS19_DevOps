@@ -11,7 +11,7 @@ provider:
         DB_USER: 'nsn-user'
         DB_PWD: 'password'
         DB_NAME: 'NSN-DB'
-        SHORT_ENV: 'dev'
+        SHORT_ENV: 'local'
 
 plugins:
     - serverless-webpack

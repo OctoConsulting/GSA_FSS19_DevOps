@@ -1,4 +1,4 @@
-import { DynamoDB } from 'aws-sdk';
+import { DynamoDB, RDS } from 'aws-sdk';
 
 let options = {};
 
@@ -17,17 +17,41 @@ export const getDBSettings = () => {
             '`' +
             process.env.DB_NAME +
             '`.' +
-            '`nsn-routing' +
-            (process.env.SHORT_ENV == undefined ? '' : '-' + process.env.SHORT_ENV) +
+            '`nsn_routing' +
+            (process.env.SHORT_ENV == undefined ? '' : '_' + process.env.SHORT_ENV) +
             '`',
         IS_OFFLINE: process.env.IS_OFFLINE,
-        CONNECTION_POOL: mysql.createPool({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PWD,
-            database: process.env.DB_NAME,
-        }),
+        CONNECTION_POOL:
+            process.env.SHORT_ENV == 'local'
+                ? mysql.createPool({
+                      host: process.env.DB_HOST,
+                      user: process.env.DB_USER,
+                      password: process.env.DB_PWD,
+                      database: process.env.DB_NAME,
+                  })
+                : new RDS.Signer().getAuthToken(
+                      {
+                          // uses the IAM role access keys to create an authentication token
+                          region: process.env.AWS_REGION,
+                          hostname: process.env.DB_HOST,
+                          username: process.env.DB_NAME,
+                          port: 3306,
+                      },
+                      function (err, token) {
+                          if (err) {
+                              console.log(`could not get auth token: ${err}`);
+                          } else {
+                              var connection = mysql.createConnection({
+                                  host: process.env.DB_HOST,
+                                  port: 3306,
+                                  user: process.env.DB_USER,
+                                  password: token,
+                                  database: process.env.DB_NAME,
+                                  ssl: 'Amazon RDS',
+                              });
+                              connection.connect();
+                          }
+                      }
+                  ),
     };
 };
-
-
