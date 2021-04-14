@@ -12,6 +12,8 @@
             "auroraMysql": {
                 "allowFrom": ["172.28.124.0/23"],
                 "instanceCount": 1,
+                "readOnlyGroups": ["FSS-Developers"],
+                "adminGroups": ["FSS-19.Arch-DevOps-Sec", "FSS-DataOps-Eng"],
                 "backupRetentionDays": 7
             }
         },

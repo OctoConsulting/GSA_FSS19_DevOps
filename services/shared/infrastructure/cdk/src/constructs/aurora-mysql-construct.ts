@@ -6,10 +6,12 @@ import { AuroraMysqlParms } from '../models/aurora-mysql-construct-parms';
 import * as iam from '@aws-cdk/aws-iam';
 import { Secret } from '@aws-cdk/aws-secretsmanager';
 import { CfnInstance } from '@aws-cdk/aws-ec2';
+import { ScopedAws } from '@aws-cdk/core';
 
 export class AuroraMysqlConstruct extends cdk.Construct {
     private props: AuroraMysqlParms;
     proxy: rds.DatabaseProxy;
+    readOnlyEndpoint: rds.CfnDBProxyEndpoint;
 
     constructor(parent: cdk.Construct, id: string, props: AuroraMysqlParms) {
         super(parent, id);
@@ -24,20 +26,9 @@ export class AuroraMysqlConstruct extends cdk.Construct {
             enableKeyRotation: true,
         });
 
-        const secretKey = new kms.Key(this, 'SecretKmsKey', {
-            enableKeyRotation: true,
-        });
-
-        const masterSecret = new Secret(this, 'AuroraClusterMasterSecret', {
-            encryptionKey: secretKey,
-            generateSecretString: {
-                excludePunctuation: true,
-                secretStringTemplate: JSON.stringify({
-                    username: 'admin',
-                }),
-                generateStringKey: 'password',
-            },
-        });
+        const masterSecret = createSecret(this, 'Master', 'admin');
+        const readonlySecret = createSecret(this, 'ReadOnly', 'readonly');
+        const lambdaSecret = createSecret(this, 'Lambda', 'lambda');
 
         const cluster = new rds.DatabaseCluster(this, 'Database', {
             credentials: rds.Credentials.fromSecret(masterSecret),
@@ -57,21 +48,31 @@ export class AuroraMysqlConstruct extends cdk.Construct {
                 retention: cdk.Duration.days(params.backupRetentionDays),
             },
         });
-        // Allow IAM authentication
-        const cfnCluster = cluster.node.defaultChild as rds.CfnDBCluster;
-        cfnCluster.addPropertyOverride('EnableIAMDatabaseAuthentication', true);
-
+        const proxySecrets = [cluster.secret!, readonlySecret, lambdaSecret];
         // Use for performance enhacement through connection pooling
         // as well as better scaling and security management
         this.proxy = new rds.DatabaseProxy(this, 'Proxy', {
             proxyTarget: rds.ProxyTarget.fromCluster(cluster),
-            secrets: [cluster.secret!],
+            secrets: proxySecrets,
             vpc: this.props.vpc,
             iamAuth: true,
+            requireTLS: true,
             vpcSubnets: this.props.vpc.selectSubnets({
                 subnetGroupName: 'IsolatedNsnAurora',
             }),
             dbProxyName: `fss-nsn-${this.props.shortEnv}`,
+        });
+
+        // The default endpoint is read/write, we will also create a
+        // Readonly endpoint for the rds proxy
+        this.readOnlyEndpoint = new rds.CfnDBProxyEndpoint(this, 'ReadOnlyProxyEndpoint', {
+            dbProxyName: this.proxy.dbProxyName,
+            dbProxyEndpointName: 'readonly',
+            vpcSubnetIds: this.props.vpc.selectSubnets({
+                subnetGroupName: 'IsolatedNsnAurora',
+            }).subnetIds,
+            targetRole: 'READ_ONLY',
+            vpcSecurityGroupIds: this.proxy.connections.securityGroups.map((s) => s.securityGroupId),
         });
 
         // for the meantime allowing all vpc connections
@@ -80,11 +81,59 @@ export class AuroraMysqlConstruct extends cdk.Construct {
         for (let range of ranges) {
             this.proxy.connections.allowFrom(ec2.Peer.ipv4(range), ec2.Port.tcp(3306));
         }
+        for (let grp of params.adminGroups) {
+            let adminGroup = iam.Group.fromGroupArn(
+                this,
+                `${grp}-Import`,
+                `arn:aws:iam::${this.props.account}:group/${grp}`
+            );
+            this.proxy.grantConnect(adminGroup, 'admin');
+        }
+
+        for (let grp of params.readOnlyGroups) {
+            let readOnlyGroup = iam.Group.fromGroupArn(
+                this,
+                `${grp}-Import`,
+                `arn:aws:iam::${this.props.account}:group/${grp}`
+            );
+            this.proxy.grantConnect(readOnlyGroup, 'readonly');
+        }
     }
 
     private generateCfnOutputs() {
-        new cdk.CfnOutput(this, 'AuroraMysqlProxyEndpoint', {
-            value: this.proxy.endpoint,
-        });
+        const cfnExports = [
+            { name: 'rds-proxy-default-endpoint', value: this.proxy.endpoint },
+            { name: 'rds-proxy-readonly-endpoint', value: this.readOnlyEndpoint.attrEndpoint },
+            { name: 'rds-proxy-name', value: this.proxy.dbProxyName },
+            { name: 'rds-proxy-arn', value: this.proxy.dbProxyArn },
+            {
+                name: 'rds-proxy-sgs',
+                value: this.proxy.connections.securityGroups.map((s) => s.securityGroupId).join(','),
+            },
+        ];
+        for (let e of cfnExports) createExport(this, e.name, e.value);
     }
+}
+
+function createExport(scope: cdk.Construct, name: string, val: string) {
+    return new cdk.CfnOutput(scope, name, {
+        value: val,
+        exportName: name,
+    });
+}
+
+function createSecret(scope: cdk.Construct, name: string, user: string) {
+    const secretKey = new kms.Key(scope, `${name}SecretKmsKey`, {
+        enableKeyRotation: true,
+    });
+    return new Secret(scope, `AuroraCluster${name}Secret`, {
+        encryptionKey: secretKey,
+        generateSecretString: {
+            excludePunctuation: true,
+            secretStringTemplate: JSON.stringify({
+                username: user,
+            }),
+            generateStringKey: 'password',
+        },
+    });
 }
