@@ -1,4 +1,4 @@
-import { ISubnet, IVpc } from '@aws-cdk/aws-ec2';
+import { IVpc } from '@aws-cdk/aws-ec2';
 
 export interface AuroraMysqlParms {
     shortEnv: string;

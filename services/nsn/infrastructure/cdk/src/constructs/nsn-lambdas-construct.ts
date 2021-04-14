@@ -69,6 +69,9 @@ export class NsnLambdasConstruct extends cdk.Construct {
             lambdaEnvParameters: {
                 SHORT_ENV: this.props.shortEnv,
                 TABLE_NAME: this.props.nsnTable.tableName,
+                DB_HOST: cdk.Fn.importValue('rds-proxy-default-endpoint'),
+                DB_NAME: this.props.mysqlDbName,
+                DB_USER: cdk.Fn.importValue('rds-proxy-lambda-user'),
             },
             handler: handler,
             type: LambdaConstructProps.LambdaTypeEnum.NODEJS,

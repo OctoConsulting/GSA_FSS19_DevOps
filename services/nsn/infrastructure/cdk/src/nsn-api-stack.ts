@@ -28,6 +28,7 @@ export class NsnApiStack extends cdk.Stack {
             artifactBucket: envParameters.artifactsBucket,
             artifactKey: constants.NSN_ROUTING_LAMBDA_ZIP_PATH,
             logRetentionInDays: 30,
+            mysqlDbName: envParameters.mysqlDbName,
         });
 
         new ApiGatewayConstruct(this, 'api', {
