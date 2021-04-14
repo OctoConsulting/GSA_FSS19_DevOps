@@ -13,7 +13,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         return apiResponses._400({ message: 'No routing data provided to update NSN routing record.' });
     }
 
-    let { routing_id, owa, is_civ_mgr, is_mil_mgr, ric, updated_by } = JSON.parse(event.body);
+    let { routing_id, owa, is_civ_mgr, is_mil_mgr, ric, changed_by } = JSON.parse(event.body);
 
     if (!routing_id) {
         return apiResponses._400({ message: 'Routing NSN number is mandatory to update NSN record' });
@@ -68,24 +68,25 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         is_mil_mgr,
         ric: !ric ? existingNsnData.ric : ric.toUpperCase(),
         routing_id_category: existingNsnData.routing_id_category,
+        change_date: new Date(),
+        changed_by: changed_by,
         create_date: existingNsnData.create_date,
         created_by: existingNsnData.created_by,
-        updated_date: new Date(),
     };
 
     try {
         let update_query =
             'UPDATE ' +
             getDBSettings().TABLE_NAME +
-            ' SET owa = ?, is_civ_mgr = ?, is_mil_mgr = ?, ric = ?, updated_date = ?, updated_by = ? ' +
+            ' SET owa = ?, is_civ_mgr = ?, is_mil_mgr = ?, ric = ?, change_date = ?, changed_by = ? ' +
             ' WHERE routing_id = ?';
         getDBSettings().CONNECTION_POOL.query(update_query, [
             owa,
-            is_civ_mgr === 'Y' ? 1 : 0,
-            is_mil_mgr === 'Y' ? 1 : 0,
+            is_civ_mgr,
+            is_mil_mgr,
             ric,
             new Date(),
-            updated_by,
+            changed_by,
             routing_id,
         ]);
         return apiResponses._200(nsnData);
