@@ -1,88 +1,62 @@
 service: nsn-get-routing
 
 provider:
-  name: aws
-  runtime: nodejs12.x
-  profile: serverlessUser
-  region: us-east-1
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:*
-      Resource: '*'
-  environment:
-    TABLE_NAME: ""
+    name: aws
+    runtime: nodejs12.x
+    profile: serverlessUser
+    region: us-east-1
+    environment:
+        PORT: 3306
+        DB_HOST: 'localhost'
+        DB_USER: 'nsn-user'
+        DB_PWD: 'password'
+        DB_NAME: 'NSN-DB'
+        SHORT_ENV: 'local'
 
 plugins:
-  - serverless-webpack
-  - serverless-offline
-  - serverless-dynamodb-local
+    - serverless-webpack
+    - serverless-offline
 
 package:
-  individually: true
+    individually: true
 
-custom:
-  dynamodb:
-    stages:
-      - dev
-    start:
-      port: 8000
-      inMemory: false
-      migrate: true
-    migration:
-        dir: offline/migrations
-
-resources:
-  Resources:
-    DynamoDBTable:
-      Type: AWS::DynamoDB::Table
-      DeletionPolicy: Retain
-      Properties:
-        TableName: nsn_data
-        AttributeDefinitions:
-          - AttributeName: group_id
-            AttributeType: N
-          - AttributeName: routing_id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: group_id
-            KeyType: HASH
-          - AttributeName: routing_id
-            KeyType: S
-        BillingMode: PAY_PER_REQUEST 
 functions:
-  saveNSNData:
-    handler: postNsn
-    events:
-      - http:
-          path: /nsnrouting/v1/details/
-          method: post
-          cors: true
-  retrieveNSNData:
-    handler: getNsn
-    events:
-      - http:
-          path: /nsnrouting/v1/details/paginated
-          method: POST
-  deleteNSNData:
-    handler: deleteNsn
-    events:
-      - http:
-          path: /nsnrouting/v1/details/{routingId}
-          method: DELETE
-        request:
-          parameters:
-            paths:
-              id: true
-  updateNSNData:
-    handler: putNsn
-    events:
-      - http:
-          path: /nsnrouting/v1/details/
-          method: PUT
-  test:
-    handler: test
-    events:
-      - http:
-        path: test
-        method: get
+    postNsn:
+        handler: postNsn
+        events:
+            - http:
+                  path: /nsnrouting/v1/details/
+                  method: post
+                  cors: true
+    getNsn:
+        handler: getNsn
+        events:
+            - http:
+                  path: /nsnrouting/v1/details/paginated
+                  method: post
+              request:
+                  parameters:
+                      paths:
+                          id: true
+    deleteNsn:
+        handler: deleteNsn
+        events:
+            - http:
+                  path: /nsnrouting/v1/details/{routingId}
+                  method: DELETE
+              request:
+                  parameters:
+                      paths:
+                          id: true
+    putNsn:
+        handler: putNsn
+        events:
+            - http:
+                  path: /nsnrouting/v1/details/
+                  method: PUT
+    test:
+        handler: test
+        events:
+            - http:
+              path: test
+              method: get
