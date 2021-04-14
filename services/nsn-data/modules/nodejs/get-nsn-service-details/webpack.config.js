@@ -8,7 +8,7 @@ module.exports = {
     },
     target: 'node',
     output: {
-        path: path.resolve(__dirname, 'dist/entity-data'),
+        path: path.resolve(__dirname, 'dist/get-nsn-service-details'),
         filename: 'index.js',
         libraryTarget: 'umd',
     },

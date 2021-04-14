@@ -55,8 +55,8 @@ functions:
     handler: getNSNData
     events:
       - http:
-          path: /nsn-data/v1/details
-          method: POST
+          path: /nsnservice/v1/details/{nsnid}
+          method: GET
   test:
     handler: test
     events:

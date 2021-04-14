@@ -1,8 +1,8 @@
 {
-    "name": "entity-data",
+    "name": "nsn-data",
     "version": "1.0.0",
-    "description": "Get Entity data Lambda",
-    "main": "dist/entity-data/service/index.js",
+    "description": "Get NSN data Lambda",
+    "main": "dist/get-nsn-service-details/service/index.js",
     "directories": {
         "test": "test"
     },
