@@ -47,7 +47,6 @@ export const getDBSettings = () => {
                                   user: process.env.DB_USER,
                                   password: token,
                                   database: process.env.DB_NAME,
-                                  ssl: 'Amazon RDS',
                               });
                               connection.connect();
                           }
