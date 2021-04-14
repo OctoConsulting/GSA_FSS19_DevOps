@@ -27,7 +27,7 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
     if (routing_id.length > 4 && routing_id.length < 13) {
         return apiResponses._400({ message: 'Invalid routing Id, Please Enter valid Routing ID.' });
-    }
+    }``
     if (routing_id.length > 14) {
         return apiResponses._400({ message: 'Routing id can not be more than 14 characters.' });
     }
@@ -68,8 +68,8 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         getDBSettings().CONNECTION_POOL.query(insertQuery, [
             routing_id,
             owa,
-            is_civ_mgr === 'Y' ? 1 : 0,
-            is_mil_mgr === 'Y' ? 1 : 0,
+            is_civ_mgr,
+            is_mil_mgr,
             ric,
             routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
             now,

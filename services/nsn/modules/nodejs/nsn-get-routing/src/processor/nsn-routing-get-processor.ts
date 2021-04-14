@@ -144,8 +144,6 @@ function classifyNsnData(list: any, keyGetter: any): Map<string, NsnData[]> {
     let nsnArr: any = [];
     list.forEach((item: any) => {
         if (item) {
-            item.is_civ_mgr = item.is_civ_mgr === 1 ? 'Y' : 'N';
-            item.is_mil_mgr = item.is_mil_mgr === 1 ? 'Y' : 'N';
             const key = keyGetter(item);
             if (classifiedData.has(key)) {
                 nsnArr = classifiedData.get(key);
