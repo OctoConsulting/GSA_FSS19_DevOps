@@ -5,13 +5,12 @@ import * as kms from '@aws-cdk/aws-kms';
 import { AuroraMysqlParms } from '../models/aurora-mysql-construct-parms';
 import * as iam from '@aws-cdk/aws-iam';
 import { Secret } from '@aws-cdk/aws-secretsmanager';
-import { CfnInstance } from '@aws-cdk/aws-ec2';
-import { ScopedAws } from '@aws-cdk/core';
 
 export class AuroraMysqlConstruct extends cdk.Construct {
     private props: AuroraMysqlParms;
     proxy: rds.DatabaseProxy;
     readOnlyEndpoint: rds.CfnDBProxyEndpoint;
+    lambdaProxyUser: string;
 
     constructor(parent: cdk.Construct, id: string, props: AuroraMysqlParms) {
         super(parent, id);
@@ -25,13 +24,20 @@ export class AuroraMysqlConstruct extends cdk.Construct {
         const key = new kms.Key(this, 'AuroraKmsKey', {
             enableKeyRotation: true,
         });
+        this.lambdaProxyUser = 'lambda';
+        const readonlyProxyUser = 'readonly';
+        const adminProxyUser = 'admin';
 
-        const masterSecret = createSecret(this, 'Master', 'admin');
-        const readonlySecret = createSecret(this, 'ReadOnly', 'readonly');
-        const lambdaSecret = createSecret(this, 'Lambda', 'lambda');
+        const secretsConfig = [
+            { name: 'Master', user: adminProxyUser },
+            { name: 'ReadOnly', user: readonlyProxyUser },
+            { name: 'Lambda', user: this.lambdaProxyUser },
+        ];
+        let secrets: Record<string, Secret> = {};
+        for (let s of secretsConfig) secrets[s.name] = createSecret(this, s.name, s.user);
 
         const cluster = new rds.DatabaseCluster(this, 'Database', {
-            credentials: rds.Credentials.fromSecret(masterSecret),
+            credentials: rds.Credentials.fromSecret(secrets['Master']),
             engine: rds.DatabaseClusterEngine.auroraMysql({ version: rds.AuroraMysqlEngineVersion.VER_2_08_1 }),
             storageEncrypted: true,
             storageEncryptionKey: key,
@@ -48,7 +54,7 @@ export class AuroraMysqlConstruct extends cdk.Construct {
                 retention: cdk.Duration.days(params.backupRetentionDays),
             },
         });
-        const proxySecrets = [cluster.secret!, readonlySecret, lambdaSecret];
+        const proxySecrets = [cluster.secret!, secrets['ReadOnly'], secrets['Lambda']];
         // Use for performance enhacement through connection pooling
         // as well as better scaling and security management
         this.proxy = new rds.DatabaseProxy(this, 'Proxy', {
@@ -87,7 +93,7 @@ export class AuroraMysqlConstruct extends cdk.Construct {
                 `${grp}-Import`,
                 `arn:aws:iam::${this.props.account}:group/${grp}`
             );
-            this.proxy.grantConnect(adminGroup, 'admin');
+            this.proxy.grantConnect(adminGroup, adminProxyUser);
         }
 
         for (let grp of params.readOnlyGroups) {
@@ -96,7 +102,7 @@ export class AuroraMysqlConstruct extends cdk.Construct {
                 `${grp}-Import`,
                 `arn:aws:iam::${this.props.account}:group/${grp}`
             );
-            this.proxy.grantConnect(readOnlyGroup, 'readonly');
+            this.proxy.grantConnect(readOnlyGroup, readonlyProxyUser);
         }
     }
 
@@ -109,6 +115,10 @@ export class AuroraMysqlConstruct extends cdk.Construct {
             {
                 name: 'rds-proxy-sgs',
                 value: this.proxy.connections.securityGroups.map((s) => s.securityGroupId).join(','),
+            },
+            {
+                name: 'rds-proxy-lambda-user',
+                value: this.lambdaProxyUser,
             },
         ];
         for (let e of cfnExports) createExport(this, e.name, e.value);

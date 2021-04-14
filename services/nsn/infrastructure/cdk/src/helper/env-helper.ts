@@ -13,6 +13,7 @@ export class EnvHelper {
             logRetentionInDays: stackContext.logRetentionInDays,
             apiKeySecruity: stackContext.apiKeySecruity,
             xRayTracing: stackContext.xRayTracing,
+            mysqlDbName: stackContext.mysqlDbName,
         };
         return envParameters;
     }

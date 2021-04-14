@@ -8,4 +8,5 @@ export interface EnvParameters {
     logRetentionInDays: number;
     apiKeySecruity: boolean;
     xRayTracing: boolean;
+    mysqlDbName: string;
 }
