@@ -4,4 +4,5 @@ export interface AuroraMysqlParms {
     shortEnv: string;
     vpc: IVpc;
     stackContext: any;
+    account: string;
 }

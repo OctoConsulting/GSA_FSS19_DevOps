@@ -1,4 +1,5 @@
 import * as cdk from '@aws-cdk/core';
+import * as rds from '@aws-cdk/aws-rds';
 import * as ec2 from '@aws-cdk/aws-ec2';
 import * as customResource from '@aws-cdk/custom-resources';
 import * as s3 from '@aws-cdk/aws-s3';
@@ -79,6 +80,16 @@ export class NsnLambdasConstruct extends cdk.Construct {
         writeAccessToDynamo
             ? this.props.nsnTable.grantReadWriteData(lambdaFun.lambdaFunction)
             : this.props.nsnTable.grantReadData(lambdaFun.lambdaFunction);
+
+        const nsnRdsProxy = rds.DatabaseProxy.fromDatabaseProxyAttributes(this, `rds-proxy-import-${name}`, {
+            dbProxyArn: cdk.Fn.importValue('rds-proxy-arn'),
+            dbProxyName: cdk.Fn.importValue('rds-proxy-name'),
+            endpoint: cdk.Fn.importValue('rds-proxy-default-endpoint'),
+            securityGroups: cdk.Fn.split(',', cdk.Fn.importValue('rds-proxy-sgs')).map((sg) =>
+                ec2.SecurityGroup.fromSecurityGroupId(this, sg, sg)
+            ),
+        });
+        nsnRdsProxy.grantConnect(lambdaFun.lambdaFunction, 'lambda');
 
         return lambdaFun.alias;
     }

@@ -17,9 +17,10 @@ export class FssDatabaseStack extends cdk.Stack {
         };
 
         new AuroraMysqlConstruct(this, 'aurora-mysql', {
-            shortEnv: process.env.shortEnv!,
+            shortEnv: process.env.SHORT_ENV!,
             vpc: props!.vpc,
             stackContext,
+            account: process.env.AWS_ACCOUNT!,
         });
     }
 }
