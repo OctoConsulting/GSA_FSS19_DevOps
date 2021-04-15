@@ -5,7 +5,12 @@ MacOs/Linux Shell:
 ```
 export SHORT_ENV='dev' AWS_ACCOUNT='902479997164' AWS_REGION='us-east-1'
 
-aws s3 sync ../../modules/nodejs/nsn-get-routing/dist/nsn-get-routing/ s3://artifacts-902479997164-us-east-1-dev/services/nsn/nsn-get-routing --profile fss
+
+aws s3 cp ../../modules/nodejs/packages/get-contract-aco-office-address-details/dist/get-contract-aco-office-address-details/index.zip s3://artifacts-902479997164-us-east-1-dev/services/contract-const/get-contract-aco-office-address-details/index.zip --profile fss
+
+aws s3 cp ../../modules/nodejs/packages/get-contract-buyer-details/dist/get-contract-buyer-details/index.zip s3://artifacts-902479997164-us-east-1-dev/services/contract-const/get-contract-buyer-details/index.zip --profile fss
+
+aws s3 cp ../../modules/nodejs/packages/get-contract-vendor-address-details/dist/get-contract-vendor-address-details/index.zip s3://artifacts-902479997164-us-east-1-dev/services/contract-const/get-contract-vendor-address-details/index.zip --profile fss
 
 ```
 
