@@ -56,14 +56,13 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     if (await checkForExistingNsn(routing_id)) {
         return apiResponses._422({ message: 'NSN routing record already exists for the routing id - ' + routing_id });
     }
-    console.log('6');
 
     let insertQuery =
         'Insert into ' +
         getDBSettings().TABLE_NAME +
         '( routing_id,  owa, is_civ_mgr, is_mil_mgr, ric, routing_id_category, changed_by, change_date, created_by, create_date ) ' +
         ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    console.log('7');
+    console.log('Executing insert query - ' + insertQuery);
     let now: Date = new Date();
     try {
         getDBSettings().CONNECTION.query(insertQuery, [
@@ -78,7 +77,22 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             created_by,
             now,
         ]);
-
+        console.log(
+            'with values - routing_id - ' +
+                routing_id +
+                ', owa - ' +
+                owa +
+                ', is_civ_mgr - ' +
+                is_civ_mgr +
+                ', is_mil_mgr - ' +
+                is_mil_mgr +
+                ', ric - ' +
+                ric +
+                ', routing_id_category - ' +
+                (routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN') +
+                ', created_by - ' +
+                created_by
+        );
         const nsnData: NsnData = {
             routing_id: routing_id.toUpperCase(),
             owa: owa,
