@@ -21,7 +21,7 @@ export const getDBSettings = () => {
             (process.env.SHORT_ENV == undefined ? '' : '_' + process.env.SHORT_ENV) +
             '`',
         IS_OFFLINE: process.env.IS_OFFLINE,
-        CONNECTION_POOL:
+        CONNECTION:
             process.env.SHORT_ENV == 'local'
                 ? mysql.createPool({
                       host: process.env.DB_HOST,
