@@ -12,6 +12,17 @@ if (process.env.IS_OFFLINE) {
 export const dynamoDocumentClient = new DynamoDB.DocumentClient(options);
 
 export const getDBSettings = () => {
+    var signer = new RDS.Signer({
+        region: process.env.AWS_REGION,
+        hostname: process.env.DB_HOST,,
+        port: 3306,
+        username: process.env.DB_NAME,
+      });
+    
+    let token = signer.getAuthToken({
+      username: process.env.DB_NAME
+    });
+
     return {
         TABLE_NAME:
             '`' +
@@ -37,13 +48,19 @@ export const getDBSettings = () => {
                           port: 3306,
                           user: process.env.DB_USER,
                           ssl: { rejectUnauthorized: false },
-                          password: new RDS.Signer().getAuthToken({
-                              region: process.env.AWS_REGION,
-                              hostname: process.env.DB_HOST,
-                              username: process.env.DB_NAME,
-                              port: 3306,
-                          }),
+                          password: token,
                           database: process.env.DB_NAME,
+                          authSwitchHandler: function ({pluginName, pluginData}, cb:Function) {
+                            console.log("Setting new auth handler.");
+                            console.log("pluginName: "+pluginName);
+                            if (pluginName === 'mysql_clear_password') {
+                                let password = token + '\0';
+                                cb(null, password);
+                              }
+
+
+                        }
+                          
                       })
                       .promise(),
     };
