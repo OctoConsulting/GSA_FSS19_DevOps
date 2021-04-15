@@ -58,7 +58,7 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
             '( ' +
             (routingId.length == 2 ? "'GROUP'" : "'CLASS'" + ',' + "'NSN'") +
             ' )';
-        console.log('Query to be executed 1 - ' + query);
+        console.log('Record count Query to be executed 1 - ' + query);
         console.log('Environment variables - ');
         console.log('process.env.DB_HOST - ' + process.env.DB_HOST);
         console.log('process.env.DB_USER - ' + process.env.DB_USER);
@@ -76,14 +76,11 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
 
         let groupQueryStr =
             'SELECT * FROM ' + getDBSettings().TABLE_NAME + " where routing_id = '" + routingId.substring(0, 2) + "'";
+        console.log('Group query - ' + groupQueryStr);
         result = await getDBSettings().CONNECTION.query(groupQueryStr);
 
         const groupArr = classifyNsnData(result[0], (item: NsnData) => item.routing_id_category);
-
-        let classQueryStr =
-            'SELECT * FROM ' + getDBSettings().TABLE_NAME + " where routing_id = '" + routingId.substring(0, 4) + "'";
-        result = await getDBSettings().CONNECTION.query(classQueryStr);
-        const classArr = classifyNsnData(result[0], (item: NsnData) => item.routing_id_category);
+        let classArr;
 
         // recordCount needs to be adjusted.
         if (routingId.length == 2) {
@@ -104,8 +101,17 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
             });
             console.log('record count - ' + recordCount);
         } else {
-            // For the routing id search of 4 characters, ignore the class record from the record count if exists.
-            recordCount = routingId.length == 4 && classArr.size == 1 ? recordCount - 1 : recordCount;
+            let classQueryStr =
+                'SELECT * FROM ' +
+                getDBSettings().TABLE_NAME +
+                " where routing_id = '" +
+                routingId.substring(0, 4) +
+                "'";
+            console.log('Class query - ' + classQueryStr);
+            result = await getDBSettings().CONNECTION.query(classQueryStr);
+            classArr = classifyNsnData(result[0], (item: NsnData) => item.routing_id_category);
+            // Ignore the class record from the NSN record count if exists.
+            recordCount = classArr && classArr.size == 1 ? recordCount - 1 : recordCount;
         }
 
         query =
@@ -133,7 +139,8 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
 
         let nsnResponse = {
             group: groupArr.get('GROUP'),
-            class: routingId.length == 2 ? (nsnArr ? nsnArr.get('CLASS') : null) : classArr.get('CLASS'),
+            class:
+                routingId.length == 2 ? (nsnArr ? nsnArr.get('CLASS') : null) : classArr ? classArr.get('CLASS') : null,
             nsn: nsnArr ? nsnArr.get('NSN') : null,
             recordCount: recordCount,
         };

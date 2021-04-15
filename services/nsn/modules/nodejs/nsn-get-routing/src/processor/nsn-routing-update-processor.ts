@@ -80,6 +80,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             getDBSettings().TABLE_NAME +
             ' SET owa = ?, is_civ_mgr = ?, is_mil_mgr = ?, ric = ?, change_date = ?, changed_by = ? ' +
             ' WHERE routing_id = ?';
+        console.log('Update query - ' + update_query);
         getDBSettings().CONNECTION.query(update_query, [
             owa,
             is_civ_mgr,
@@ -89,6 +90,20 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             changed_by,
             routing_id,
         ]);
+        console.log(
+            'With parameters - ' +
+                owa +
+                ', is_civ_mgr - ' +
+                is_civ_mgr +
+                ', is_mil_mgr - ' +
+                is_mil_mgr +
+                ', ric - ' +
+                ric +
+                ', changed_by - ' +
+                changed_by +
+                ', routing_id - ' +
+                routing_id
+        );
         return apiResponses._200(nsnData);
     } catch (err) {
         console.log('Error while updating - ' + err);
