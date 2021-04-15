@@ -61,7 +61,7 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     let insertQuery =
         'Insert into ' +
         getDBSettings().TABLE_NAME +
-        '( routing_id,  owa, is_civ_mgr, is_mil_mgr, ric, routing_id_category, changed_by, change_date, created_by, created_date ) ' +
+        '( routing_id,  owa, is_civ_mgr, is_mil_mgr, ric, routing_id_category, changed_by, change_date, created_by, create_date ) ' +
         ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
     console.log('7');
     let now: Date = new Date();

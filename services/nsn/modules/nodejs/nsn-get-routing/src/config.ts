@@ -1,5 +1,5 @@
 import { DynamoDB, RDS } from 'aws-sdk';
-import mysql2, { Connection, Pool } from 'mysql2';
+import mysql2 from 'mysql2';
 
 let options = {};
 
