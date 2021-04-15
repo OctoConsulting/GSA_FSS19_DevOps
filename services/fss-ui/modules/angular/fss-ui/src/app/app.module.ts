@@ -13,7 +13,8 @@ import { LayoutFooterComponent } from './layout-footer/layout-footer.component';
   declarations: [
     AppComponent,
     LayoutHeaderComponent,
-    LayoutFooterComponent
+    LayoutFooterComponent,
+
   ],
   imports: [
     BrowserModule,
