@@ -48,7 +48,6 @@ export const getDBSettings = () => {
                                   password: token,
                                   database: process.env.DB_NAME,
                               });
-                              connection.connect();
                           }
                       }
                   ),
