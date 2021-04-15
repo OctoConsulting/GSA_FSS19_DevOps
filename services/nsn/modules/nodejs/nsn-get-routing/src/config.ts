@@ -16,11 +16,11 @@ export const getDBSettings = () => {
         region: process.env.AWS_REGION,
         hostname: process.env.DB_HOST,
         port: 3306,
-        username: process.env.DB_NAME,
+        username: process.env.DB_USER,
     });
 
     let token = signer.getAuthToken({
-        username: process.env.DB_NAME,
+        username: process.env.DB_USER,
     });
 
     return {
