@@ -33,6 +33,7 @@ export class NsnServiceStack extends cdk.Stack {
                 {
                     artifactPath: `${constants.LAMBDA_ARTIFACT_PATH_PREFIX}/${constants.FUNCTION_NAMES.GET_NSN_SERVICE_DETAILS}/index.zip`,
                     name: `${constants.FUNCTION_NAMES.GET_NSN_SERVICE_DETAILS}`,
+                    handler: 'index.getNSNData',
                 },
             ],
         });

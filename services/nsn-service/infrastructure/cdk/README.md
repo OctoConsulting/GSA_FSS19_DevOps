@@ -5,12 +5,15 @@ MacOs/Linux Shell:
 ```
 export SHORT_ENV='dev' AWS_ACCOUNT='902479997164' AWS_REGION='us-east-1'
 
+aws s3 sync ../../modules/nodejs/get-nsn-service-details/dist/get-nsn-service-details/ s3://artifacts-902479997164-us-east-1-dev/services/nsn-service/get-nsn-service-details --profile fss
+
 ```
 
 Windows PowerShell:
 
 ```
 $env:SHORT_ENV='qa'
+
 ```
 
 ## Deploy Stacks
