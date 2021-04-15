@@ -21,7 +21,7 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
 
     try {
         let delete_query = 'DELETE FROM ' + getDBSettings().TABLE_NAME + ' where routing_id = ? ';
-        getDBSettings().CONNECTION_POOL.query(delete_query, [routingId]);
+        getDBSettings().CONNECTION.query(delete_query, [routingId]);
         return apiResponses._204({ message: 'NSN record for routing id ' + routingId + ' is deleted successfully!' });
     } catch (err) {
         console.log('Error >>>>>> ' + err);

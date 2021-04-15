@@ -59,7 +59,7 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
             (routingId.length == 2 ? "'GROUP'" : "'CLASS'" + ',' + "'NSN'") +
             ' )';
 
-        let result = await getDBSettings().CONNECTION_POOL.query(query);
+        let result: any = await getDBSettings().CONNECTION.promise().query(query);
 
         result.forEach((row: any) => {
             recordCount = row[0].CNT ? row[0].CNT : recordCount;
@@ -71,13 +71,13 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
 
         let groupQueryStr =
             'SELECT * FROM ' + getDBSettings().TABLE_NAME + " where routing_id = '" + routingId.substring(0, 2) + "'";
-        result = await getDBSettings().CONNECTION_POOL.query(groupQueryStr);
+        result = await getDBSettings().CONNECTION.promise().query(groupQueryStr);
 
         const groupArr = classifyNsnData(result[0], (item: NsnData) => item.routing_id_category);
 
         let classQueryStr =
             'SELECT * FROM ' + getDBSettings().TABLE_NAME + " where routing_id = '" + routingId.substring(0, 4) + "'";
-        result = await getDBSettings().CONNECTION_POOL.query(classQueryStr);
+        result = await getDBSettings().CONNECTION.promise().query(classQueryStr);
         const classArr = classifyNsnData(result[0], (item: NsnData) => item.routing_id_category);
 
         // recordCount needs to be adjusted.
@@ -92,11 +92,12 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
                 ' and routing_id_category in ' +
                 " ('CLASS') ";
             console.log('count query one more time - ' + query);
-            let result = await getDBSettings().CONNECTION_POOL.query(query);
+            let result: any = await getDBSettings().CONNECTION.promise().query(query);
 
             result.forEach((row: any) => {
                 recordCount = row[0].CNT ? row[0].CNT : recordCount;
             });
+            console.log('record count - ' + recordCount);
         } else {
             // For the routing id search of 4 characters, ignore the class record from the record count if exists.
             recordCount = routingId.length == 4 && classArr.size == 1 ? recordCount - 1 : recordCount;
@@ -121,7 +122,7 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
             pageSize;
 
         console.log('main query - ' + query);
-        result = await getDBSettings().CONNECTION_POOL.query(query);
+        result = await getDBSettings().CONNECTION.promise().query(query);
 
         let nsnArr = classifyNsnData(result[0], (item: NsnData) => item.routing_id_category);
 

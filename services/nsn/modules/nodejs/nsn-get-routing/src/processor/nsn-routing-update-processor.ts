@@ -48,7 +48,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     }
 
     let select_query = 'SELECT * FROM ' + getDBSettings().TABLE_NAME + " where routing_id = '" + routing_id + "'";
-    let result = await getDBSettings().CONNECTION_POOL.query(select_query);
+    let result: any = await getDBSettings().CONNECTION.promise().query(select_query);
     let existingNsnData: any;
 
     result.forEach((row: any) => {
@@ -80,7 +80,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             getDBSettings().TABLE_NAME +
             ' SET owa = ?, is_civ_mgr = ?, is_mil_mgr = ?, ric = ?, change_date = ?, changed_by = ? ' +
             ' WHERE routing_id = ?';
-        getDBSettings().CONNECTION_POOL.query(update_query, [
+        getDBSettings().CONNECTION.query(update_query, [
             owa,
             is_civ_mgr,
             is_mil_mgr,

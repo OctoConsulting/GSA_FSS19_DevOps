@@ -66,7 +66,7 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     console.log('7');
     let now: Date = new Date();
     try {
-        getDBSettings().CONNECTION_POOL.query(insertQuery, [
+        getDBSettings().CONNECTION.query(insertQuery, [
             routing_id,
             owa,
             is_civ_mgr,
