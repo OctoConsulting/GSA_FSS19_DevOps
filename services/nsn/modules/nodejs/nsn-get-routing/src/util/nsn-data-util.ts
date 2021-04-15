@@ -4,7 +4,7 @@ export async function checkForExistingNsn(routing_id: string) {
     let queryStr: string =
         'SELECT count(*) as CNT FROM ' + getDBSettings().TABLE_NAME + " where routing_id = '" + routing_id + "'";
 
-    let result = await getDBSettings().CONNECTION_POOL.query(queryStr);
+    let result: any = await getDBSettings().CONNECTION.promise().query(queryStr);
 
     let recordCount: number = 0;
 

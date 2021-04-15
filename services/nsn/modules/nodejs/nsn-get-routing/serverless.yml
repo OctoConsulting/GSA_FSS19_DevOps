@@ -12,6 +12,7 @@ provider:
         DB_PWD: 'password'
         DB_NAME: 'NSN-DB'
         SHORT_ENV: 'local'
+        AWS_REGION: 'localhost'
 
 plugins:
     - serverless-webpack
