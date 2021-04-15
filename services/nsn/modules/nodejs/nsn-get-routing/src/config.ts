@@ -36,6 +36,7 @@ export const getDBSettings = () => {
                           host: process.env.DB_HOST,
                           port: 3306,
                           user: process.env.DB_USER,
+                          ssl: { rejectUnauthorized: false },
                           password: new RDS.Signer().getAuthToken({
                               region: process.env.AWS_REGION,
                               hostname: process.env.DB_HOST,
