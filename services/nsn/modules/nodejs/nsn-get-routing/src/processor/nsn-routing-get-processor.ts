@@ -58,8 +58,13 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
             '( ' +
             (routingId.length == 2 ? "'GROUP'" : "'CLASS'" + ',' + "'NSN'") +
             ' )';
-
-        let result: any = await getDBSettings().CONNECTION.promise().query(query);
+        console.log('Query to be executed 1 - ' + query);
+        console.log('Environment variables - ');
+        console.log('process.env.DB_HOST - ' + process.env.DB_HOST);
+        console.log('process.env.DB_USER - ' + process.env.DB_USER);
+        console.log('process.env.DB_NAME - ' + process.env.DB_NAME);
+        console.log('process.env.SHORT_ENV - ' + process.env.SHORT_ENV);
+        let result: any = await getDBSettings().CONNECTION.query(query);
 
         result.forEach((row: any) => {
             recordCount = row[0].CNT ? row[0].CNT : recordCount;
@@ -71,13 +76,13 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
 
         let groupQueryStr =
             'SELECT * FROM ' + getDBSettings().TABLE_NAME + " where routing_id = '" + routingId.substring(0, 2) + "'";
-        result = await getDBSettings().CONNECTION.promise().query(groupQueryStr);
+        result = await getDBSettings().CONNECTION.query(groupQueryStr);
 
         const groupArr = classifyNsnData(result[0], (item: NsnData) => item.routing_id_category);
 
         let classQueryStr =
             'SELECT * FROM ' + getDBSettings().TABLE_NAME + " where routing_id = '" + routingId.substring(0, 4) + "'";
-        result = await getDBSettings().CONNECTION.promise().query(classQueryStr);
+        result = await getDBSettings().CONNECTION.query(classQueryStr);
         const classArr = classifyNsnData(result[0], (item: NsnData) => item.routing_id_category);
 
         // recordCount needs to be adjusted.
@@ -92,7 +97,7 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
                 ' and routing_id_category in ' +
                 " ('CLASS') ";
             console.log('count query one more time - ' + query);
-            let result: any = await getDBSettings().CONNECTION.promise().query(query);
+            let result: any = await getDBSettings().CONNECTION.query(query);
 
             result.forEach((row: any) => {
                 recordCount = row[0].CNT ? row[0].CNT : recordCount;
@@ -122,7 +127,7 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
             pageSize;
 
         console.log('main query - ' + query);
-        result = await getDBSettings().CONNECTION.promise().query(query);
+        result = await getDBSettings().CONNECTION.query(query);
 
         let nsnArr = classifyNsnData(result[0], (item: NsnData) => item.routing_id_category);
 

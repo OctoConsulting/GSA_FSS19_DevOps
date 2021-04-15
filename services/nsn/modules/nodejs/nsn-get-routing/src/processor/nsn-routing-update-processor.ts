@@ -48,14 +48,14 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     }
 
     let select_query = 'SELECT * FROM ' + getDBSettings().TABLE_NAME + " where routing_id = '" + routing_id + "'";
-    let result: any = await getDBSettings().CONNECTION.promise().query(select_query);
+    let result: any = await getDBSettings().CONNECTION.query(select_query);
     let existingNsnData: any;
 
     result.forEach((row: any) => {
         existingNsnData = row ? row[0] : undefined;
     });
 
-    //let existingNsnData = await getDocumentDbClient().get(params).promise();
+    //let existingNsnData = await getDocumentDbClient().get(params);
 
     if (!existingNsnData) {
         return apiResponses._404({ message: 'No NSN Data found for update for routing_id - ' + routing_id });
