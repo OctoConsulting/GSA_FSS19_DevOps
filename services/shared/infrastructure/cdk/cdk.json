@@ -14,6 +14,7 @@
                 "instanceCount": 1,
                 "readOnlyGroups": ["FSS-Developers"],
                 "adminGroups": ["FSS-19.Arch-DevOps-Sec", "FSS-DataOps-Eng"],
+                "RdsProxyLogRetention": "ONE_WEEK",
                 "backupRetentionDays": 7
             }
         },

@@ -59,6 +59,7 @@ export class NsnLambdasConstruct extends cdk.Construct {
     }
 
     private nsnLambda(name: string, handler: string, writeAccessToDynamo = true) {
+        const dbUser = cdk.Fn.importValue('rds-proxy-lambda-user');
         const lambdaFun = new LambdaConstruct(this, `${name}`, {
             functionName: `${name}-${this.props.shortEnv}`,
             vpc: this.vpc,
@@ -71,7 +72,7 @@ export class NsnLambdasConstruct extends cdk.Construct {
                 TABLE_NAME: this.props.nsnTable.tableName,
                 DB_HOST: cdk.Fn.importValue('rds-proxy-default-endpoint'),
                 DB_NAME: this.props.mysqlDbName,
-                DB_USER: cdk.Fn.importValue('rds-proxy-lambda-user'),
+                DB_USER: dbUser,
             },
             handler: handler,
             type: LambdaConstructProps.LambdaTypeEnum.NODEJS,
@@ -92,7 +93,7 @@ export class NsnLambdasConstruct extends cdk.Construct {
                 ec2.SecurityGroup.fromSecurityGroupId(this, sg, sg)
             ),
         });
-        nsnRdsProxy.grantConnect(lambdaFun.lambdaFunction, 'lambda');
+        nsnRdsProxy.grantConnect(lambdaFun.lambdaFunction, dbUser);
 
         return lambdaFun.alias;
     }
