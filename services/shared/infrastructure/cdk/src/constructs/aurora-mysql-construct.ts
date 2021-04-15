@@ -71,15 +71,16 @@ export class AuroraMysqlConstruct extends cdk.Construct {
 
         // The default endpoint is read/write, we will also create a
         // Readonly endpoint for the rds proxy
-        this.readOnlyEndpoint = new rds.CfnDBProxyEndpoint(this, 'ReadOnlyProxyEndpoint', {
-            dbProxyName: this.proxy.dbProxyName,
-            dbProxyEndpointName: 'readonly',
-            vpcSubnetIds: this.props.vpc.selectSubnets({
-                subnetGroupName: 'IsolatedNsnAurora',
-            }).subnetIds,
-            targetRole: 'READ_ONLY',
-            vpcSecurityGroupIds: this.proxy.connections.securityGroups.map((s) => s.securityGroupId),
-        });
+        if (params.instanceCount > 1)
+            this.readOnlyEndpoint = new rds.CfnDBProxyEndpoint(this, 'ReadOnlyProxyEndpoint', {
+                dbProxyName: this.proxy.dbProxyName,
+                dbProxyEndpointName: 'readonly',
+                vpcSubnetIds: this.props.vpc.selectSubnets({
+                    subnetGroupName: 'IsolatedNsnAurora',
+                }).subnetIds,
+                targetRole: 'READ_ONLY',
+                vpcSecurityGroupIds: this.proxy.connections.securityGroups.map((s) => s.securityGroupId),
+            });
 
         // for the meantime allowing all vpc connections
         const ranges: string[] = params.allowFrom;
@@ -109,7 +110,11 @@ export class AuroraMysqlConstruct extends cdk.Construct {
     private generateCfnOutputs() {
         const cfnExports = [
             { name: 'rds-proxy-default-endpoint', value: this.proxy.endpoint },
-            { name: 'rds-proxy-readonly-endpoint', value: this.readOnlyEndpoint.attrEndpoint },
+            {
+                name: 'rds-proxy-readonly-endpoint',
+                value:
+                    this.props.stackContext.auroraMysql.instanceCount > 1 ? this.readOnlyEndpoint.attrEndpoint : 'NONE',
+            },
             { name: 'rds-proxy-name', value: this.proxy.dbProxyName },
             { name: 'rds-proxy-arn', value: this.proxy.dbProxyArn },
             {
