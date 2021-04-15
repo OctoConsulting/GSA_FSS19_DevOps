@@ -1,0 +1,33 @@
+{
+    "Table": {
+        "TableName": "contract-const-data-dev",
+        "KeySchema":[
+            {
+                "AttributeName": "pk",
+                "KeyType": "HASH"
+            },
+            {
+                "AttributeName": "sk",
+                "KeyType": "S"
+            }
+        ],
+        "AttributeDefinitions":[
+            {
+                "AttributeName": "pk",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "sk",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "details",
+                "AttributeType": "S"
+            }
+        ],
+        "ProvisionedThroughput":{
+            "ReadCapacityUnits": 1,
+            "WriteCapacityUnits": 1
+        }
+    }
+}

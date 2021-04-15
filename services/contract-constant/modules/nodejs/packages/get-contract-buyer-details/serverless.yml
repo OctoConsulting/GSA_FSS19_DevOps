@@ -1,0 +1,65 @@
+service: get-contract-buyer-details
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  profile: serverlessUser
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource: '*'
+  environment:
+    TABLE_NAME: ""
+
+plugins:
+  - serverless-webpack
+  - serverless-offline
+  - serverless-dynamodb-local
+
+package:
+  individually: true
+
+custom:
+  dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: false
+      migrate: true
+    migration:
+        dir: offline/migrations
+
+resources:
+  Resources:
+    DynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties:
+        TableName: contract-const-data-dev
+        AttributeDefinitions:
+          - AttributeName: pk
+            AttributeType: S
+          - AttributeName: sk
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pk
+            KeyType: HASH
+          - AttributeName: sk
+            KeyType: S
+        BillingMode: PAY_PER_REQUEST 
+functions:
+  getContractBuyerDetails:
+    handler: getContractBuyerDetails
+    events:
+      - http:
+          path:  /contractconstantdata/v1/buyer/details/
+          method: POST
+  test:
+    handler: test
+    events:
+      - http:
+        path: test
+        method: get
