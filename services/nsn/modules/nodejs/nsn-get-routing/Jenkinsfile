@@ -1,9 +1,33 @@
+def s3ObjectLatestVersion = "latest"
+
+// branches for parallel deployment of functions
+def updateLambdas() {
+    def branches = [:]
+    def functions = [ "get-nsn-routing-lambda", "put-nsn-routing-lambda", "delete-nsn-routing-lambda", "post-nsn-routing-lambda" ]
+    functions.each { function ->
+        branches[function] = {
+            sh '''
+                cd ${APP_DIR}
+                FUNCTION_NAME=''' + function + '''-${SHORT_ENV}
+                ~/aws lambda update-function-code --function-name ${FUNCTION_NAME} --s3-bucket "${ARTIFACTS_BUCKET}" --s3-key "${S3_PREFIX}" --s3-object-version "${S3_OBJECT_LATEST_VERSION}"
+                FUNCTION_VERSION=$(~/aws lambda publish-version --function-name ${FUNCTION_NAME} --query 'FunctionArn' --output text | cut -d: -f8)
+                ~/aws lambda update-alias --function-name ${FUNCTION_NAME} --name ${LAMBDA_ALIAS_NAME} --function-version "${FUNCTION_VERSION}" --routing-config AdditionalVersionWeights={}
+                # removing old version
+                #let FUNCTION_VERSION=FUNCTION_VERSION-1
+                #~/aws lambda delete-version --function-name ${FUNCTION_NAME}:${FUNCTION_VERSION} || true
+            '''
+        }
+    }
+    return branches
+}
+
 pipeline {
     environment {
         APP_DIR="services/nsn/modules/nodejs/nsn-get-routing"
-        S3_PREFIX="services/nsn/nsn-get-routing/"
+        S3_PREFIX="services/nsn/nsn-get-routing/index.zip"
         SHORT_ENV = "${env.SHORT_ENV}"
         ARTIFACTS_BUCKET = "${env.ARTIFACTS_BUCKET}"
+        LAMBDA_ALIAS_NAME="live"
     }
     agent {
         label "linux"
@@ -40,8 +64,22 @@ pipeline {
                 cd "${APP_DIR}"
                 ~/aws s3 cp dist/nsn-get-routing/index.zip s3://${ARTIFACTS_BUCKET}/${S3_PREFIX}
                 '''
+                script {
+                    s3ObjectLatestVersion = sh (
+                        script: '''~/aws s3api list-object-versions --bucket "${ARTIFACTS_BUCKET}" --prefix "${S3_PREFIX}" --query 'Versions[*].VersionId' --output text | cut -f1''',
+                        returnStdout: true).trim()
+                }
             }
-
+        }
+        stage('Deploy:Lambdas') {
+            environment {
+                S3_OBJECT_LATEST_VERSION = "${s3ObjectLatestVersion}"
+            }
+            steps {
+                script {
+                    parallel updateLambdas()
+                }
+            }
         }
     }
 }
