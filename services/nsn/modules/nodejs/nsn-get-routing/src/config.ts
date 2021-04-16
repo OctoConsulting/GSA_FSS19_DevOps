@@ -19,7 +19,7 @@ export const getDBSettings = () => {
         username: process.env.DB_USER,
     });
 
-    let token = signer.getAuthToken({
+    let token: any = signer.getAuthToken({
         username: process.env.DB_USER,
     });
 
@@ -54,6 +54,9 @@ export const getDBSettings = () => {
                               let password = token + '\0';
                               cb(null, password);
                           }
+                      },
+                      authPlugins: {
+                          mysql_clear_password: () => () => token.promise(),
                       },
                   }),
     };
