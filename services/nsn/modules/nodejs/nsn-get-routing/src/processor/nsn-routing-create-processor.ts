@@ -65,34 +65,65 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     console.log('Executing insert query - ' + insertQuery);
     let now: Date = new Date();
     try {
-        getDBSettings().CONNECTION.query(insertQuery, [
-            routing_id,
-            owa,
-            is_civ_mgr,
-            is_mil_mgr,
-            ric,
-            routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
-            created_by,
-            now,
-            created_by,
-            now,
-        ]);
-        console.log(
-            'with values - routing_id - ' +
-                routing_id +
-                ', owa - ' +
-                owa +
-                ', is_civ_mgr - ' +
-                is_civ_mgr +
-                ', is_mil_mgr - ' +
-                is_mil_mgr +
-                ', ric - ' +
-                ric +
-                ', routing_id_category - ' +
-                (routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN') +
-                ', created_by - ' +
-                created_by
-        );
+        getDBSettings().CONNECTION.getConnection((error, conn) => {
+            if (error) {
+                console.log('Error while getting connection for routing record insertion - ' + error);
+            }
+            console.log('About to execute insert query.....');
+            conn.query(
+                insertQuery,
+                [
+                    routing_id,
+                    owa,
+                    is_civ_mgr,
+                    is_mil_mgr,
+                    ric,
+                    routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
+                    created_by,
+                    now,
+                    created_by,
+                    now,
+                ],
+                (error, results, fields) => {
+                    console.log('Inserting routing record with fields - ' + fields);
+                    if (error) {
+                        console.log('Error while inserting routing record - ' + error);
+                    } else {
+                        console.log('Insert query executed successfully.....');
+                    }
+                }
+            );
+
+            conn.release();
+        });
+        // getDBSettings().CONNECTION.query(insertQuery, [
+        //     routing_id,
+        //     owa,
+        //     is_civ_mgr,
+        //     is_mil_mgr,
+        //     ric,
+        //     routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
+        //     created_by,
+        //     now,
+        //     created_by,
+        //     now,
+        // ]);
+        // console.log(
+        //     'with values - routing_id - ' +
+        //         routing_id +
+        //         ', owa - ' +
+        //         owa +
+        //         ', is_civ_mgr - ' +
+        //         is_civ_mgr +
+        //         ', is_mil_mgr - ' +
+        //         is_mil_mgr +
+        //         ', ric - ' +
+        //         ric +
+        //         ', routing_id_category - ' +
+        //         (routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN') +
+        //         ', created_by - ' +
+        //         created_by
+        // );
         const nsnData: NsnData = {
             routing_id: routing_id.toUpperCase(),
             owa: owa,

@@ -5,7 +5,7 @@ export async function checkForExistingNsn(routing_id: string) {
         'SELECT count(*) as CNT FROM ' + getDBSettings().TABLE_NAME + " where routing_id = '" + routing_id + "'";
     console.log('Executing query inside checkForExistingNsn - ' + queryStr);
 
-    let result: any = await getDBSettings().CONNECTION.query(queryStr);
+    let result: any = await getDBSettings().CONNECTION.promise().query(queryStr);
 
     let recordCount: number = 0;
 

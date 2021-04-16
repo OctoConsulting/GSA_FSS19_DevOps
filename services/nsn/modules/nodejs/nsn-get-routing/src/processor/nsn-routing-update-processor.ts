@@ -48,7 +48,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     }
 
     let select_query = 'SELECT * FROM ' + getDBSettings().TABLE_NAME + " where routing_id = '" + routing_id + "'";
-    let result: any = await getDBSettings().CONNECTION.query(select_query);
+    let result: any = await getDBSettings().CONNECTION.promise().query(select_query);
     let existingNsnData: any;
 
     result.forEach((row: any) => {
@@ -81,15 +81,34 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             ' SET owa = ?, is_civ_mgr = ?, is_mil_mgr = ?, ric = ?, change_date = ?, changed_by = ? ' +
             ' WHERE routing_id = ?';
         console.log('Update query - ' + update_query);
-        getDBSettings().CONNECTION.query(update_query, [
-            owa,
-            is_civ_mgr,
-            is_mil_mgr,
-            ric,
-            new Date(),
-            changed_by,
-            routing_id,
-        ]);
+        getDBSettings().CONNECTION.getConnection((error, conn) => {
+            if (error) {
+                console.log('Error while getting connection for updating routing record - ' + error);
+            }
+            console.log('About to update routing record for id - ' + routing_id);
+            conn.query(
+                update_query,
+                [owa, is_civ_mgr, is_mil_mgr, ric, new Date(), changed_by, routing_id],
+                (error, results, fields) => {
+                    console.log('Updating records with fields - ' + fields);
+                    if (error) {
+                        console.log('Error while updating routing record - ' + error);
+                    } else {
+                        console.log('Update query executed successfully.....');
+                    }
+                }
+            );
+            conn.release();
+        });
+        // getDBSettings().CONNECTION.query(update_query, [
+        //     owa,
+        //     is_civ_mgr,
+        //     is_mil_mgr,
+        //     ric,
+        //     new Date(),
+        //     changed_by,
+        //     routing_id,
+        // ]);
         console.log(
             'With parameters - ' +
                 owa +
