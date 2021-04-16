@@ -56,7 +56,7 @@ export const getDBSettings = () => {
                       //       }
                       //   },
                       authPlugins: {
-                          mysql_clear_password: () => () => token.promise(),
+                          mysql_clear_password: () => () => token,
                       },
                   }),
     };
