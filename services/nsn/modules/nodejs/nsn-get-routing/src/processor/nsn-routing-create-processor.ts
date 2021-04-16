@@ -66,71 +66,96 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     let now: Date = new Date();
     try {
         let inserted;
-        getDBSettings().CONNECTION.getConnection(function (error, conn) {
-            if (error) {
-                console.log('Error while getting connection for routing record insertion - ' + error);
-            }
-            console.log('About to execute insert query..... with connection - ' + conn);
-            conn.query(
-                insertQuery,
-                [
-                    routing_id,
-                    owa,
-                    is_civ_mgr,
-                    is_mil_mgr,
-                    ric,
-                    routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
-                    created_by,
-                    now,
-                    created_by,
-                    now,
-                ],
-                (error, results, fields) => {
-                    console.log('Inserting routing record with fields - ' + fields);
-                    if (error) {
-                        console.log('Error while inserting routing record - ' + error);
-                    } else {
-                        inserted = true;
-                        console.log('Insert query executed successfully.....');
-                    }
+        console.log('Executing insert query');
+        getDBSettings().CONNECTION.execute(
+            insertQuery,
+            [
+                routing_id,
+                owa,
+                is_civ_mgr,
+                is_mil_mgr,
+                ric,
+                routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
+                created_by,
+                now,
+                created_by,
+                now,
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    console.log('Error while inserting routing record - ' + error);
+                } else {
+                    inserted = true;
+                    console.log('Insert query executed successfully.....');
                 }
-            );
+            }
+        );
+        // getDBSettings().CONNECTION.getConnection(function (error, conn) {
+        //     if (error) {
+        //         console.log('Error while getting connection for routing record insertion - ' + error);
+        //     }
+        //     console.log('About to execute insert query..... with connection - ' + conn);
+        //     conn.query(
+        //         insertQuery,
+        //         [
+        //             routing_id,
+        //             owa,
+        //             is_civ_mgr,
+        //             is_mil_mgr,
+        //             ric,
+        //             routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
+        //             created_by,
+        //             now,
+        //             created_by,
+        //             now,
+        //         ],
+        //         (error, results, fields) => {
+        //             console.log('Inserting routing record with fields - ' + fields);
+        //             if (error) {
+        //                 console.log('Error while inserting routing record - ' + error);
+        //             } else {
+        //                 inserted = true;
+        //                 conn.commit();
+        //                 console.log('Insert query executed successfully.....');
+        //             }
+        //         }
+        //     );
 
-            conn.release();
-        });
+        //     conn.release();
+        // });
 
-        if (!inserted) {
-            getDBSettings()
-                .CONNECTION.promise()
-                .query(insertQuery, [
-                    routing_id,
-                    owa,
-                    is_civ_mgr,
-                    is_mil_mgr,
-                    ric,
-                    routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
-                    created_by,
-                    now,
-                    created_by,
-                    now,
-                ]);
-            console.log(
-                'with values - routing_id - ' +
-                    routing_id +
-                    ', owa - ' +
-                    owa +
-                    ', is_civ_mgr - ' +
-                    is_civ_mgr +
-                    ', is_mil_mgr - ' +
-                    is_mil_mgr +
-                    ', ric - ' +
-                    ric +
-                    ', routing_id_category - ' +
-                    (routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN') +
-                    ', created_by - ' +
-                    created_by
-            );
-        }
+        // if (!inserted) {
+        //     getDBSettings()
+        //         .CONNECTION.promise()
+        //         .query(insertQuery, [
+        //             routing_id,
+        //             owa,
+        //             is_civ_mgr,
+        //             is_mil_mgr,
+        //             ric,
+        //             routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
+        //             created_by,
+        //             now,
+        //             created_by,
+        //             now,
+        //         ]);
+        //     console.log(
+        //         'with values - routing_id - ' +
+        //             routing_id +
+        //             ', owa - ' +
+        //             owa +
+        //             ', is_civ_mgr - ' +
+        //             is_civ_mgr +
+        //             ', is_mil_mgr - ' +
+        //             is_mil_mgr +
+        //             ', ric - ' +
+        //             ric +
+        //             ', routing_id_category - ' +
+        //             (routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN') +
+        //             ', created_by - ' +
+        //             created_by
+        //     );
+        // }
         const nsnData: NsnData = {
             routing_id: routing_id.toUpperCase(),
             owa: owa,
