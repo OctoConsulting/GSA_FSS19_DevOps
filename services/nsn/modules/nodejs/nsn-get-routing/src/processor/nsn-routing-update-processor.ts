@@ -75,6 +75,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     };
 
     try {
+        let updated;
         let update_query =
             'UPDATE ' +
             getDBSettings().TABLE_NAME +
@@ -94,21 +95,18 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
                     if (error) {
                         console.log('Error while updating routing record - ' + error);
                     } else {
+                        updated = true;
                         console.log('Update query executed successfully.....');
                     }
                 }
             );
             conn.release();
         });
-        // getDBSettings().CONNECTION.query(update_query, [
-        //     owa,
-        //     is_civ_mgr,
-        //     is_mil_mgr,
-        //     ric,
-        //     new Date(),
-        //     changed_by,
-        //     routing_id,
-        // ]);
+        if (!updated) {
+            getDBSettings()
+                .CONNECTION.promise()
+                .query(update_query, [owa, is_civ_mgr, is_mil_mgr, ric, new Date(), changed_by, routing_id]);
+        }
         console.log(
             'With parameters - ' +
                 owa +

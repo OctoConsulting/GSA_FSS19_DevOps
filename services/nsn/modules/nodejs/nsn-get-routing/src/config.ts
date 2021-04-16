@@ -47,14 +47,14 @@ export const getDBSettings = () => {
                       ssl: { rejectUnauthorized: false },
                       password: token,
                       database: process.env.DB_NAME,
-                      authSwitchHandler: function ({ pluginName, pluginData }, cb: Function) {
-                          console.log('Setting new auth handler.');
-                          console.log('pluginName: ' + pluginName);
-                          if (pluginName === 'mysql_clear_password') {
-                              let password = token + '\0';
-                              cb(null, password);
-                          }
-                      },
+                      //   authSwitchHandler: function ({ pluginName, pluginData }, cb: Function) {
+                      //       console.log('Setting new auth handler.');
+                      //       console.log('pluginName: ' + pluginName);
+                      //       if (pluginName === 'mysql_clear_password') {
+                      //           let password = token + '\0';
+                      //           cb(null, password);
+                      //       }
+                      //   },
                       authPlugins: {
                           mysql_clear_password: () => () => token.promise(),
                       },
