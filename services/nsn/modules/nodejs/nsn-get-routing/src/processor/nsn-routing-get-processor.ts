@@ -64,7 +64,7 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
         console.log('process.env.DB_USER - ' + process.env.DB_USER);
         console.log('process.env.DB_NAME - ' + process.env.DB_NAME);
         console.log('process.env.SHORT_ENV - ' + process.env.SHORT_ENV);
-        let result: any = await getDBSettings().CONNECTION.query(query);
+        let result: any = await getDBSettings().CONNECTION.promise().query(query);
 
         result.forEach((row: any) => {
             recordCount = row[0].CNT ? row[0].CNT : recordCount;
@@ -77,7 +77,7 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
         let groupQueryStr =
             'SELECT * FROM ' + getDBSettings().TABLE_NAME + " where routing_id = '" + routingId.substring(0, 2) + "'";
         console.log('Group query - ' + groupQueryStr);
-        result = await getDBSettings().CONNECTION.query(groupQueryStr);
+        result = await getDBSettings().CONNECTION.promise().query(groupQueryStr);
 
         const groupArr = classifyNsnData(result[0], (item: NsnData) => item.routing_id_category);
         let classArr;
@@ -94,7 +94,7 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
                 ' and routing_id_category in ' +
                 " ('CLASS') ";
             console.log('count query one more time - ' + query);
-            let result: any = await getDBSettings().CONNECTION.query(query);
+            let result: any = await getDBSettings().CONNECTION.promise().query(query);
 
             result.forEach((row: any) => {
                 recordCount = row[0].CNT ? row[0].CNT : recordCount;
@@ -108,7 +108,7 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
                 routingId.substring(0, 4) +
                 "'";
             console.log('Class query - ' + classQueryStr);
-            result = await getDBSettings().CONNECTION.query(classQueryStr);
+            result = await getDBSettings().CONNECTION.promise().query(classQueryStr);
             classArr = classifyNsnData(result[0], (item: NsnData) => item.routing_id_category);
             // Ignore the class record from the NSN record count if exists.
             recordCount = classArr && classArr.size == 1 ? recordCount - 1 : recordCount;
@@ -133,7 +133,7 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
             pageSize;
 
         console.log('main query - ' + query);
-        result = await getDBSettings().CONNECTION.query(query);
+        result = await getDBSettings().CONNECTION.promise().query(query);
 
         let nsnArr = classifyNsnData(result[0], (item: NsnData) => item.routing_id_category);
 

@@ -34,31 +34,27 @@ export const getDBSettings = () => {
         IS_OFFLINE: process.env.IS_OFFLINE,
         CONNECTION:
             process.env.SHORT_ENV == 'local'
-                ? mysql2
-                      .createPool({
-                          host: process.env.DB_HOST,
-                          user: process.env.DB_USER,
-                          password: process.env.DB_PWD,
-                          database: process.env.DB_NAME,
-                      })
-                      .promise()
-                : mysql2
-                      .createPool({
-                          host: process.env.DB_HOST,
-                          port: 3306,
-                          user: process.env.DB_USER,
-                          ssl: { rejectUnauthorized: false },
-                          password: token,
-                          database: process.env.DB_NAME,
-                          authSwitchHandler: function ({ pluginName, pluginData }, cb: Function) {
-                              console.log('Setting new auth handler.');
-                              console.log('pluginName: ' + pluginName);
-                              if (pluginName === 'mysql_clear_password') {
-                                  let password = token + '\0';
-                                  cb(null, password);
-                              }
-                          },
-                      })
-                      .promise(),
+                ? mysql2.createPool({
+                      host: process.env.DB_HOST,
+                      user: process.env.DB_USER,
+                      password: process.env.DB_PWD,
+                      database: process.env.DB_NAME,
+                  })
+                : mysql2.createPool({
+                      host: process.env.DB_HOST,
+                      port: 3306,
+                      user: process.env.DB_USER,
+                      ssl: { rejectUnauthorized: false },
+                      password: token,
+                      database: process.env.DB_NAME,
+                      authSwitchHandler: function ({ pluginName, pluginData }, cb: Function) {
+                          console.log('Setting new auth handler.');
+                          console.log('pluginName: ' + pluginName);
+                          if (pluginName === 'mysql_clear_password') {
+                              let password = token + '\0';
+                              cb(null, password);
+                          }
+                      },
+                  }),
     };
 };
