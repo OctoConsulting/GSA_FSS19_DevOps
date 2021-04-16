@@ -65,7 +65,7 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     console.log('Executing insert query - ' + insertQuery);
     let now: Date = new Date();
     try {
-        getDBSettings().CONNECTION.getConnection((error, conn) => {
+        getDBSettings().CONNECTION.getConnection(function (error, conn) {
             if (error) {
                 console.log('Error while getting connection for routing record insertion - ' + error);
             }

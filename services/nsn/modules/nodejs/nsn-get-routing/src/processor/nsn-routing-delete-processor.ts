@@ -22,7 +22,7 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
     try {
         let delete_query = 'DELETE FROM ' + getDBSettings().TABLE_NAME + ' where routing_id = ? ';
 
-        getDBSettings().CONNECTION.getConnection((error, conn) => {
+        getDBSettings().CONNECTION.getConnection(function (error, conn) {
             if (error) {
                 console.log('Error while getting connection for deleting` routing record - ' + error);
             }
