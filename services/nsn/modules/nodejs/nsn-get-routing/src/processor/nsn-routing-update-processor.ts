@@ -82,31 +82,46 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             ' SET owa = ?, is_civ_mgr = ?, is_mil_mgr = ?, ric = ?, change_date = ?, changed_by = ? ' +
             ' WHERE routing_id = ?';
         console.log('Update query - ' + update_query);
-        getDBSettings().CONNECTION.getConnection(function (error, conn) {
-            if (error) {
-                console.log('Error while getting connection for updating routing record - ' + error);
-            }
-            console.log('About to update routing record for id - ' + routing_id + ' with connection - ' + conn);
-            conn.query(
-                update_query,
-                [owa, is_civ_mgr, is_mil_mgr, ric, new Date(), changed_by, routing_id],
-                (error, results, fields) => {
-                    console.log('Updating records with fields - ' + fields);
-                    if (error) {
-                        console.log('Error while updating routing record - ' + error);
-                    } else {
-                        updated = true;
-                        console.log('Update query executed successfully.....');
-                    }
+
+        getDBSettings().CONNECTION.execute(
+            update_query,
+            [owa, is_civ_mgr, is_mil_mgr, ric, new Date(), changed_by, routing_id],
+            (error, results, fields) => {
+                console.log('Updating records with fields - ' + fields);
+                if (error) {
+                    console.log('Error while updating routing record - ' + error);
+                } else {
+                    updated = true;
+                    console.log('Update query executed successfully.....');
                 }
-            );
-            conn.release();
-        });
-        if (!updated) {
-            getDBSettings()
-                .CONNECTION.promise()
-                .query(update_query, [owa, is_civ_mgr, is_mil_mgr, ric, new Date(), changed_by, routing_id]);
-        }
+            }
+        );
+
+        // getDBSettings().CONNECTION.getConnection(function (error, conn) {
+        //     if (error) {
+        //         console.log('Error while getting connection for updating routing record - ' + error);
+        //     }
+        //     console.log('About to update routing record for id - ' + routing_id + ' with connection - ' + conn);
+        //     conn.query(
+        //         update_query,
+        //         [owa, is_civ_mgr, is_mil_mgr, ric, new Date(), changed_by, routing_id],
+        //         (error, results, fields) => {
+        //             console.log('Updating records with fields - ' + fields);
+        //             if (error) {
+        //                 console.log('Error while updating routing record - ' + error);
+        //             } else {
+        //                 updated = true;
+        //                 console.log('Update query executed successfully.....');
+        //             }
+        //         }
+        //     );
+        //     conn.release();
+        // });
+        // if (!updated) {
+        //     getDBSettings()
+        //         .CONNECTION.promise()
+        //         .query(update_query, [owa, is_civ_mgr, is_mil_mgr, ric, new Date(), changed_by, routing_id]);
+        // }
         console.log(
             'With parameters - ' +
                 owa +
@@ -121,6 +136,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
                 ', routing_id - ' +
                 routing_id
         );
+
         return apiResponses._200(nsnData);
     } catch (err) {
         console.log('Error while updating - ' + err);
