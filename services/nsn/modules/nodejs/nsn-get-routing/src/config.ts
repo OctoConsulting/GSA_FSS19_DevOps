@@ -43,7 +43,7 @@ export const getDBSettings = () => {
                       })
                       .promise()
                 : mysql2
-                      .createConnection({
+                      .createPool({
                           host: process.env.DB_HOST,
                           port: 3306,
                           user: process.env.DB_USER,
