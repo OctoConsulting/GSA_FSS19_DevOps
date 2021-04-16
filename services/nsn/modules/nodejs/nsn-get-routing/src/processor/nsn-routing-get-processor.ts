@@ -111,7 +111,7 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
             result = await getDBSettings().CONNECTION.promise().query(classQueryStr);
             classArr = classifyNsnData(result[0], (item: NsnData) => item.routing_id_category);
             // Ignore the class record from the NSN record count if exists.
-            recordCount = classArr && classArr.size == 1 ? recordCount - 1 : recordCount;
+            recordCount = routingId.length == 4 && classArr && classArr.size == 1 ? recordCount - 1 : recordCount;
         }
 
         query =
