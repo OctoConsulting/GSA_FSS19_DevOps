@@ -26,7 +26,7 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
             if (error) {
                 console.log('Error while getting connection for deleting` routing record - ' + error);
             }
-            console.log('About to delete routing record for id - ' + routingId);
+            console.log('About to delete routing record for id - ' + routingId + ' with connection - ' + conn);
             conn.query(delete_query, [routingId], (error, results, fields) => {
                 console.log('Deleting routing record with fields - ' + fields);
                 if (error) {
