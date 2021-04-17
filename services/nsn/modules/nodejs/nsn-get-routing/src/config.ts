@@ -34,7 +34,7 @@ export const getDBSettings = () => {
         IS_OFFLINE: process.env.IS_OFFLINE,
         CONNECTION:
             process.env.SHORT_ENV == 'local'
-                ? mysql2.createPool({
+                ? mysql2.createConnection({
                       host: process.env.DB_HOST,
                       user: process.env.DB_USER,
                       password: process.env.DB_PWD,
