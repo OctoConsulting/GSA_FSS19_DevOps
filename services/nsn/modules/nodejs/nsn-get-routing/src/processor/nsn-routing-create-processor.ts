@@ -6,6 +6,7 @@ import { getDBSettings } from '../config';
 import { apiResponses } from '../model/responseAPI';
 import { DynamoDB } from 'aws-sdk';
 import { checkForExistingNsn } from '../util/nsn-data-util';
+import { Connection } from 'mysql2';
 
 export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     console.log('Saving the NSN data - ' + event);
@@ -67,7 +68,17 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     try {
         let inserted;
         console.log('Executing insert query');
-        getDBSettings().CONNECTION.execute(
+        let connection: Connection = getDBSettings().CONNECTION;
+        getDBSettings().CONNECTION.connect(function (err) {
+            if (err) {
+                console.log('error connecting: ' + err.stack);
+                return;
+            }
+
+            console.log('connected as id ' + connection.threadId + '\n');
+        });
+
+        connection.query(
             insertQuery,
             [
                 routing_id,
@@ -90,72 +101,13 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 }
             }
         );
-        // getDBSettings().CONNECTION.getConnection(function (error, conn) {
-        //     if (error) {
-        //         console.log('Error while getting connection for routing record insertion - ' + error);
-        //     }
-        //     console.log('About to execute insert query..... with connection - ' + conn);
-        //     conn.query(
-        //         insertQuery,
-        //         [
-        //             routing_id,
-        //             owa,
-        //             is_civ_mgr,
-        //             is_mil_mgr,
-        //             ric,
-        //             routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
-        //             created_by,
-        //             now,
-        //             created_by,
-        //             now,
-        //         ],
-        //         (error, results, fields) => {
-        //             console.log('Inserting routing record with fields - ' + fields);
-        //             if (error) {
-        //                 console.log('Error while inserting routing record - ' + error);
-        //             } else {
-        //                 inserted = true;
-        //                 conn.commit();
-        //                 console.log('Insert query executed successfully.....');
-        //             }
-        //         }
-        //     );
+        connection.end((error: any, results: any) => {
+            if (error) {
+                console.log('Error while closing connection - ' + error);
+            }
+            console.log('Connection ended\n');
+        });
 
-        //     conn.release();
-        // });
-
-        // if (!inserted) {
-        //     getDBSettings()
-        //         .CONNECTION.promise()
-        //         .query(insertQuery, [
-        //             routing_id,
-        //             owa,
-        //             is_civ_mgr,
-        //             is_mil_mgr,
-        //             ric,
-        //             routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
-        //             created_by,
-        //             now,
-        //             created_by,
-        //             now,
-        //         ]);
-        //     console.log(
-        //         'with values - routing_id - ' +
-        //             routing_id +
-        //             ', owa - ' +
-        //             owa +
-        //             ', is_civ_mgr - ' +
-        //             is_civ_mgr +
-        //             ', is_mil_mgr - ' +
-        //             is_mil_mgr +
-        //             ', ric - ' +
-        //             ric +
-        //             ', routing_id_category - ' +
-        //             (routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN') +
-        //             ', created_by - ' +
-        //             created_by
-        //     );
-        // }
         const nsnData: NsnData = {
             routing_id: routing_id.toUpperCase(),
             owa: owa,
