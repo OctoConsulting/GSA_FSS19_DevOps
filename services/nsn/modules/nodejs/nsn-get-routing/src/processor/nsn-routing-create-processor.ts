@@ -69,7 +69,7 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         let inserted;
         console.log('Executing insert query');
         let connection: Connection = getDBSettings().CONNECTION;
-        getDBSettings().CONNECTION.connect(function (err) {
+        connection.connect(function (err) {
             if (err) {
                 console.log('error connecting: ' + err.stack);
                 return;
