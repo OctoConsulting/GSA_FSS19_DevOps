@@ -2,7 +2,7 @@
 
 import { NsnData } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { getDBSettings } from '../config';
+import { getDBSettings, executeDbDMLCommand } from '../config';
 import { apiResponses } from '../model/responseAPI';
 import { DynamoDB } from 'aws-sdk';
 import { checkForExistingNsn } from '../util/nsn-data-util';
@@ -83,36 +83,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             ' SET owa = ?, is_civ_mgr = ?, is_mil_mgr = ?, ric = ?, change_date = ?, changed_by = ? ' +
             ' WHERE routing_id = ?';
         console.log('Update query - ' + update_query);
-        let connection: Connection = getDBSettings().CONNECTION;
-        connection.connect(function (err) {
-            if (err) {
-                console.log('error connecting in update: ' + err.stack);
-                return;
-            }
-
-            console.log('connected in update as id ' + connection.threadId + '\n');
-        });
-
-        connection.query(
-            update_query,
-            [owa, is_civ_mgr, is_mil_mgr, ric, new Date(), changed_by, routing_id],
-            (error, results, fields) => {
-                console.log('Updating records with fields - ' + fields);
-                if (error) {
-                    console.log('Error while updating routing record - ' + error);
-                } else {
-                    updated = true;
-                    console.log('Update query executed successfully.....');
-                }
-            }
-        );
-
-        connection.end((error: any, results: any) => {
-            if (error) {
-                console.log('Error while closing connection after update- ' + error);
-            }
-            console.log('Connection ended after update\n');
-        });
+        executeDbDMLCommand(update_query, [owa, is_civ_mgr, is_mil_mgr, ric, new Date(), changed_by, routing_id]);
 
         // getDBSettings().CONNECTION.getConnection(function (error, conn) {
         //     if (error) {
