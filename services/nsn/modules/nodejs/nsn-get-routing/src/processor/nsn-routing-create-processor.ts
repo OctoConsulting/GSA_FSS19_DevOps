@@ -2,7 +2,7 @@
 
 import { NsnData } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { getDBSettings } from '../config';
+import { getDBSettings, executeDbDMLCommand } from '../config';
 import { apiResponses } from '../model/responseAPI';
 import { DynamoDB } from 'aws-sdk';
 import { checkForExistingNsn } from '../util/nsn-data-util';
@@ -68,45 +68,18 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     try {
         let inserted;
         console.log('Executing insert query');
-        let connection: Connection = getDBSettings().CONNECTION;
-        connection.connect(function (err) {
-            if (err) {
-                console.log('error connecting: ' + err.stack);
-                return;
-            }
-
-            console.log('connected as id ' + connection.threadId + '\n');
-        });
-
-        connection.query(
-            insertQuery,
-            [
-                routing_id,
-                owa,
-                is_civ_mgr,
-                is_mil_mgr,
-                ric,
-                routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
-                created_by,
-                now,
-                created_by,
-                now,
-            ],
-            (error, results, fields) => {
-                if (error) {
-                    console.log('Error while inserting routing record - ' + error);
-                } else {
-                    inserted = true;
-                    console.log('Insert query executed successfully.....');
-                }
-            }
-        );
-        connection.end((error: any, results: any) => {
-            if (error) {
-                console.log('Error while closing connection - ' + error);
-            }
-            console.log('Connection ended\n');
-        });
+        executeDbDMLCommand(insertQuery, [
+            routing_id,
+            owa,
+            is_civ_mgr,
+            is_mil_mgr,
+            ric,
+            routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
+            created_by,
+            now,
+            created_by,
+            now,
+        ]);
 
         const nsnData: NsnData = {
             routing_id: routing_id.toUpperCase(),
