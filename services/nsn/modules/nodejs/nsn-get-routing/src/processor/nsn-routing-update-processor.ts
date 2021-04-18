@@ -83,8 +83,16 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             ' SET owa = ?, is_civ_mgr = ?, is_mil_mgr = ?, ric = ?, change_date = ?, changed_by = ? ' +
             ' WHERE routing_id = ?';
         console.log('Update query - ' + update_query);
-        executeDbDMLCommand(update_query, [owa, is_civ_mgr, is_mil_mgr, ric, new Date(), changed_by, routing_id]);
-
+        let response: any = await executeDbDMLCommand(update_query, [
+            owa,
+            is_civ_mgr,
+            is_mil_mgr,
+            ric,
+            new Date(),
+            changed_by,
+            routing_id,
+        ]);
+        console.log('Update query result - ' + response.result);
         // getDBSettings().CONNECTION.getConnection(function (error, conn) {
         //     if (error) {
         //         console.log('Error while getting connection for updating routing record - ' + error);

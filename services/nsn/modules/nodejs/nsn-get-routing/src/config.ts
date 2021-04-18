@@ -54,65 +54,75 @@ export const getDBSettings = () => {
     };
 };
 
-export const executeDbDMLCommand = (query: string, values: any | any[] | { [param: string]: any }) => {
-    console.log('Executing SQL DML command - ' + query);
-    console.log('With parameters - ' + values);
-    let parameters: string = '';
-    values.forEach((param: any) => {
-        parameters += param + ', ';
-    });
-    console.log(' parameters -  ' + parameters);
+export async function executeDbDMLCommand(query: string, values: any | any[] | { [param: string]: any }) {
+    let connection: Connection;
+    const promise = new Promise(function (resolve, reject) {
+        console.log('Starting query ...\n');
+        console.log('Running iam auth ...\n');
 
-    var signer = new RDS.Signer({
-        region: process.env.AWS_REGION,
-        hostname: process.env.DB_HOST,
-        port: 3306,
-        username: process.env.DB_USER,
-    });
+        //
+        var signer = new RDS.Signer({
+            region: process.env.AWS_REGION,
+            hostname: process.env.DB_HOST,
+            port: 3306,
+            username: process.env.DB_USER,
+        });
 
-    let token: any = signer.getAuthToken({
-        username: process.env.DB_USER,
-    });
+        let token = signer.getAuthToken({
+            username: process.env.DB_USER,
+        });
 
-    const connection: Connection =
-        process.env.SHORT_ENV == 'local'
-            ? mysql2.createConnection({
-                  host: process.env.DB_HOST,
-                  user: process.env.DB_USER,
-                  password: process.env.DB_PWD,
-                  database: process.env.DB_NAME,
-              })
-            : mysql2.createConnection({
-                  host: process.env.DB_HOST,
-                  port: 3306,
-                  user: process.env.DB_USER,
-                  ssl: { rejectUnauthorized: false },
-                  password: token,
-                  database: process.env.DB_NAME,
-                  authPlugins: {
-                      mysql_clear_password: () => () => token,
-                  },
-              });
-    connection.connect(function (err) {
-        if (err) {
-            console.log('error connecting: ' + err);
-            return;
-        }
+        console.log('IAM Token obtained' + token);
 
-        console.log('connected as id ' + connection.threadId + '\n');
-    });
+        let connectionConfig = {
+            host: process.env.DB_HOST,
+            user: process.env.DB_USER,
+            database: process.env.DB_NAME,
+            ssl: { rejectUnauthorized: false },
+            password: token,
+            authSwitchHandler: (data: any, cb: Function) => {
+                if (data.pluginName === 'mysql_clear_password') {
+                    // See https://dev.mysql.com/doc/internals/en/clear-text-authentication.html
+                    console.log('pluginName: ' + data.pluginName);
+                    let password = token + '\0';
+                    let buffer = Buffer.from(password);
+                    cb(null, password);
+                }
+            },
+        };
 
-    connection.query(query, values, (error, results, fields) => {
-        if (error) {
-            console.log('Error while executeDbDMLCommand routing record - ' + error);
-        } else {
-            console.log('executeDbDMLCommand query executed successfully.....');
-        }
+        connection = mysql2.createConnection(connectionConfig);
+
+        connection.connect(function (err) {
+            if (err) {
+                console.log('error connecting: ' + err.stack);
+                return;
+            }
+
+            console.log('connected as id ' + connection.threadId + '\n');
+        });
+
+        connection.query(query, values, function (error, results, fields) {
+            if (error) {
+                //throw error;
+                reject({ result: 'Error - ' + error });
+            }
+
+            if (results) {
+                console.log('executeDbDMLCommand Query result - ' + results);
+
+                connection.end(function (error: any, results: any) {
+                    if (error) {
+                        //return "error";
+                        reject('ERROR');
+                    }
+                    // The connection is terminated now
+                    console.log('Connection ended\n');
+
+                    resolve({ result: 'Success!' });
+                });
+            }
+        });
     });
-    connection.end((error: any, results: any) => {
-        if (error) {
-            console.log('Error while closing connection - ' + error);
-        }
-        console.log('Connection ended\n');
-    });
-};
+    return promise;
+}

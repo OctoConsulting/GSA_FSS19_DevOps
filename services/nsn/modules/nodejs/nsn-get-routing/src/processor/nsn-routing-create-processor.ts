@@ -68,7 +68,7 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     try {
         let inserted;
         console.log('Executing insert query');
-        executeDbDMLCommand(insertQuery, [
+        let response: any = await executeDbDMLCommand(insertQuery, [
             routing_id,
             owa,
             is_civ_mgr,
@@ -80,7 +80,7 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             created_by,
             now,
         ]);
-
+        console.log('Insert query result - ' + response.result);
         const nsnData: NsnData = {
             routing_id: routing_id.toUpperCase(),
             owa: owa,
