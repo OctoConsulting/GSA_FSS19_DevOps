@@ -29,13 +29,12 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
             region: process.env.AWS_REGION,
             hostname: process.env.DB_HOST,
             port: 3306,
-            username: process.env.DB_USER,
         });
 
         let token: any = signer.getAuthToken({
             username: process.env.DB_USER,
         });
-
+        console.log('Got token - ' + token);
         const connection: Connection =
             process.env.SHORT_ENV == 'local'
                 ? mysql2.createConnection({
@@ -51,8 +50,16 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
                       ssl: { rejectUnauthorized: false },
                       password: token,
                       database: process.env.DB_NAME,
-                      authPlugins: {
-                          mysql_clear_password: () => () => token,
+                      //   authPlugins: {
+                      //       mysql_clear_password: () => () => token,
+                      //   },
+                      authSwitchHandler: (data: any, cb: Function) => {
+                          if (data.pluginName === 'mysql_clear_password') {
+                              console.log('pluginName: ' + data.pluginName);
+                              let password = token + '\0';
+                              let buffer = Buffer.from(password);
+                              cb(null, password);
+                          }
                       },
                   });
         console.log('Got connection for delete - ' + connection);
