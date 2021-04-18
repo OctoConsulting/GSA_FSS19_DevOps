@@ -55,6 +55,8 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
                           mysql_clear_password: () => () => token,
                       },
                   });
+        console.log('Got connection for delete - ' + connection);
+        console.log('About to connect to connection with thread - ' + connection.threadId);
         connection.connect(function (err) {
             if (err) {
                 console.log('error connecting: ' + err);
@@ -63,6 +65,7 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
 
             console.log('connected as id ' + connection.threadId + '\n');
         });
+        console.log('Connection established.....');
         //connection.execute
         connection.execute(delete_query, [routingId], (error, results, fields) => {
             if (error) {
@@ -72,12 +75,14 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
             }
             console.log('result on deletion - ' + results);
         });
+        console.log('Execution of query done --- ');
         connection.end((error: any, results: any) => {
             if (error) {
                 console.log('Error while closing connection - ' + error);
             }
             console.log('Connection ended\n');
         });
+        console.log('Connection end done...');
 
         return apiResponses._204({ message: 'NSN record for routing id ' + routingId + ' is deleted successfully!' });
     } catch (err) {
