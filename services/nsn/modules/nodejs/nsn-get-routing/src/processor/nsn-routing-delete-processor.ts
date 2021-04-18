@@ -65,7 +65,7 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
 
             console.log('connected as id ' + connection.threadId + '\n');
         });
-        console.log('Connection established.....');
+        console.log('Connection established..... with thread - ' + connection.threadId);
         //connection.execute
         connection.execute(delete_query, [routingId], (error, results, fields) => {
             if (error) {
