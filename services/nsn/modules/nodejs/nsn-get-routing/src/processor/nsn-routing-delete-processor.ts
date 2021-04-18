@@ -63,13 +63,14 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
 
             console.log('connected as id ' + connection.threadId + '\n');
         });
-
-        connection.query(delete_query, [routingId], (error, results, fields) => {
+        //connection.execute
+        connection.execute(delete_query, [routingId], (error, results, fields) => {
             if (error) {
                 console.log('Error while executeDbDMLCommand routing record - ' + error);
             } else {
                 console.log('executeDbDMLCommand query executed successfully.....');
             }
+            console.log('result on deletion - ' + results);
         });
         connection.end((error: any, results: any) => {
             if (error) {
