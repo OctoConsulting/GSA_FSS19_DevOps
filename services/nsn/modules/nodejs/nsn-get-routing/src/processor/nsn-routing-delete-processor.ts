@@ -62,28 +62,15 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
                           }
                       },
                   });
+
         console.log('Got connection for delete - ' + connection);
         console.log('About to connect to connection with thread - ' + connection.threadId);
-        connection.connect(function (err) {
-            if (err) {
-                console.log('error connecting: ' + err);
-                return;
-            }
-
-            console.log('connected as id ' + connection.threadId + '\n');
-        });
-        console.log('Connection established..... with thread - ' + connection.threadId);
+        await connection.promise().connect();
+        console.log('About to execute query - ' + connection.threadId);
         //connection.execute
-        connection.execute(delete_query, [routingId], (error, results, fields) => {
-            if (error) {
-                console.log('Error while executeDbDMLCommand routing record - ' + error);
-            } else {
-                console.log('executeDbDMLCommand query executed successfully.....');
-            }
-            console.log('result on deletion - ' + results);
-        });
+        await connection.promise().query(delete_query, [routingId]);
         console.log('Execution of query done --- ');
-        connection.end((error: any, results: any) => {
+        connection.promise().end((error: any, results: any) => {
             if (error) {
                 console.log('Error while closing connection - ' + error);
             }
