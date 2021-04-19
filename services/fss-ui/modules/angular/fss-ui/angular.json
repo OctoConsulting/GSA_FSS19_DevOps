@@ -39,8 +39,13 @@
 				"output": "/assets/"
 			  }
             ],
-            "styles": [],
-            "scripts": []
+            "styles": [
+				"./node_modules/uswds/dist/css/uswds.min.css",
+				"src/assets/css/fss19.css"
+			],
+            "scripts": [
+				"./node_modules/uswds/dist/js/uswds.min.js"
+			]
           },
           "configurations": {
             "production": {
@@ -60,13 +65,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
                 },
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumError": "6kb"
                 }
               ]
             }
@@ -106,8 +111,13 @@
 				"output": "/assets/"
 			  }
             ],
-            "styles": [],
-            "scripts": []
+            "styles": [
+				"./node_modules/uswds/dist/css/uswds.min.css",
+				"src/assets/css/fss19.css"
+			],
+            "scripts": [
+				"./node_modules/uswds/dist/js/uswds.min.js"
+			]
           }
         },
         "lint": {
