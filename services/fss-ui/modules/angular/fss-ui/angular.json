@@ -23,6 +23,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+		    "allowedCommonJsDependencies": [ "uswds", "angular2-text-mask" ],
             "outputPath": "dist/fss-ui",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -91,6 +92,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
+		    "allowedCommonJsDependencies": [ "uswds", "angular2-text-mask" ],
             "main": "src/test.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.spec.json",
