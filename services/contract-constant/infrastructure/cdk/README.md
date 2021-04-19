@@ -12,6 +12,9 @@ aws s3 cp ../../modules/nodejs/packages/get-contract-buyer-details/dist/get-cont
 
 aws s3 cp ../../modules/nodejs/packages/get-contract-vendor-address-details/dist/get-contract-vendor-address-details/index.zip s3://artifacts-902479997164-us-east-1-dev/services/contract-const/get-contract-vendor-address-details/index.zip --profile fss
 
+aws s3 cp ../../modules/nodejs/packages/get-contract-notes-details/dist/get-contract-notes-details/index.zip s3://artifacts-902479997164-us-east-1-dev/services/contract-const/get-contract-notes-details/index.zip --profile fss
+
+
 ```
 
 Windows PowerShell:

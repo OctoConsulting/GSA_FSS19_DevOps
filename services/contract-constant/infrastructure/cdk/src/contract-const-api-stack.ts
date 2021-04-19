@@ -32,21 +32,22 @@ export class ContractConstApiStack extends cdk.Stack {
                 {
                     artifactPath: `${constants.LAMBDA_ARTIFACT_PATH_PREFIX}/${constants.FUNCTION_NAMES.GET_CONTRACT_ACO_OFFICE_ADDRESS_DETAILS_NAME}/index.zip`,
                     name: `${constants.FUNCTION_NAMES.GET_CONTRACT_ACO_OFFICE_ADDRESS_DETAILS_NAME}`,
-                    handler: 'getContractAcoOfficeAddressDetailsData',
+                    handler: 'index.getContractAcoOfficeAddressDetailsData',
                 },
                 {
                     artifactPath: `${constants.LAMBDA_ARTIFACT_PATH_PREFIX}/${constants.FUNCTION_NAMES.GET_CONTRACT_BUYER_DETAILS_NAME}/index.zip`,
                     name: `${constants.FUNCTION_NAMES.GET_CONTRACT_BUYER_DETAILS_NAME}`,
-                    handler: 'getContractBuyerDetails',
+                    handler: 'index.getContractBuyerDetails',
                 },
                 {
                     artifactPath: `${constants.LAMBDA_ARTIFACT_PATH_PREFIX}/${constants.FUNCTION_NAMES.GET_CONTRACT_NOTES_DETAILS_NAME}/index.zip`,
                     name: `${constants.FUNCTION_NAMES.GET_CONTRACT_NOTES_DETAILS_NAME}`,
+                    handler: 'index.getNotesDetailsData',
                 },
                 {
                     artifactPath: `${constants.LAMBDA_ARTIFACT_PATH_PREFIX}/${constants.FUNCTION_NAMES.GET_CONTRACT_VENDOR_ADDRESS_DETAILS_NAME}/index.zip`,
                     name: `${constants.FUNCTION_NAMES.GET_CONTRACT_VENDOR_ADDRESS_DETAILS_NAME}`,
-                    handler: 'get-contract-vendor-address-details',
+                    handler: 'index.get-contract-vendor-address-details',
                 },
             ],
         });
