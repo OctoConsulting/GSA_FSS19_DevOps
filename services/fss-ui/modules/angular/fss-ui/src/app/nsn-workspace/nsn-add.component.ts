@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import USWDS from "uswds/src/js/components";
-import { NSNFormModel, NSNModel } from './nsn-model';
+import { NSNFormModel } from './nsn-model';
 const { tooltip } = USWDS;
 
 @Component({
@@ -37,7 +37,9 @@ export class NsnAddComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    tooltip.on();
+    setTimeout (() => {
+      tooltip.on();
+    }, 100);
   }
 
   ngOnDestroy() {
@@ -46,7 +48,7 @@ export class NsnAddComponent implements OnInit {
 
   searchHandler() {
     this.nsnFormModel.nsn = this.nsnFormModel.nsn?.replace(/(-*\s*)$/, '');
-    if(this.nsnFormModel.nsn == '3510') {
+    if (this.nsnFormModel.nsn == '3510') {
       this.recordFound = true;
       return;
     }
@@ -66,13 +68,11 @@ export class NsnAddComponent implements OnInit {
   }
 
   get validationPassed() {
-    return (this.nsnFormModel.nsn?.length > 1 && this.nsnFormModel.contractOffice?.key.length > 0 &&
+    return (!this.recordFound && this.nsnFormModel.nsn?.length > 1 && this.nsnFormModel.contractOffice?.key.length > 0 &&
       (!this.routingIdentifierRequired || this.nsnFormModel.routingIdentifierCode?.length > 0));
   }
 
   get routingIdentifierRequired() {
-    return ((this.nsnFormModel.dodCivilianManager == 'false' && this.nsnFormModel.dodMilitaryManager == 'true') ||
-      (this.nsnFormModel.dodCivilianManager == 'true' && this.nsnFormModel.dodMilitaryManager == 'true'));
-
+    return this.nsnFormModel.dodCivilianManager != 'false' || this.nsnFormModel.dodMilitaryManager != 'false';
   }
 }
