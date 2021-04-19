@@ -29,7 +29,7 @@ pipeline {
                     npm config set prefix '~/.local/'
                     cd "${APP_DIR}"
                     npm install
-                    npm run build
+                    npm run build --output-hashing=all
                 '''
             }
         }
