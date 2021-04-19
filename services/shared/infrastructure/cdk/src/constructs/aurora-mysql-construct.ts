@@ -36,9 +36,18 @@ export class AuroraMysqlConstruct extends cdk.Construct {
         let secrets: Record<string, Secret> = {};
         for (let s of secretsConfig) secrets[s.name] = createSecret(this, s.name, s.user);
 
+        const dbEngine = rds.DatabaseClusterEngine.auroraMysql({ version: rds.AuroraMysqlEngineVersion.VER_2_08_1 });
+        const pg = new rds.ParameterGroup(this, 'AuroraMysqlParameterGroup', {
+            engine: dbEngine,
+            parameters: {
+                sql_mode: 'STRICT_ALL_TABLES',
+            },
+        });
+
         const cluster = new rds.DatabaseCluster(this, 'Database', {
+            parameterGroup: pg,
             credentials: rds.Credentials.fromSecret(secrets['Master']),
-            engine: rds.DatabaseClusterEngine.auroraMysql({ version: rds.AuroraMysqlEngineVersion.VER_2_08_1 }),
+            engine: dbEngine,
             storageEncrypted: true,
             storageEncryptionKey: key,
             instanceProps: {
@@ -54,6 +63,7 @@ export class AuroraMysqlConstruct extends cdk.Construct {
                 retention: cdk.Duration.days(params.backupRetentionDays),
             },
         });
+
         const proxySecrets = [cluster.secret!, secrets['ReadOnly'], secrets['Lambda']];
         // Use for performance enhacement through connection pooling
         // as well as better scaling and security management
