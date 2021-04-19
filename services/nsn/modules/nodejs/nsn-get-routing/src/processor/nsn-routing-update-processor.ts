@@ -2,7 +2,7 @@
 
 import { NsnData } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { getDBSettings, executeDbDMLCommand } from '../config';
+import { getDBSettings, executeUpdate } from '../config';
 import { apiResponses } from '../model/responseAPI';
 import { DynamoDB } from 'aws-sdk';
 import { checkForExistingNsn } from '../util/nsn-data-util';
@@ -62,19 +62,6 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         return apiResponses._404({ message: 'No NSN Data found for update for routing_id - ' + routing_id });
     }
 
-    const nsnData: NsnData = {
-        routing_id: routing_id.toUpperCase(),
-        owa: !owa ? existingNsnData.owa : owa.toUpperCase(),
-        is_civ_mgr,
-        is_mil_mgr,
-        ric: !ric ? existingNsnData.ric : ric.toUpperCase(),
-        routing_id_category: existingNsnData.routing_id_category,
-        change_date: new Date(),
-        changed_by: changed_by,
-        create_date: existingNsnData.create_date,
-        created_by: existingNsnData.created_by,
-    };
-
     try {
         let updated;
         let update_query =
@@ -83,7 +70,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             ' SET owa = ?, is_civ_mgr = ?, is_mil_mgr = ?, ric = ?, change_date = ?, changed_by = ? ' +
             ' WHERE routing_id = ?';
         console.log('Update query - ' + update_query);
-        let response: any = await executeDbDMLCommand(update_query, [
+        let response: any = await executeUpdate(update_query, [
             owa,
             is_civ_mgr,
             is_mil_mgr,
@@ -93,31 +80,10 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             routing_id,
         ]);
         console.log('Update query result - ' + response.result);
-        // getDBSettings().CONNECTION.getConnection(function (error, conn) {
-        //     if (error) {
-        //         console.log('Error while getting connection for updating routing record - ' + error);
-        //     }
-        //     console.log('About to update routing record for id - ' + routing_id + ' with connection - ' + conn);
-        //     conn.query(
-        //         update_query,
-        //         [owa, is_civ_mgr, is_mil_mgr, ric, new Date(), changed_by, routing_id],
-        //         (error, results, fields) => {
-        //             console.log('Updating records with fields - ' + fields);
-        //             if (error) {
-        //                 console.log('Error while updating routing record - ' + error);
-        //             } else {
-        //                 updated = true;
-        //                 console.log('Update query executed successfully.....');
-        //             }
-        //         }
-        //     );
-        //     conn.release();
-        // });
-        // if (!updated) {
-        //     getDBSettings()
-        //         .CONNECTION.promise()
-        //         .query(update_query, [owa, is_civ_mgr, is_mil_mgr, ric, new Date(), changed_by, routing_id]);
-        // }
+        if (response.code === -1) {
+            return apiResponses._500(response.error);
+        }
+
         console.log(
             'With parameters - ' +
                 owa +
@@ -132,6 +98,19 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
                 ', routing_id - ' +
                 routing_id
         );
+
+        const nsnData: NsnData = {
+            routing_id: routing_id.toUpperCase(),
+            owa: !owa ? existingNsnData.owa : owa.toUpperCase(),
+            is_civ_mgr,
+            is_mil_mgr,
+            ric: !ric ? existingNsnData.ric : ric.toUpperCase(),
+            routing_id_category: existingNsnData.routing_id_category,
+            change_date: new Date(),
+            changed_by: changed_by,
+            create_date: existingNsnData.create_date,
+            created_by: existingNsnData.created_by,
+        };
 
         return apiResponses._200(nsnData);
     } catch (err) {
