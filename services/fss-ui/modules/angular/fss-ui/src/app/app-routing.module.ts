@@ -1,14 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { NsnWorkspaceComponent } from './nsn-workspace/nsn-workspace.component';
-import { NsnWorkspaceModule } from './nsn-workspace/nsn-workspace.module';
+import { NsnSearchComponent } from './nsn-workspace/nsn-search.component';
 
 const routes: Routes = [
   {
-    path: '', component: NsnWorkspaceComponent, children: [
+    path: 'nsn', component: NsnSearchComponent, children: [
       {
-        path: '',
-        component: NsnWorkspaceComponent,
+        path: 'nsn',
+        loadChildren: () => import('./nsn-workspace/nsn-workspace.module').then(m => m.NsnWorkspaceModule),
         data: {
           title: 'NSN'
         }
@@ -18,7 +17,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, {onSameUrlNavigation: 'reload'}),NsnWorkspaceModule],
+  imports: [RouterModule.forRoot(routes, {onSameUrlNavigation: 'reload'})],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

@@ -1,0 +1,163 @@
+<div class="usa-section">
+  <div class="grid-container">
+    <div class="grid-row grid-gap">
+      <main class="main-content" id="main-content">
+        <h1>NSN/Class/Group Routing Maintenance</h1>
+        <div>
+          <div *ngIf="!recordFound && nsn" class="usa-alert usa-alert--warning">
+            <div class="usa-alert__body">
+              <p class="usa-alert__text">NSN, Class, or Group record [{{nsn}}] not found.</p>
+            </div>
+          </div>
+          <div *ngIf="validationFailed" class="usa-alert usa-alert--error" role="alert">
+            <div class="usa-alert__body">
+              <p class="usa-alert__text">NSN, Class, or Group field cannot be empty. Enter a minimum of 2 digits.</p>
+            </div>
+          </div>
+          <h3>Search</h3>
+          <div class="margin-top-105">NSN, Class or Group
+            <sup class="usa-tooltip" data-position="top"
+              title="Enter 2 digits for Federal Supply Group (FSG) or<br/>4 digits for Federal Supply Class (FSC) or<br/>13-15 digits for the National Stock Number (NSN)."><svg
+                class="usa-icon" aria-hidden="true" focusable="false" role="img">
+                <use xlink:href="/assets/img/sprite.svg#info_outline"></use>
+              </svg>
+            </sup>
+          </div>
+          <div class="usa-form">
+            <form class="usa-search" role="search">
+              <label class="usa-sr-only" for="nsn-search-field">Search</label>
+              <input required class="usa-input nsn-search" id="nsn-search-field" type="search" name="nsn-search"
+                autocomplete="off" [(ngModel)]="nsnInput" [textMask]="nsnInputMask">
+              <button class="usa-button nsn-search" type="submit" (click)="searchHandler()">
+                Search
+              </button>
+            </form>
+            <span class="usa-hint">Minimum of 2 digits required</span>
+          </div>
+
+          <div class="margin-top-205">
+            <h3>Add Record</h3>
+            <button class="margin-top-105 usa-button" [routerLink]="'/nsn/add'">Add a Routing Record</button>
+          </div>
+        </div>
+
+        <div *ngIf="recordFound">
+          <div class="usa-table-container--scrollable">
+            <table class="usa-table">
+              <caption>Group Routing Details</caption>
+              <thead>
+                <tr>
+                  <th scope="col" role="columnheader">
+                    Group(FSG)
+                  </th>
+                  <th scope="col" role="columnheader">
+                    Commodity Center
+                  </th>
+                  <th scope="col" role="columnheader">
+                    Civilian Manager
+                  </th>
+                  <th scope="col" role="columnheader">
+                    Military Manager
+                  </th>
+                  <th scope="col" role="columnheader">
+                    Routing Identifier Code
+                  </th>
+                  <th scope="col" role="columnheader">
+                    Last Modified
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let groupRouting of nsnModel.groupRoutings">
+                  <th scope="row">{{groupRouting.group}}</th>
+                  <td>{{groupRouting.commodityCenter}}</td>
+                  <td>{{groupRouting.civilianManager}}</td>
+                  <td>{{groupRouting.militaryManager}}</td>
+                  <td>{{groupRouting.routingIdentifierCode}}</td>
+                  <td>{{groupRouting.lastModified}}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="usa-sr-only usa-table__announcement-region" aria-live="polite"></div>
+          </div>
+          <div class="usa-table-container--scrollable">
+            <table class="usa-table">
+              <caption>Class Routing Details</caption>
+              <thead>
+                <tr>
+                  <th scope="col" role="columnheader">
+                    Group(FSC)
+                  </th>
+                  <th scope="col" role="columnheader">
+                    Commodity Center
+                  </th>
+                  <th scope="col" role="columnheader">
+                    Civilian Manager
+                  </th>
+                  <th scope="col" role="columnheader">
+                    Military Manager
+                  </th>
+                  <th scope="col" role="columnheader">
+                    Routing Identifier Code
+                  </th>
+                  <th scope="col" role="columnheader">
+                    Last Modified
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let classRouting of nsnModel.classRoutings">
+                  <th scope="row">{{classRouting.group}}</th>
+                  <td>{{classRouting.commodityCenter}}</td>
+                  <td>{{classRouting.civilianManager}}</td>
+                  <td>{{classRouting.militaryManager}}</td>
+                  <td>{{classRouting.routingIdentifierCode}}</td>
+                  <td>{{classRouting.lastModified}}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="usa-sr-only usa-table__announcement-region" aria-live="polite"></div>
+          </div>
+          <div class="usa-table-container--scrollable">
+            <table class="usa-table">
+              <caption>NSN Routing Details</caption>
+              <thead>
+                <tr>
+                  <th scope="col" role="columnheader">
+                    NSN
+                  </th>
+                  <th scope="col" role="columnheader">
+                    Commodity Center
+                  </th>
+                  <th scope="col" role="columnheader">
+                    Civilian Manager
+                  </th>
+                  <th scope="col" role="columnheader">
+                    Military Manager
+                  </th>
+                  <th scope="col" role="columnheader">
+                    Routing Identifier Code
+                  </th>
+                  <th scope="col" role="columnheader">
+                    Last Modified
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let nsnRouting of nsnModel.nsnRoutings">
+                  <th scope="row">{{nsnRouting.nationalStockNumber}}</th>
+                  <td>{{nsnRouting.commodityCenter}}</td>
+                  <td>{{nsnRouting.civilianManager}}</td>
+                  <td>{{nsnRouting.militaryManager}}</td>
+                  <td>{{nsnRouting.routingIdentifierCode}}</td>
+                  <td>{{nsnRouting.lastModified}}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="usa-sr-only usa-table__announcement-region" aria-live="polite"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>

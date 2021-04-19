@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NsnWorkspaceComponent } from './nsn-workspace.component';
+import { NsnSearchComponent } from './nsn-search.component';
 
-describe('NsnWorkspaceComponent', () => {
-  let component: NsnWorkspaceComponent;
-  let fixture: ComponentFixture<NsnWorkspaceComponent>;
+describe('NsnSearchComponent', () => {
+  let component: NsnSearchComponent;
+  let fixture: ComponentFixture<NsnSearchComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ NsnWorkspaceComponent ]
+      declarations: [ NsnSearchComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NsnWorkspaceComponent);
+    fixture = TestBed.createComponent(NsnSearchComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

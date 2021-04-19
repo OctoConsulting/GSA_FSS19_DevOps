@@ -2,13 +2,16 @@ h1 {
     font-size: 1.5em;
 }
 h3 {
-    margin: 10px 0;
+    margin: 10px 0 0;
 }
 .usa-logo {
 	font-size: 1.8rem;
 }
+.usa-hint {
+    font-size: 14px;
+}
 .usa-input {
-    max-width: 20em;
+    border-radius: .25rem;
 }
 .usa-table caption {
     font-size: 1.17em
@@ -20,17 +23,12 @@ h3 {
 .usa-form-group {
     margin-top: 0.5rem;
 }
+.usa-combo-box {
+    max-width: 18em;
+}
 .usa-footer__secondary-section{
   padding-bottom: 0.5rem;
   padding-top: 1rem;
-}
-.nsn-field-label {
-    font-weight: 700;
-}
-.nsn-field-requirements {
-    font-size: 0.9em;
-    margin:5px 0;
-    display: inline-block;
 }
 .nsn-search {
     border-right: 1px solid #565c65;
@@ -42,11 +40,36 @@ h3 {
     height: 2.2rem;
     margin: 0 10px;
 }
+.usa-input--error {
+    border-width: .15rem;
+    border-color: #b50909 !important;
+}
+.usa-form-group--error {
+    margin-top: 0px;
+}
+.usa-error-message {
+    font-weight: 500;
+}
 .main-content {
     min-height:calc(100vh - 263px)
+}
+.radio-inline {
+    display: inline-block;
+    padding-right: 40px;
+}
+.required {
+    font-weight:bolder;
+    color: #800000;
+}
+.no-border-table th, .no-border-table td {
+    border: 0px solid;
+    padding: .5rem 2rem .5rem 0;
 }
 @media (max-width: 63.99em) {
     .main-content {
         min-height:calc(100vh - 232px)
     }
+}
+.usa-form .usa-input {
+    max-width: 25.6rem;
 }
