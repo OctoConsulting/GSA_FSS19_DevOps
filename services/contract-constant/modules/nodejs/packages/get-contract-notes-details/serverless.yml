@@ -1,4 +1,4 @@
-service: get-contract-aco-office-address-details
+service: get-contract-notes-details
 
 provider:
   name: aws
@@ -51,11 +51,11 @@ resources:
             KeyType: S
         BillingMode: PAY_PER_REQUEST 
 functions:
-  getContractAcoOfficeAddressDetails:
-    handler: getContractAcoOfficeAddressDetailsData
+  getNotesDetails:
+    handler: getNotesDetailsData
     events:
       - http:
-          path:  /contractconstantdata/v1/acoOfficeAddress/details/
+          path:  /contractconstantdata/v1/notes/details/
           method: POST
   test:
     handler: test
