@@ -48,6 +48,12 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         return apiResponses._400({ message: 'Routing identifier code is mandatory.' });
     }
 
+    if (ric && ric.length > 3) {
+        return apiResponses._400({
+            message: 'Invalid RIC value ' + ric + '. Maximim of 3 characters are allowed for RIC.',
+        });
+    }
+
     let select_query = 'SELECT * FROM ' + getDBSettings().TABLE_NAME + " where routing_id = '" + routing_id + "'";
     let result: any = await getDBSettings().CONNECTION.promise().query(select_query);
     let existingNsnData: any;

@@ -50,6 +50,11 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         return apiResponses._400({ message: 'Routing identifier code is mandatory.' });
     }
 
+    if (ric && ric.length > 3) {
+        return apiResponses._400({
+            message: 'Invalid RIC value ' + ric + '. Maximim of 3 characters are allowed for RIC.',
+        });
+    }
     let group_id = Number(routing_id.substring(0, 2));
     // check for the class keyed nsn information -- A group_id column can be groupId or classId value
     let classId = routing_id.length >= 4 ? Number(routing_id.substring(0, 4)) : 0;
