@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import USWDS from "uswds/src/js/components";
 import { ClassRoutingModel, GroupRoutingModel, NSNModel, NSNRoutingModel } from './nsn-model';
 const { tooltip } = USWDS;
