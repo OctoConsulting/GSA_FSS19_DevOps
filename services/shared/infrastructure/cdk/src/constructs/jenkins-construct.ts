@@ -10,7 +10,7 @@ import {
     ThroughputMode,
     CfnFileSystem,
 } from '@aws-cdk/aws-efs';
-import { Port, SecurityGroup } from '@aws-cdk/aws-ec2';
+import { Peer, Port, SecurityGroup } from '@aws-cdk/aws-ec2';
 import {
     Cluster,
     ContainerImage,
@@ -52,10 +52,23 @@ export class JenkinsConstruct extends Construct {
 
         const leaderSecurityGroup = new SecurityGroup(this, 'LeaderSecurityGroup', {
             vpc,
+            allowAllOutbound: false,
         });
+        leaderSecurityGroup.addEgressRule(
+            Peer.anyIpv4(),
+            Port.allTcp(),
+            'DO NOT REMOVE, required for cognito communication'
+        );
+
         const workerSecurityGroup = new SecurityGroup(this, 'WorkerSecurityGroup', {
             vpc,
+            allowAllOutbound: false,
         });
+        workerSecurityGroup.addEgressRule(
+            Peer.anyIpv4(),
+            Port.allTcp(),
+            'DO NOT REMOVE, required for package downloads'
+        );
 
         leaderSecurityGroup.connections.allowFrom(workerSecurityGroup, Port.allTraffic());
         workerSecurityGroup.connections.allowFrom(leaderSecurityGroup, Port.allTraffic());
@@ -429,6 +442,10 @@ export class JenkinsConstruct extends Construct {
             throughputMode: ThroughputMode.BURSTING,
             vpcSubnets: this.props.vpc.selectSubnets({
                 subnets: this.props.ciCdSubnets,
+            }),
+            securityGroup: new SecurityGroup(this, 'EFSSecurityGroup', {
+                allowAllOutbound: false,
+                vpc: this.props.vpc,
             }),
         });
 
