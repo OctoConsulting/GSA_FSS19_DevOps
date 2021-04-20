@@ -47,7 +47,7 @@ export class ContractConstApiStack extends cdk.Stack {
                 {
                     artifactPath: `${constants.LAMBDA_ARTIFACT_PATH_PREFIX}/${constants.FUNCTION_NAMES.GET_CONTRACT_VENDOR_ADDRESS_DETAILS_NAME}/index.zip`,
                     name: `${constants.FUNCTION_NAMES.GET_CONTRACT_VENDOR_ADDRESS_DETAILS_NAME}`,
-                    handler: 'index.get-contract-vendor-address-details',
+                    handler: 'index.getContractVendorAddressDetails',
                 },
             ],
         });
