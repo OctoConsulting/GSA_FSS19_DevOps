@@ -4,14 +4,19 @@
       <main class="main-content" id="main-content">
         <h1>NSN/Class/Group Routing Maintenance</h1>
         <div>
-          <div *ngIf="!recordFound && nsn" class="usa-alert usa-alert--warning">
+          <div *ngIf="!recordFound && !validationFailed && nsn" class="usa-alert usa-alert--warning">
             <div class="usa-alert__body">
               <p class="usa-alert__text">NSN, Class, or Group record [{{nsn}}] not found.</p>
             </div>
           </div>
-          <div *ngIf="validationFailed" class="usa-alert usa-alert--error" role="alert">
+          <div *ngIf="validationFailed && nsn?.length == 0" class="usa-alert usa-alert--error" role="alert">
             <div class="usa-alert__body">
               <p class="usa-alert__text">NSN, Class, or Group field cannot be empty. Enter a minimum of 2 digits.</p>
+            </div>
+          </div>
+          <div *ngIf="validationFailed && nsn?.length == 1" class="usa-alert usa-alert--error" role="alert">
+            <div class="usa-alert__body">
+              <p class="usa-alert__text">NSN, Class, or Group field must have a minimum of 2 digits.</p>
             </div>
           </div>
           <h3>Search</h3>
