@@ -23,7 +23,11 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-		    "allowedCommonJsDependencies": [ "uswds", "angular2-text-mask" ],
+            "allowedCommonJsDependencies": [
+              "uswds",
+              "angular2-text-mask",
+              "rxjs-compat"
+            ],
             "outputPath": "dist/fss-ui",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -33,19 +37,19 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-			  {
-				"glob": "**/*",
-				"input": "./node_modules/uswds/dist/",
-				"output": "/assets/"
-			  }
+              {
+                "glob": "**/*",
+                "input": "./node_modules/uswds/dist/",
+                "output": "/assets/"
+              }
             ],
             "styles": [
-				"./node_modules/uswds/dist/css/uswds.min.css",
-				"src/assets/css/fss19.css"
-			],
+              "./node_modules/uswds/dist/css/uswds.min.css",
+              "src/assets/css/fss19.css"
+            ],
             "scripts": [
-				"./node_modules/uswds/dist/js/uswds.min.js"
-			]
+              "./node_modules/uswds/dist/js/uswds.min.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -97,7 +101,6 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-		    "allowedCommonJsDependencies": [ "uswds", "angular2-text-mask" ],
             "main": "src/test.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.spec.json",
@@ -105,19 +108,19 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-			  {
-				"glob": "**/*",
-				"input": "./node_modules/uswds/dist/",
-				"output": "/assets/"
-			  }
+              {
+                "glob": "**/*",
+                "input": "./node_modules/uswds/dist/",
+                "output": "/assets/"
+              }
             ],
             "styles": [
-				"./node_modules/uswds/dist/css/uswds.min.css",
-				"src/assets/css/fss19.css"
-			],
+              "./node_modules/uswds/dist/css/uswds.min.css",
+              "src/assets/css/fss19.css"
+            ],
             "scripts": [
-				"./node_modules/uswds/dist/js/uswds.min.js"
-			]
+              "./node_modules/uswds/dist/js/uswds.min.js"
+            ]
           }
         },
         "lint": {
