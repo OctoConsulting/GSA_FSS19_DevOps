@@ -27,8 +27,8 @@ export class NsnAddComponent implements OnInit {
   contractOffices: Array<any> = [
     { key: "F", value: "F - Forth Worth" },
     { key: "M", value: "M - Kansas City (Tools Center)" },
-    { key: "N", value: "New York" },
-    { key: "P", value: "Philadelphia" },
+    { key: "N", value: "N - New York" },
+    { key: "P", value: "P - Philadelphia" },
   ];
 
   constructor() {
