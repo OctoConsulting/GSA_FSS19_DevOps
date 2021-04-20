@@ -77,6 +77,12 @@ export class AuroraMysqlConstruct extends cdk.Construct {
                 subnetGroupName: 'IsolatedNsnAurora',
             }),
             dbProxyName: `fss-nsn-${this.props.shortEnv}`,
+            securityGroups: [
+                new ec2.SecurityGroup(this, 'RdsProxySG', {
+                    allowAllOutbound: false,
+                    vpc: this.props.vpc,
+                }),
+            ],
         });
 
         // The default endpoint is read/write, we will also create a
