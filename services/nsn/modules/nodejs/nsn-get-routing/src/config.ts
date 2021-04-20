@@ -54,7 +54,7 @@ export const getDBSettings = () => {
     };
 };
 
-export async function executeUpdate(query: string, values: any | any[] | { [param: string]: any }) {
+export async function executeQuery(query: string, values: any | any[] | { [param: string]: any }) {
     let connection: Connection;
     const promise = new Promise(function (resolve, reject) {
         console.log('Starting query ...\n');
@@ -116,16 +116,16 @@ export async function executeUpdate(query: string, values: any | any[] | { [para
 
             if (results) {
                 console.log('executeDbDMLCommand Query result - ' + results);
+                let responseData: any = {};
 
+                resolve({ code: 1, result: results, error: null });
                 connection.end(function (error: any, results: any) {
                     if (error) {
                         //return "error";
                         reject({ code: -1, result: null, error: error });
                     }
                     // The connection is terminated now
-                    console.log('Connection ended\n');
-
-                    resolve({ code: 1, result: results, error: null });
+                    console.log('Connection ended\n' + results);
                 });
             }
         });

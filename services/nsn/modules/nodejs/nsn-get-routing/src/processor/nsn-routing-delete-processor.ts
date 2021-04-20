@@ -1,7 +1,7 @@
 'use strict';
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { getDBSettings, executeUpdate } from '../config';
+import { getDBSettings, executeQuery } from '../config';
 import { apiResponses } from '../model/responseAPI';
 import { checkForExistingNsn } from '../util/nsn-data-util';
 import mysql2, { Connection } from 'mysql2';
@@ -24,7 +24,7 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
     try {
         let delete_query = 'DELETE FROM ' + getDBSettings().TABLE_NAME + ' where routing_id = ? ';
         let deleted;
-        let response: any = await executeUpdate(delete_query, [routingId]);
+        let response: any = await executeQuery(delete_query, [routingId]);
 
         console.log('Delete query result - ' + response.result);
         if (response.code === -1) {

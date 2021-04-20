@@ -44,8 +44,9 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
 
     orderField = orderField ? orderField : ' routing_id ';
     pageSize = pageSize ? pageSize : 5;
-    pageNo = pageNo && !isNaN(pageNo) && Number(pageNo) <= 0 ? 1 : pageNo;
-    let start = (pageNo - 1) * pageSize;
+    //pageNo = pageNo && !isNaN(pageNo) && Number(pageNo) <= 0 ? 1 : pageNo;
+    let page: number = !pageNo ? 1 : pageNo;
+    let start = (page - 1) * pageSize;
     let recordCount: number = 0;
 
     try {
