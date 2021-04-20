@@ -2,7 +2,7 @@
 
 import { NsnData } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { getDBSettings, executeUpdate } from '../config';
+import { getDBSettings, executeQuery } from '../config';
 import { apiResponses } from '../model/responseAPI';
 import { DynamoDB } from 'aws-sdk';
 import { checkForExistingNsn } from '../util/nsn-data-util';
@@ -73,7 +73,7 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     try {
         let inserted;
         console.log('Executing insert query');
-        let response: any = await executeUpdate(insertQuery, [
+        let response: any = await executeQuery(insertQuery, [
             routing_id,
             owa,
             is_civ_mgr,

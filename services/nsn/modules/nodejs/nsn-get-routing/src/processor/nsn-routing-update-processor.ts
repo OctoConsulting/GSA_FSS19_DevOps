@@ -2,7 +2,7 @@
 
 import { NsnData } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { getDBSettings, executeUpdate } from '../config';
+import { getDBSettings, executeQuery } from '../config';
 import { apiResponses } from '../model/responseAPI';
 import { DynamoDB } from 'aws-sdk';
 import { checkForExistingNsn } from '../util/nsn-data-util';
@@ -55,12 +55,13 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
     }
 
     let select_query = 'SELECT * FROM ' + getDBSettings().TABLE_NAME + " where routing_id = '" + routing_id + "'";
-    let result: any = await getDBSettings().CONNECTION.promise().query(select_query);
     let existingNsnData: any;
 
-    result.forEach((row: any) => {
-        existingNsnData = row ? row[0] : undefined;
-    });
+    await executeQuery(select_query, null)
+        .then((response: any) => {
+            existingNsnData = response && response.result ? response.result : undefined;
+        })
+        .catch(() => {});
 
     //let existingNsnData = await getDocumentDbClient().get(params);
 
@@ -76,7 +77,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             ' SET owa = ?, is_civ_mgr = ?, is_mil_mgr = ?, ric = ?, change_date = ?, changed_by = ? ' +
             ' WHERE routing_id = ?';
         console.log('Update query - ' + update_query);
-        let response: any = await executeUpdate(update_query, [
+        let response: any = await executeQuery(update_query, [
             owa,
             is_civ_mgr,
             is_mil_mgr,
