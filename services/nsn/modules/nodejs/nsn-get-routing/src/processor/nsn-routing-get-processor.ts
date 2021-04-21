@@ -3,7 +3,7 @@ import { NsnData } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { apiResponses } from '../model/responseAPI';
 import { getDBSettings, executeQuery } from '../config';
-import { checkForExistingNsn } from '../util/nsn-data-util';
+import { checkForExistingNsn, getOrdinalDate } from '../util/nsn-data-util';
 
 export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
     if (!event.body) {
@@ -189,6 +189,7 @@ function classifyNsnData(list: any, keyGetter: any): Map<string, NsnData[]> {
     list.forEach((item: any) => {
         if (item) {
             const key = keyGetter(item);
+            item.change_date_julian = getOrdinalDate(item.change_date);
             if (classifiedData.has(key)) {
                 nsnArr = classifiedData.get(key);
             }

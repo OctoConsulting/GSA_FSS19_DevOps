@@ -18,3 +18,19 @@ export async function checkForExistingNsn(routing_id: string) {
     console.log('Got routing_id in checkForExistingNsn = ' + recordCount);
     return recordCount == 1 ? true : false;
 }
+
+const isLeapYear = function (date: Date) {
+    var year = date.getFullYear();
+    if ((year & 3) != 0) return false;
+    return year % 100 != 0 || year % 400 == 0;
+};
+
+export function getOrdinalDate(date: Date): string {
+    var dayCount = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+    var mn = date.getMonth();
+    var dn = date.getDate();
+    var yearYY = (date.getFullYear() + '').substring(2, 4);
+    var dayOfYear = dayCount[mn] + dn;
+    if (mn > 1 && isLeapYear(date)) dayOfYear++;
+    return yearYY + dayOfYear;
+}
