@@ -2,7 +2,7 @@
 import { NsnData } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { apiResponses } from '../model/responseAPI';
-import { getDBSettings } from '../config';
+import { getDBSettings, executeQuery } from '../config';
 import { checkForExistingNsn } from '../util/nsn-data-util';
 
 export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
@@ -44,9 +44,8 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
 
     orderField = orderField ? orderField : ' routing_id ';
     pageSize = pageSize ? pageSize : 5;
-    //pageNo = pageNo && !isNaN(pageNo) && Number(pageNo) <= 0 ? 1 : pageNo;
-    let page: number = !pageNo ? 1 : pageNo;
-    let start = (page - 1) * pageSize;
+    pageNo = (pageNo && Number(pageNo) <= 0) || isNaN(pageNo) ? 1 : pageNo;
+    let start = (pageNo - 1) * pageSize;
     let recordCount: number = 0;
 
     try {
@@ -60,17 +59,15 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
             '( ' +
             (routingId.length == 2 ? "'GROUP'" : "'CLASS'" + ',' + "'NSN'") +
             ' )';
-        console.log('Record count Query to be executed 1 - ' + query);
-        console.log('Environment variables - ');
-        console.log('process.env.DB_HOST - ' + process.env.DB_HOST);
-        console.log('process.env.DB_USER - ' + process.env.DB_USER);
-        console.log('process.env.DB_NAME - ' + process.env.DB_NAME);
-        console.log('process.env.SHORT_ENV - ' + process.env.SHORT_ENV);
-        let result: any = await getDBSettings().CONNECTION.promise().query(query);
 
-        result.forEach((row: any) => {
-            recordCount = row[0].CNT ? row[0].CNT : recordCount;
-        });
+        await executeQuery(query, null)
+            .then((response: any) => {
+                recordCount = response && response.result && response.result[0] ? response.result[0].CNT : 0;
+            })
+            .catch((error: any) => {
+                console.log('Error while executing query for count - ' + error);
+                recordCount = 0;
+            });
 
         if (!recordCount || recordCount == 0) {
             return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
@@ -79,10 +76,20 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
         let groupQueryStr =
             'SELECT * FROM ' + getDBSettings().TABLE_NAME + " where routing_id = '" + routingId.substring(0, 2) + "'";
         console.log('Group query - ' + groupQueryStr);
-        result = await getDBSettings().CONNECTION.promise().query(groupQueryStr);
 
-        const groupArr = classifyNsnData(result[0], (item: NsnData) => item.routing_id_category);
-        let classArr;
+        let groupArr: any;
+        await executeQuery(groupQueryStr, null)
+            .then((response: any) => {
+                if (response && response.result && response.result[0]) {
+                    groupArr = classifyNsnData(response.result, (item: NsnData) => item.routing_id_category);
+                }
+            })
+            .catch((error: any) => {
+                console.log('Error while executing group query - ' + error);
+                recordCount = 0;
+            });
+
+        let classArr: any;
 
         // recordCount needs to be adjusted.
         if (routingId.length == 2) {
@@ -96,11 +103,16 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
                 ' and routing_id_category in ' +
                 " ('CLASS') ";
             console.log('count query one more time - ' + query);
-            let result: any = await getDBSettings().CONNECTION.promise().query(query);
 
-            result.forEach((row: any) => {
-                recordCount = row[0].CNT ? row[0].CNT : recordCount;
-            });
+            await executeQuery(query, null)
+                .then((response: any) => {
+                    recordCount = response && response.result && response.result[0] ? response.result[0].CNT : 0;
+                })
+                .catch((error: any) => {
+                    console.log('Error while executing query for count - ' + error);
+                    recordCount = 0;
+                });
+
             console.log('record count - ' + recordCount);
         } else {
             let classQueryStr =
@@ -110,8 +122,17 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
                 routingId.substring(0, 4) +
                 "'";
             console.log('Class query - ' + classQueryStr);
-            result = await getDBSettings().CONNECTION.promise().query(classQueryStr);
-            classArr = classifyNsnData(result[0], (item: NsnData) => item.routing_id_category);
+
+            await executeQuery(classQueryStr, null)
+                .then((response: any) => {
+                    if (response && response.result) {
+                        classArr = classifyNsnData(response.result, (item: NsnData) => item.routing_id_category);
+                    }
+                })
+                .catch((error: any) => {
+                    console.log('Error while executing class query - ' + error);
+                });
+
             // Ignore the class record from the NSN record count if exists.
             recordCount = routingId.length == 4 && classArr && classArr.size == 1 ? recordCount - 1 : recordCount;
         }
@@ -135,12 +156,20 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
             pageSize;
 
         console.log('main query - ' + query);
-        result = await getDBSettings().CONNECTION.promise().query(query);
 
-        let nsnArr = classifyNsnData(result[0], (item: NsnData) => item.routing_id_category);
+        let nsnArr: any;
+        await executeQuery(query, null)
+            .then((response: any) => {
+                if (response && response.result) {
+                    nsnArr = classifyNsnData(response.result, (item: NsnData) => item.routing_id_category);
+                }
+            })
+            .catch((error: any) => {
+                console.log('Error while executing main query - ' + error);
+            });
 
         let nsnResponse = {
-            group: groupArr.get('GROUP'),
+            group: groupArr ? groupArr.get('GROUP') : null,
             class:
                 routingId.length == 2 ? (nsnArr ? nsnArr.get('CLASS') : null) : classArr ? classArr.get('CLASS') : null,
             nsn: nsnArr ? nsnArr.get('NSN') : null,
