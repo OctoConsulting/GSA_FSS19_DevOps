@@ -188,29 +188,10 @@ export class JenkinsConstruct extends Construct {
         const CfnService = fargateService.service.node.findChild('Service') as CfnService;
         CfnService.addPropertyOverride('EnableExecuteCommand', true);
 
-        // Enable SSL communication between Jenkins Leader and workers via ALB
         fargateService.service.taskDefinition.defaultContainer?.addPortMappings({
             containerPort: WORKERPORT,
             hostPort: WORKERPORT,
         });
-
-        const workerCommTarget = fargateService.service.loadBalancerTarget({
-            containerName: fargateService.taskDefinition.defaultContainer?.containerName!,
-            containerPort: WORKERPORT,
-        });
-        const workerCommListener = fargateService.loadBalancer.addListener('WorkCommunicationListener', {
-            port: WORKERPORT,
-            protocol: ApplicationProtocol.HTTPS,
-            certificates: [certificate],
-            open: false,
-        });
-        workerCommListener.addTargets('WorkerCommTarget', {
-            targets: [workerCommTarget],
-            protocol: ApplicationProtocol.HTTP,
-            port: WORKERPORT,
-        });
-        workerCommListener.connections.allowFrom(workerSecurityGroup, Port.tcp(WORKERPORT));
-        workerCommListener.connections.allowTo(leaderSecurityGroup, Port.tcp(WORKERPORT));
 
         const cfnLoadBalancer = fargateService.loadBalancer.node.defaultChild as CfnLoadBalancer;
         cfnLoadBalancer.subnets = vpc.selectSubnets({ subnets: this.props.ciCdSubnets }).subnetIds;
