@@ -1,5 +1,5 @@
 import { Bucket, BucketEncryption, IBucket } from '@aws-cdk/aws-s3';
-import { CfnLoadBalancer } from '@aws-cdk/aws-elasticloadbalancingv2';
+import { CfnLoadBalancer, ApplicationProtocol } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { JenkinsConstructParms, CreateSecretsProps, CreateClusterProps } from '../models/jenkins-construct-parms';
 import {
     IFileSystem,
@@ -107,15 +107,19 @@ export class JenkinsConstruct extends Construct {
         this.artifactsBucket = this.createAritfactsS3Bucket();
         this.artifactsBucket.grantReadWrite(jenkinsWorkerTaskRole);
 
+        const WORKERPORT = 50000;
+
+        const certificate = new Certificate(this, 'Certificate', {
+            domainName: jenkinsDomainName,
+            validation: CertificateValidation.fromDns(hostedZone),
+        });
+
         const fargateService = new ApplicationLoadBalancedFargateService(this, 'JenkinsService', {
             listenerPort: 443,
             domainZone: privateHostedZone,
             domainName: jenkinsDomainName,
-            certificate: new Certificate(this, 'Certificate', {
-                domainName: jenkinsDomainName,
-                validation: CertificateValidation.fromDns(hostedZone),
-            }),
             cluster,
+            certificate: certificate,
             taskSubnets: vpc.selectSubnets({
                 subnets: this.props.ciCdSubnets,
             }),
@@ -128,6 +132,7 @@ export class JenkinsConstruct extends Construct {
             taskImageOptions: {
                 image: ContainerImage.fromAsset('src/jenkins/docker/jenkinsLeader'),
                 containerPort: 8080,
+                containerName: 'web',
                 executionRole,
                 taskRole: jenkinsLeaderTaskRole,
                 logDriver: LogDriver.awsLogs({
@@ -183,11 +188,30 @@ export class JenkinsConstruct extends Construct {
         const CfnService = fargateService.service.node.findChild('Service') as CfnService;
         CfnService.addPropertyOverride('EnableExecuteCommand', true);
 
-        // TODO: Make communication between jenkins leader and workers SSL (via ALB)
-        // need to use ApplicationMultipleTargetGroupsServiceBaseProps or escape hatches
-        // steps are to add a target group to point at container exposed service 50000 (HTTP)
-        // and also add a listener on HTTPS 50000
-        // and lastly change jenkins config to point at the ssl endpoint in ecs cloud config
+        // Enable SSL communication between Jenkins Leader and workers via ALB
+        fargateService.service.taskDefinition.defaultContainer?.addPortMappings({
+            containerPort: WORKERPORT,
+            hostPort: WORKERPORT,
+        });
+
+        const workerCommTarget = fargateService.service.loadBalancerTarget({
+            containerName: fargateService.taskDefinition.defaultContainer?.containerName!,
+            containerPort: WORKERPORT,
+        });
+        const workerCommListener = fargateService.loadBalancer.addListener('WorkCommunicationListener', {
+            port: WORKERPORT,
+            protocol: ApplicationProtocol.HTTPS,
+            certificates: [certificate],
+            open: false,
+        });
+        workerCommListener.addTargets('WorkerCommTarget', {
+            targets: [workerCommTarget],
+            protocol: ApplicationProtocol.HTTP,
+            port: WORKERPORT,
+        });
+        workerCommListener.connections.allowFrom(workerSecurityGroup, Port.tcp(WORKERPORT));
+        workerCommListener.connections.allowTo(leaderSecurityGroup, Port.tcp(WORKERPORT));
+
         const cfnLoadBalancer = fargateService.loadBalancer.node.defaultChild as CfnLoadBalancer;
         cfnLoadBalancer.subnets = vpc.selectSubnets({ subnets: this.props.ciCdSubnets }).subnetIds;
 
@@ -208,11 +232,6 @@ export class JenkinsConstruct extends Construct {
                     accessPointId: this.accessPoint.accessPointId,
                 },
             },
-        });
-
-        fargateService.service.taskDefinition.defaultContainer?.addPortMappings({
-            containerPort: 50000,
-            hostPort: 50000,
         });
 
         fargateService.service.taskDefinition.defaultContainer?.addMountPoints({
