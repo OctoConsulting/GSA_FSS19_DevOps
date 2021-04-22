@@ -17,7 +17,20 @@ export class EndpointsConstruct extends cdk.Construct {
          * Add Gateway Endpoint
          */
         this.setDynamoDbEndpoint();
+
+        /**
+         * S3 Endpoint
+         */
+        this.setS3Endpoint();
+
+        /**
+         * ExecuteApi Endpoint
+         */
         this.setApiGatewayEndpoint();
+
+        /**
+         * Route53 Resolver endpoint
+         */
         this.setRoute53ResolverEndpoint();
     }
 
@@ -31,6 +44,18 @@ export class EndpointsConstruct extends cdk.Construct {
             ],
         });
     }
+
+    private setS3Endpoint() {
+        this.props.vpc.addGatewayEndpoint('s3-db', {
+            service: ec2.GatewayVpcEndpointAwsService.S3,
+            subnets: [
+                {
+                    subnets: this.props.isolatedSubnets,
+                },
+            ],
+        });
+    }
+
     private setRoute53ResolverEndpoint() {
         const route53ResolverEndpoint = new CfnResolverEndpoint(this, 'route53-resolver-endpoint', {
             direction: 'OUTBOUND',
