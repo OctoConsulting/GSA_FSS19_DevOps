@@ -1,6 +1,5 @@
 import { Bucket, BucketEncryption, IBucket } from '@aws-cdk/aws-s3';
-import { LoadBalancerTarget } from '@aws-cdk/aws-route53-targets';
-import { CfnLoadBalancer, ApplicationProtocol, ListenerCondition } from '@aws-cdk/aws-elasticloadbalancingv2';
+import { CfnLoadBalancer, ApplicationProtocol } from '@aws-cdk/aws-elasticloadbalancingv2';
 import { JenkinsConstructParms, CreateSecretsProps, CreateClusterProps } from '../models/jenkins-construct-parms';
 import {
     IFileSystem,
@@ -32,7 +31,7 @@ import { LogGroup, RetentionDays } from '@aws-cdk/aws-logs';
 import { Secret } from '@aws-cdk/aws-secretsmanager';
 import { DnsRecordType } from '@aws-cdk/aws-servicediscovery';
 import { CfnOutput, Construct, Duration } from '@aws-cdk/core';
-import { ARecord, HostedZone, RecordTarget } from '@aws-cdk/aws-route53';
+import { HostedZone } from '@aws-cdk/aws-route53';
 import { CertificateValidation, Certificate } from '@aws-cdk/aws-certificatemanager';
 import { Key } from '@aws-cdk/aws-kms';
 
@@ -46,7 +45,6 @@ export class JenkinsConstruct extends Construct {
         this.props = props;
         const vpc = props.vpc;
         const jenkinsDomainName = `jenkins.${props.stackContext.domainName}`;
-        const workerDomainName = `worker.${jenkinsDomainName}`;
         const cognitoServerUrl = `https://fss19-${props.envParameters.shortEnv}.auth.${props.envParameters.region}.amazoncognito.com`;
         const cognitoAdminGroup = props.stackContext.cognitoAdminGroup;
 
@@ -111,19 +109,17 @@ export class JenkinsConstruct extends Construct {
 
         const WORKERPORT = 50000;
 
+        const certificate = new Certificate(this, 'Certificate', {
+            domainName: jenkinsDomainName,
+            validation: CertificateValidation.fromDns(hostedZone),
+        });
+
         const fargateService = new ApplicationLoadBalancedFargateService(this, 'JenkinsService', {
             listenerPort: 443,
             domainZone: privateHostedZone,
             domainName: jenkinsDomainName,
-            certificate: new Certificate(this, 'Certificate', {
-                domainName: jenkinsDomainName,
-                subjectAlternativeNames: [workerDomainName],
-                validation: CertificateValidation.fromDnsMultiZone({
-                    jenkinsDomainName: hostedZone,
-                    workerDomainName: hostedZone,
-                }),
-            }),
             cluster,
+            certificate: certificate,
             taskSubnets: vpc.selectSubnets({
                 subnets: this.props.ciCdSubnets,
             }),
@@ -202,19 +198,20 @@ export class JenkinsConstruct extends Construct {
             containerName: fargateService.taskDefinition.defaultContainer?.containerName!,
             containerPort: WORKERPORT,
         });
-        new ARecord(this, 'AliasRecord', {
-            target: RecordTarget.fromAlias(new LoadBalancerTarget(fargateService.loadBalancer)),
-            zone: privateHostedZone,
-            recordName: workerDomainName,
+        const workerCommListener = fargateService.loadBalancer.addListener('WorkCommunicationListener', {
+            port: WORKERPORT,
+            protocol: ApplicationProtocol.HTTPS,
+            certificates: [certificate],
+            open: false,
         });
-
-        fargateService.listener.addTargets('WorkerCommTarget', {
-            conditions: [ListenerCondition.hostHeaders([workerDomainName])],
+        workerCommListener.addTargets('WorkerCommTarget', {
             targets: [workerCommTarget],
             protocol: ApplicationProtocol.HTTP,
             port: WORKERPORT,
-            priority: 10,
         });
+        workerCommListener.connections.allowFrom(workerSecurityGroup, Port.tcp(WORKERPORT));
+        workerCommListener.connections.allowTo(leaderSecurityGroup, Port.tcp(WORKERPORT));
+
         const cfnLoadBalancer = fargateService.loadBalancer.node.defaultChild as CfnLoadBalancer;
         cfnLoadBalancer.subnets = vpc.selectSubnets({ subnets: this.props.ciCdSubnets }).subnetIds;
 
