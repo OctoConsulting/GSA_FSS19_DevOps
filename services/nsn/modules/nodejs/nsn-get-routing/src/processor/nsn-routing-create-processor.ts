@@ -5,7 +5,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda
 import { getDBSettings, executeQuery } from '../config';
 import { apiResponses } from '../model/responseAPI';
 import { DynamoDB } from 'aws-sdk';
-import { checkForExistingNsn } from '../util/nsn-data-util';
+import { checkForExistingNsn, getOrdinalDate } from '../util/nsn-data-util';
 import { Connection } from 'mysql2';
 
 export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -66,8 +66,9 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     let insertQuery =
         'Insert into ' +
         getDBSettings().TABLE_NAME +
-        '( routing_id,  owa, is_civ_mgr, is_mil_mgr, ric, routing_id_category, changed_by, change_date, created_by, create_date ) ' +
-        ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        '( routing_id,  owa, is_civ_mgr, is_mil_mgr, ric, routing_id_category, last_change_date, created_date, created_by, updated_by, updated_date) ' +
+        ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+
     console.log('Executing insert query - ' + insertQuery);
     let now: Date = new Date();
     try {
@@ -80,8 +81,9 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             is_mil_mgr,
             ric,
             routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
-            created_by,
+            getOrdinalDate(now),
             now,
+            created_by,
             created_by,
             now,
         ]);
@@ -97,10 +99,11 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             is_mil_mgr,
             ric: ric,
             routing_id_category: routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
-            changed_by: created_by,
-            change_date: now,
+            updated_by: created_by,
+            last_change_date: getOrdinalDate(now),
             created_by: created_by,
-            create_date: now,
+            created_date: now,
+            updated_date: now,
         };
 
         return apiResponses._201(nsnData);
