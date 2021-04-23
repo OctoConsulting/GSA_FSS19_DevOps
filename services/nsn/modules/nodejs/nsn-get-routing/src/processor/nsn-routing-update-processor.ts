@@ -114,11 +114,6 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             is_mil_mgr,
             ric: !ric ? existingNsnData.ric : ric.toUpperCase(),
             routing_id_category: existingNsnData.routing_id_category,
-            updated_date: now,
-            updated_by: changed_by,
-            last_change_date: getOrdinalDate(now),
-            created_date: existingNsnData.create_date,
-            created_by: existingNsnData.created_by,
         };
 
         return apiResponses._200(nsnData);

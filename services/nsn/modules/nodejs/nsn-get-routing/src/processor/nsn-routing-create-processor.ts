@@ -99,11 +99,6 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             is_mil_mgr,
             ric: ric,
             routing_id_category: routing_id.length == 2 ? 'GROUP' : routing_id.length == 4 ? 'CLASS' : 'NSN',
-            updated_by: created_by,
-            last_change_date: getOrdinalDate(now),
-            created_by: created_by,
-            created_date: now,
-            updated_date: now,
         };
 
         return apiResponses._201(nsnData);

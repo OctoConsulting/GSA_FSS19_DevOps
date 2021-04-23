@@ -7,9 +7,9 @@ export interface NsnData {
     is_mil_mgr?: string;
     ric?: string;
     routing_id_category?: string;
-    last_change_date: string;
-    updated_date: DateTime;
+    last_change_date?: string;
+    updated_date?: DateTime;
     updated_by?: string;
     created_by?: string;
-    created_date: DateTime;
+    created_date?: DateTime;
 }
