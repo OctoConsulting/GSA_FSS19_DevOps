@@ -5,8 +5,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda
 import { getDBSettings, executeQuery } from '../config';
 import { apiResponses } from '../model/responseAPI';
 import { DynamoDB } from 'aws-sdk';
-import { checkForExistingNsn } from '../util/nsn-data-util';
-import { Connection } from 'mysql2';
+import { checkForExistingNsn, getOrdinalDate } from '../util/nsn-data-util';
 
 export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     console.log('Updating the NSN data - ' + event);
@@ -74,9 +73,10 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
         let update_query =
             'UPDATE ' +
             getDBSettings().TABLE_NAME +
-            ' SET owa = ?, is_civ_mgr = ?, is_mil_mgr = ?, ric = ?, change_date = ?, changed_by = ? ' +
+            ' SET owa = ?, is_civ_mgr = ?, is_mil_mgr = ?, ric = ?, updated_date = ?, updated_by = ?, last_change_date = ? ' +
             ' WHERE routing_id = ?';
         console.log('Update query - ' + update_query);
+        let now = new Date();
         let response: any = await executeQuery(update_query, [
             owa,
             is_civ_mgr,
@@ -84,6 +84,7 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             ric,
             new Date(),
             changed_by,
+            getOrdinalDate(now),
             routing_id,
         ]);
         console.log('Update query result - ' + response.result);
@@ -113,10 +114,6 @@ export const putNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPro
             is_mil_mgr,
             ric: !ric ? existingNsnData.ric : ric.toUpperCase(),
             routing_id_category: existingNsnData.routing_id_category,
-            change_date: new Date(),
-            changed_by: changed_by,
-            create_date: existingNsnData.create_date,
-            created_by: existingNsnData.created_by,
         };
 
         return apiResponses._200(nsnData);

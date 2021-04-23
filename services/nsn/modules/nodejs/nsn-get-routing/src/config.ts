@@ -12,17 +12,6 @@ if (process.env.IS_OFFLINE) {
 export const dynamoDocumentClient = new DynamoDB.DocumentClient(options);
 
 export const getDBSettings = () => {
-    var signer = new RDS.Signer({
-        region: process.env.AWS_REGION,
-        hostname: process.env.DB_HOST,
-        port: 3306,
-        username: process.env.DB_USER,
-    });
-
-    let token: any = signer.getAuthToken({
-        username: process.env.DB_USER,
-    });
-
     return {
         TABLE_NAME:
             '`' +
