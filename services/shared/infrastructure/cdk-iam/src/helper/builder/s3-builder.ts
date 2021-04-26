@@ -9,39 +9,46 @@ export class S3Builder extends BaseBuilder {
 
     public buildPolicyStatements(): PolicyStatement[] {
         if (this.props.permission === 's3-read') {
-            return this.read();
+            return this.read(this.props.resources!);
         }
         if (this.props.permission === 's3-write') {
-            return this.write();
+            return this.write(this.props.resources!);
         }
         return this.unimplimented(this.props.permission);
     }
 
-    private read(): PolicyStatement[] {
+    private read(resources: string[]): PolicyStatement[] {
+        var bucketObjectArns: string[] = [];
+        resources.forEach((resource) => {
+            bucketObjectArns.push(`${this.getServicePrefix('')}${resource}/*`);
+        });
         const get = new PolicyStatement({
-            actions: ['s3:GetObject'],
-            resources: [`${this.getServicePrefix('')}*/*`],
-        });
-        // const list = new PolicyStatement({
-        //     actions: ['s3:ListBucket'],
-        //     resources: [`${this.getServicePrefix('')}`],
-        // });
-        const listAll = new PolicyStatement({
-            actions: ['s3:ListAllMyBuckets', 's3:ListBuckets'],
-            resources: [`*`],
-        });
-        const all = new PolicyStatement({
-            actions: ['s3:*'],
-            resources: [`*`],
+            actions: ['s3:GetObject*'],
+            resources: bucketObjectArns,
         });
 
-        return [get, listAll, all];
+        var bucketArns: string[] = [];
+
+        resources.forEach((resource) => {
+            bucketArns.push(`${this.getServicePrefix('')}${resource}`);
+        });
+        const list = new PolicyStatement({
+            actions: ['s3:ListBucket*'],
+            resources: bucketArns,
+        });
+
+        return [get, list];
     }
 
-    private write(): PolicyStatement[] {
+    private write(resources: string[]): PolicyStatement[] {
+        var bucketObjectArns: string[] = [];
+        resources.forEach((resource) => {
+            bucketObjectArns.push(`${this.getServicePrefix('')}${resource}/*`);
+        });
+
         const writeObject = new PolicyStatement({
             actions: ['s3:PutObject'],
-            resources: [`${this.getServicePrefix('')}/*`],
+            resources: bucketObjectArns,
         });
         return [writeObject];
     }

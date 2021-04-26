@@ -26,8 +26,12 @@
                         "dynamodb-read",
                         "dynamodb-crudItem",
                         "logs-read",
-                        "s3-write",
-                        "s3-read",
+                        {
+                            "s3-write": ["nsn-routing-extract-902479997164-us-east-1-dev"]
+                        },
+                        {
+                            "s3-read": ["nsn-routing-extract-902479997164-us-east-1-dev"]
+                        },
                         "apigateway-read",
                         "apigateway-runapi",
                         "xray-read",
@@ -68,7 +72,9 @@
                     "permissions": [
                         "iam-mfa",
                         "dynamodb-read",
-                        "s3-read",
+                        {
+                            "s3-read": ["nsn-routing-extract-902479997164-us-east-1-dev"]
+                        },
                         "dynamodb-crudItem",
                         "logs-read",
                         "apigateway-read",
@@ -105,7 +111,9 @@
                     "permissions": [
                         "iam-mfa",
                         "dynamodb-read",
-                        "s3-read",
+                        {
+                            "s3-read": ["nsn-routing-extract-902479997164-us-east-1-dev"]
+                        },
                         "dynamodb-crudItem",
                         "logs-read",
                         "apigateway-read",
