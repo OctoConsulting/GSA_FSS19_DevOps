@@ -1,6 +1,10 @@
 package gov.gsa.fas.contractservice.service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,6 +12,14 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +36,7 @@ import gov.gsa.fas.contractservice.contract.RequisitionRes;
 import gov.gsa.fas.contractservice.dao.ContractServiceDAO;
 import gov.gsa.fas.contractservice.dao.ContractServiceDAOImpl;
 import gov.gsa.fas.contractservice.exception.ApplicationException;
+import gov.gsa.fas.contractservice.exception.EntityNotFoundException;
 import gov.gsa.fas.contractservice.model.ACCMapping;
 import gov.gsa.fas.contractservice.model.ACOContractDetails;
 import gov.gsa.fas.contractservice.model.Address;
@@ -256,7 +269,11 @@ public class ContractServiceImpl implements ContractService {
 			ContractDataMaster contractMaster = contractServiceDAO.getContractByGSAM(inPOLines.getContractNum());
 
 			if (contractMaster != null) {
-				contractAddress = extractAddress(contractMaster.getD402_cont_no(), contractServiceDAO);
+				try {
+					contractAddress = extractAddress(contractMaster.getD402_cecc());
+				} catch (EntityNotFoundException e) {
+					contractAddress="";
+				}
 			}
 
 			if (contractMaster == null || StringUtils.isBlank(contractAddress)) {
@@ -294,7 +311,13 @@ public class ContractServiceImpl implements ContractService {
 			 * for now we are assigning main address to suplier address, once we are done
 			 * with the API we will change this logic
 			 */
-			String supplierAddress = contractAddress;
+			
+			String supplierAddress;
+			try {
+				supplierAddress = extractAddress(contractMaster.getD402_cecs());
+			} catch (EntityNotFoundException e) {
+				supplierAddress = "";
+			}
 
 			contractDetail.setSupplierAddress(supplierAddress);
 
@@ -464,6 +487,9 @@ public class ContractServiceImpl implements ContractService {
 		} catch (ParseException ex) {
 			logger.error("Error in the validateGetContractData::{}", ex);
 
+		}
+		catch(IOException ex) {
+			logger.error("Error in the validateGetContractData::{}", ex);
 		}
 
 		return contractDetail;
@@ -732,7 +758,12 @@ public class ContractServiceImpl implements ContractService {
 					contractsType.setContractorDUNS(null);
 				}
 				
-				String contractAddress = extractAddress(internal, contractServiceDAO);
+				String contractAddress;
+				try {
+					contractAddress = extractAddress(master.getD402_cecc());
+				} catch (EntityNotFoundException e) {
+					contractAddress="";
+				}
 
 				contractsType.setContractorAddress(contractAddress);
 				
@@ -753,6 +784,10 @@ public class ContractServiceImpl implements ContractService {
 				}
 
 			} catch (ParseException ex) {
+				logger.error(ex.getLocalizedMessage(), ex);
+			} catch (MalformedURLException ex) {
+				logger.error(ex.getLocalizedMessage(), ex);
+			} catch (IOException ex) {
 				logger.error(ex.getLocalizedMessage(), ex);
 			}
 		}
@@ -801,11 +836,20 @@ public class ContractServiceImpl implements ContractService {
 	 * @param internal
 	 * @param contractServiceDAO
 	 * @return
+	 * @throws IOException 
+	 * @throws MalformedURLException 
+	 * @throws EntityNotFoundException 
 	 */
-	private String extractAddress(String internal, ContractServiceDAO contractServiceDAO) {
+	private String extractAddress(String entityId) throws MalformedURLException, IOException, EntityNotFoundException {
+		
 		StringBuffer contractorAddress = new StringBuffer();
-		String addressDetails = contractServiceDAO.getDetailsByPartitionKey(internal,
-				ContractConstants.CONTRACT_SERVICE_SK_D410 + "_" + internal);
+
+		String entityAPIKey = StringUtils.isNotBlank(System.getenv(ContractConstants.SHORT_ENV))
+				? System.getenv(ContractConstants.ENTITY_API_KEY)
+				: "xehygqufuk";
+
+		String addressDetails = invokeAPI(entityAPIKey, entityId, ContractConstants.ENTITY_API_URL);
+
 		if (StringUtils.isNotBlank(addressDetails)) {
 			Gson gson = new Gson();
 			Address address = gson.fromJson(addressDetails, Address.class);
@@ -1221,6 +1265,50 @@ public class ContractServiceImpl implements ContractService {
 		
 		}
 
+	}
+	
+	private String invokeAPI(String apiKey, String pathParam,String serviceUrl) throws MalformedURLException,IOException, EntityNotFoundException{
+
+		try {
+			//"xehygqufuk"
+			String vpc =  StringUtils.isNotBlank(System.getenv(ContractConstants.AWS_VPC))?System.getenv(ContractConstants.AWS_VPC):"vpce-088a5795f16dd4c2c-dnbntft7";
+			String env = StringUtils.isNotBlank(System.getenv(ContractConstants.SHORT_ENV))?System.getenv(ContractConstants.SHORT_ENV):"dev";
+			String url = "https://"+vpc+"."+ContractConstants.DOMAIN_URL+"/"+env+serviceUrl+pathParam;
+
+			HttpGet getReq = new HttpGet(url);
+
+			Header header = new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+			Header header2 = new BasicHeader("x-apigw-api-id", apiKey);
+			
+			List<Header> headers = Arrays.asList(header,header2);
+			HttpClient client = HttpClients.custom().setDefaultHeaders(headers).build();
+			HttpResponse response = client.execute(getReq);
+
+			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+				throw new EntityNotFoundException("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
+			}else if (response.getStatusLine().getStatusCode() != 200) {
+				throw new RuntimeException("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
+			}
+
+			BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
+
+			StringBuffer outputBuff = new StringBuffer();
+			String output;
+			System.out.println("Output from Server .... \n");
+			while ((output = br.readLine()) != null) {
+				System.out.println(output);
+				outputBuff.append(output);
+
+			}
+
+			client.getConnectionManager().shutdown();
+			
+			return outputBuff.toString();
+
+		} catch (IOException e) {
+			throw e;
+
+		} 
 	}
 
 }

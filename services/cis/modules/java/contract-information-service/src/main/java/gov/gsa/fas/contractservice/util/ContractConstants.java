@@ -117,4 +117,9 @@ public class ContractConstants {
 	
 	public static final String FLOW_TYPE_LISTCONTRACTS = "LIST_CONTRACTS";
 	public static final String FLOW_TYPE_CONTRACTDETAILS = "CONTRACT_DETAILS";
+	
+	public static final String AWS_VPC = "VPC";
+	public static final String DOMAIN_URL = "execute-api.us-east-1.vpce.amazonaws.com";
+	public static final String ENTITY_API_URL = "/entityManagement/v1/details/";
+	public static final String ENTITY_API_KEY = "ENTITY-API-KEY";
 }
