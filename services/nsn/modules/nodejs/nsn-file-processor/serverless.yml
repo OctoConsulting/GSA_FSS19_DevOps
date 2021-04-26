@@ -1,0 +1,36 @@
+service: nsn-get-routing
+
+provider:
+    name: aws
+    runtime: nodejs12.x
+    profile: serverlessUser
+    region: us-east-1
+    environment:
+        PORT: 3306
+        DB_HOST: 'localhost'
+        DB_USER: 'nsn-user'
+        DB_PWD: 'password'
+        DB_NAME: 'NSN-DB'
+        SHORT_ENV: 'local'
+
+plugins:
+    - serverless-webpack
+    - serverless-offline
+
+package:
+    individually: true
+
+functions:
+    generateNsnRoutingReport:
+        handler: generateNsnRoutingReport
+        events:
+            - http:
+                  path: /nsnrouting/v1/reports/
+                  method: post
+                  cors: true
+    test:
+        handler: test
+        events:
+            - http:
+              path: test
+              method: get
