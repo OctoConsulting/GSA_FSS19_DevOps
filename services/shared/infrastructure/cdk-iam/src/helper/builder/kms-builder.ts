@@ -3,7 +3,7 @@ import { BaseBuilder } from './common/BaseBulider';
 import * as cdk from '@aws-cdk/core';
 import * as kms from '@aws-cdk/aws-kms';
 import { BuilderProps } from '../../models/builder-props';
-import { Key } from '@aws-cdk/aws-kms';
+
 export class KmsBuilder extends BaseBuilder {
     constructor(parent: cdk.Construct, id: string, props: BuilderProps) {
         super(parent, id, props);
@@ -21,30 +21,35 @@ export class KmsBuilder extends BaseBuilder {
 
     private encrypt(resources: string[]): PolicyStatement[] {
         var policies: PolicyStatement[] = [];
+        var keyArns: string[] = [];
         resources.forEach((resource) => {
-            // const kmsKey = kms.Alias.fromAliasName(this, `${resource}`, resource);
-            policies.push(
-                new PolicyStatement({
-                    actions: ['kms:Encrypt', 'kms:ReEncrypt*', 'kms:GenerateDataKey*'],
-                    resources: [`${this.getServicePrefix('')}key/${resource}`],
-                })
-            );
+            keyArns.push(`${this.getServicePrefix('')}key/${resource}`);
         });
+
+        policies.push(
+            new PolicyStatement({
+                actions: ['kms:Encrypt', 'kms:ReEncrypt*', 'kms:GenerateDataKey*'],
+                resources: keyArns,
+            })
+        );
 
         return policies;
     }
 
     private decrypt(resources: string[]): PolicyStatement[] {
         var policies: PolicyStatement[] = [];
+
+        var keyArns: string[] = [];
         resources.forEach((resource) => {
-            const kmsKey = kms.Alias.fromAliasName(this, `${resource}`, resource);
-            policies.push(
-                new PolicyStatement({
-                    actions: ['kms:Decrypt', 'kms:DescribeKey'],
-                    resources: [`${this.getServicePrefix('')}key/${resource}`],
-                })
-            );
+            keyArns.push(`${this.getServicePrefix('')}key/${resource}`);
         });
+
+        policies.push(
+            new PolicyStatement({
+                actions: ['kms:Decrypt', 'kms:DescribeKey'],
+                resources: keyArns,
+            })
+        );
 
         return policies;
     }
