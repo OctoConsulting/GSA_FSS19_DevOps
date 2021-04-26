@@ -20,6 +20,12 @@ export const getNotesDetailsData = async (event: APIGatewayProxyEvent): Promise<
         });
     }
 
+    if ( d430_rec_type != 'N') {
+        return apiResponses._400({
+            message: 'INVALID_REQUEST : Invalid Record type in Request.',
+        });
+    }
+
     let notesData ;
     try {
         // let params = {
