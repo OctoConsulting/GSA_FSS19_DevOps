@@ -6,6 +6,7 @@ import { DynamoConstruct } from './constructs/dynamo-construct';
 import { ApiGatewayConstruct } from './constructs/api-gateway-construct';
 import { NsnLambdasConstruct } from './constructs/nsn-lambdas-construct';
 import { constants } from './models/constants';
+import { S3Construct } from './constructs/s3-constuct';
 export class NsnApiStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
@@ -19,6 +20,10 @@ export class NsnApiStack extends cdk.Stack {
             shortEnv: envParameters.shortEnv,
         });
         const crossStackImporter = new CrossStackImporter(this, 'corss-stack-imports', envParameters);
+        new S3Construct(this, 'nsn-s3', {
+            shortEnv: envParameters.shortEnv,
+            name: 'nsn-routing-extract',
+        });
 
         const lambdas = new NsnLambdasConstruct(this, 'lambdas', {
             nsnTable: dynamoDbConstruct.getNsnTable(),
