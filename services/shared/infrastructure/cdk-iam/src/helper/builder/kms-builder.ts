@@ -20,7 +20,6 @@ export class KmsBuilder extends BaseBuilder {
     }
 
     private encrypt(resources: string[]): PolicyStatement[] {
-        console.log('resources array', resources);
         var policies: PolicyStatement[] = [];
         resources.forEach((resource) => {
             // const kmsKey = kms.Alias.fromAliasName(this, `${resource}`, resource);

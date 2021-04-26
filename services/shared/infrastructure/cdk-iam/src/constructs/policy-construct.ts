@@ -15,8 +15,6 @@ export class PolicyConstruct extends cdk.Construct {
     }
 
     createPolicy() {
-        console.log('Building Policies for', this.props.iamSet);
-
         const groupName = this.props.iamSet.groupName;
         const group = new iam.Group(this, `${groupName}`, {
             groupName: groupName,
@@ -48,7 +46,6 @@ export class PolicyConstruct extends cdk.Construct {
                 permission = Object.keys(aRecord)[0];
                 resources = aRecord[Object.keys(aRecord)[0]];
             }
-            console.log('Buildling Policies for permission:', permission, 'resource', resources);
             builderFactory
                 .getPolicyBuilder(this, permission, permission, this.getArnPrefix(permission), resources)
                 .getPolicyStatements()
@@ -76,7 +73,6 @@ export class PolicyConstruct extends cdk.Construct {
             account: accountNo,
             region: region,
         });
-        console.log(`arnPrefix for ${permission} is ${arnPrefix}`);
         return arnPrefix;
     }
 }

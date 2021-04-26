@@ -11,6 +11,11 @@
         "fss-iam-dev": {
             "vpc": "vpc-0d1b73fc53abfcae7",
             "samlProvider": "arn:aws:iam::902479997164:saml-provider/SecureAuth",
+            "identityProvider": {
+                "name": "FssOkta",
+                "metadataPath": "resources/okta/saml/dev/metadata.xml",
+                "userName": "FssOkta"
+            },
             "iamSets": [
                 {
                     "groupName": "FSS-Developers",

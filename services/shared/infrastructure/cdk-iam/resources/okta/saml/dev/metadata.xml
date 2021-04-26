@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?><md:EntityDescriptor entityID="http://www.okta.com/exkldu9o9DWMWzEEk1d6" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"><md:IDPSSODescriptor WantAuthnRequestsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"><md:KeyDescriptor use="signing"><ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:X509Data><ds:X509Certificate>MIIDojCCAoqgAwIBAgIGAXizeoVaMA0GCSqGSIb3DQEBCwUAMIGRMQswCQYDVQQGEwJVUzETMBEG
+A1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNU2FuIEZyYW5jaXNjbzENMAsGA1UECgwET2t0YTEU
+MBIGA1UECwwLU1NPUHJvdmlkZXIxEjAQBgNVBAMMCWZzczE5LWRldjEcMBoGCSqGSIb3DQEJARYN
+aW5mb0Bva3RhLmNvbTAeFw0yMTA0MDgyMTUzMTRaFw0zMTA0MDgyMTU0MTRaMIGRMQswCQYDVQQG
+EwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNU2FuIEZyYW5jaXNjbzENMAsGA1UE
+CgwET2t0YTEUMBIGA1UECwwLU1NPUHJvdmlkZXIxEjAQBgNVBAMMCWZzczE5LWRldjEcMBoGCSqG
+SIb3DQEJARYNaW5mb0Bva3RhLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAInj
+pxeCGBR1nX0+yGWmOMHvb74CrnU8TQPhWJt0bk0Ke7hwVjIRWlXQaQK/IhEbGs5HnNWuC2JvwnHm
+aVsPeXLll45Dq7QCJErP2sD9vUjujG2RwmXsTRpjn/HKlgPXBpkMvO1MtW9hocjxBUqyVxVifIWC
+2NO7Kg07JXohrjDnT0rfEkHc1RGh93qD51mm10a4SrN3XtzAMnPMOZgS1WS5x9tAV5lRiNWnOWtG
+H+QLq0sPS3a9EyCE4o+7qY4O707hrdpuA3uPVWd+w8h/erPWw+uFOpJoubo1u/omfIwoe6qsmHtE
+EHSLf6Q0A/2wM0zCPPJ+iYF5bYEqq+Z3sqkCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAJMAe53AT
+gh1L+YMOzd4eXZx+PePBoPUmYDIJEYSMpDEVn4TZlWtTaoLHnzD15ZTiwD6TVzj9+iQeaxaBD0WW
+M1DILrcjEVx5WQyoSScKBPq2WfXmINUUtZ/SvCnXhxm3/RxUu3XfiEVZ/J4tI+1wgb68ZlJyokBk
+zqI9YcK1zBjB6ryon9mBAh7iBVMRRZ421cYVAxjl3gUnGMsFtKt8h8yoUyv/G33cuKdJ2q3oFbWk
+Xh+dyPL+WDuXECUzkjdugT3dNXAllHUn43GK4a9eXrF5Q+6/IYfP7+PZX8KrY4d/6f6NCFPAbB8Y
+10iJoI6OnWuUDxQuLabYqXDcWazElA==</ds:X509Certificate></ds:X509Data></ds:KeyInfo></md:KeyDescriptor><md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat><md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:unspecified</md:NameIDFormat><md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://fss19-dev.oktapreview.com/app/amazon_aws/exkldu9o9DWMWzEEk1d6/sso/saml"/><md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://fss19-dev.oktapreview.com/app/amazon_aws/exkldu9o9DWMWzEEk1d6/sso/saml"/></md:IDPSSODescriptor></md:EntityDescriptor>

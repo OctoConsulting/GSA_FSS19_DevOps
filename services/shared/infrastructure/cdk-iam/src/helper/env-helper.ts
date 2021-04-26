@@ -8,6 +8,7 @@ export class EnvHelper {
             shortEnv,
             vpc: stackContext.vpc,
             samlProvider: stackContext.samlProvider,
+            identityProvider: stackContext.identityProvider,
             iamSets: stackContext.iamSets,
         };
         return envParameters;
