@@ -26,6 +26,8 @@
                         "dynamodb-read",
                         "dynamodb-crudItem",
                         "logs-read",
+                        "s3-write",
+                        "s3-read",
                         "apigateway-read",
                         "apigateway-runapi",
                         "xray-read",
@@ -35,6 +37,7 @@
                             "kms-encrypt": [
                                 "865d3adc-973f-45f1-87d6-0deebd072a05",
                                 "5a6f96c0-abd3-4364-b7b9-0647047d6556",
+                                "ac52bf66-ff7e-4d9f-97d7-9fbbcfd88088",
                                 "28628007-30d2-4731-95f3-b1537938af68",
                                 "ff6cab05-5668-47db-9628-95851330e69a",
                                 "ae4d28f0-1a8e-474f-ad77-337582a37a15"
@@ -44,6 +47,7 @@
                             "kms-decrypt": [
                                 "865d3adc-973f-45f1-87d6-0deebd072a05",
                                 "5a6f96c0-abd3-4364-b7b9-0647047d6556",
+                                "ac52bf66-ff7e-4d9f-97d7-9fbbcfd88088",
                                 "28628007-30d2-4731-95f3-b1537938af68",
                                 "ff6cab05-5668-47db-9628-95851330e69a",
                                 "ae4d28f0-1a8e-474f-ad77-337582a37a15"
@@ -64,6 +68,7 @@
                     "permissions": [
                         "iam-mfa",
                         "dynamodb-read",
+                        "s3-read",
                         "dynamodb-crudItem",
                         "logs-read",
                         "apigateway-read",
@@ -75,6 +80,7 @@
                             "kms-encrypt": [
                                 "865d3adc-973f-45f1-87d6-0deebd072a05",
                                 "5a6f96c0-abd3-4364-b7b9-0647047d6556",
+                                "ac52bf66-ff7e-4d9f-97d7-9fbbcfd88088",
                                 "28628007-30d2-4731-95f3-b1537938af68",
                                 "ff6cab05-5668-47db-9628-95851330e69a",
                                 "ae4d28f0-1a8e-474f-ad77-337582a37a15"
@@ -85,6 +91,7 @@
                                 "865d3adc-973f-45f1-87d6-0deebd072a05",
                                 "5a6f96c0-abd3-4364-b7b9-0647047d6556",
                                 "28628007-30d2-4731-95f3-b1537938af68",
+                                "ac52bf66-ff7e-4d9f-97d7-9fbbcfd88088",
                                 "ff6cab05-5668-47db-9628-95851330e69a",
                                 "ae4d28f0-1a8e-474f-ad77-337582a37a15"
                             ]
@@ -98,6 +105,7 @@
                     "permissions": [
                         "iam-mfa",
                         "dynamodb-read",
+                        "s3-read",
                         "dynamodb-crudItem",
                         "logs-read",
                         "apigateway-read",
@@ -110,6 +118,7 @@
                                 "865d3adc-973f-45f1-87d6-0deebd072a05",
                                 "5a6f96c0-abd3-4364-b7b9-0647047d6556",
                                 "28628007-30d2-4731-95f3-b1537938af68",
+                                "ac52bf66-ff7e-4d9f-97d7-9fbbcfd88088",
                                 "ff6cab05-5668-47db-9628-95851330e69a",
                                 "ae4d28f0-1a8e-474f-ad77-337582a37a15"
                             ]
@@ -119,6 +128,7 @@
                                 "865d3adc-973f-45f1-87d6-0deebd072a05",
                                 "5a6f96c0-abd3-4364-b7b9-0647047d6556",
                                 "28628007-30d2-4731-95f3-b1537938af68",
+                                "ac52bf66-ff7e-4d9f-97d7-9fbbcfd88088",
                                 "ff6cab05-5668-47db-9628-95851330e69a",
                                 "ae4d28f0-1a8e-474f-ad77-337582a37a15"
                             ]

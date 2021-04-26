@@ -10,10 +10,10 @@ export class FssIamStack extends cdk.Stack {
         const stackContext = this.node.tryGetContext(`${id}-${process.env.SHORT_ENV}`);
         const envParameters: EnvParameters = new EnvHelper().getEnvironmentParams(stackContext);
 
-        new IdentityProviderConstruct(this, 'okta', {
-            samlMetadataFilePath: envParameters.identityProvider.metadataPath,
-            userName: envParameters.identityProvider.userName,
-        });
+        // new IdentityProviderConstruct(this, 'okta', {
+        //     samlMetadataFilePath: envParameters.identityProvider.metadataPath,
+        //     userName: envParameters.identityProvider.userName,
+        // });
 
         envParameters.iamSets.forEach((iamSet) => {
             new PolicyConstruct(this, `${iamSet.groupName}`, {
