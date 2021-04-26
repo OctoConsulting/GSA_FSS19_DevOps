@@ -8,6 +8,7 @@ import { KmsBuilder } from './kms-builder';
 import { LambdaBuilder } from './lambda-builder';
 import { XrayBuilder } from './xray-builder';
 import * as cdk from '@aws-cdk/core';
+import { S3Builder } from './s3-builder';
 
 function getPolicyBuilder(
     parent: cdk.Construct,
@@ -31,6 +32,8 @@ function getPolicyBuilder(
     if (permission.startsWith('iam')) return new IamBuilder(parent, id, { permission, arnPrefix });
 
     if (permission.startsWith('kms')) return new KmsBuilder(parent, id, { permission, arnPrefix, resources });
+
+    if (permission.startsWith('s3')) return new S3Builder(parent, id, { permission, arnPrefix, resources });
 
     throw Error(`Policy Builder entry missing in builder-factory.js for ${permission}`);
 }

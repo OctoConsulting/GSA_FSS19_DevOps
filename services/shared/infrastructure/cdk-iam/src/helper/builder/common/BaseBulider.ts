@@ -26,6 +26,11 @@ export class BaseBuilder extends cdk.Construct {
             resource = '';
             region = '';
         }
+        if (this.props.permission.startsWith('s3')) {
+            region = '';
+            accountNo = '';
+        }
+
         const arnPrefix = cdk.Stack.of(this).formatArn({
             service: this.props.permission.substr(0, this.props.permission.indexOf('-')),
             resource: resource,
