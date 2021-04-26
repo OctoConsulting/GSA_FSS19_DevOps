@@ -63,12 +63,6 @@ export class IamBuilder extends BaseBuilder {
             },
         });
 
-        return [
-            viewAccountInfo,
-            allowManageOwnPasswords,
-            allowManageOwnMfaDevices,
-            allowManageOwnUserMfa,
-            denyAllExceptListedIfNoMFA,
-        ];
+        return [viewAccountInfo, allowManageOwnPasswords, allowManageOwnMfaDevices, allowManageOwnUserMfa];
     }
 }
