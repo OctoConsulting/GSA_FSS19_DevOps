@@ -8,7 +8,7 @@ module.exports = {
     },
     target: 'node',
     output: {
-        path: path.resolve(__dirname, 'dist/nsn-routing-report'),
+        path: path.resolve(__dirname, 'dist/nsn-routing-file-processor'),
         filename: 'index.js',
         libraryTarget: 'umd',
     },
