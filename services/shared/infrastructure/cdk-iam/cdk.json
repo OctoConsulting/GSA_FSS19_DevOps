@@ -23,6 +23,7 @@
                     "users": [],
                     "permissions": [
                         "iam-mfa",
+                        "iam-accessKeys",
                         "dynamodb-read",
                         "dynamodb-crudItem",
                         "logs-read",

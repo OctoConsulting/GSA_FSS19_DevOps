@@ -13,10 +13,20 @@ export class IamBuilder extends BaseBuilder {
         if (this.props.permission === 'iam-mfa') {
             return this.mfa();
         }
+        if (this.props.permission === 'iam-accessKeys') {
+            return this.accessKeys();
+        }
 
         return this.unimplimented(this.props.permission);
     }
 
+    private accessKeys(): PolicyStatement[] {
+        const allowAccessKeyMaint = new PolicyStatement({
+            actions: ['iam:CreateAccessKey', 'iam:DeleteAccessKey', 'iam:ListAccessKeys', 'iam:UpdateAccessKey'],
+            resources: [`${this.getServicePrefix()}` + 'user/${aws:username}'],
+        });
+        return [allowAccessKeyMaint];
+    }
     private mfa(): PolicyStatement[] {
         const viewAccountInfo = new PolicyStatement({
             actions: [
