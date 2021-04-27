@@ -1,14 +1,11 @@
 'use strict';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { apiResponses } from '../model/responseAPI';
+import { apiResponses } from './model/responseAPI';
 import AWS, { RDS } from 'aws-sdk';
 import mysql2, { Connection } from 'mysql2';
 import fs from 'fs';
 
-export const generateNsnRoutingReport = async (
-    event: APIGatewayProxyEvent,
-    context: Context
-): Promise<APIGatewayProxyResult> => {
+exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
     let TABLE_NAME: string =
         '`' +
         process.env.DB_NAME +
@@ -167,8 +164,4 @@ const connection = function (): Connection {
 
 const sleep = (ms: number) => {
     return new Promise((resolve) => setTimeout(resolve, ms));
-};
-
-module.exports = {
-    generateNsnRoutingReport,
 };

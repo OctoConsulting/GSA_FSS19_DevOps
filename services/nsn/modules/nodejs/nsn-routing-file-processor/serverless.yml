@@ -21,8 +21,8 @@ package:
     individually: true
 
 functions:
-    generateNsnRoutingReport:
-        handler: generateNsnRoutingReport
+    nsn-routing-file-processor:
+        handler: handler
         events:
             - http:
                   path: /nsnrouting/v1/reports/
