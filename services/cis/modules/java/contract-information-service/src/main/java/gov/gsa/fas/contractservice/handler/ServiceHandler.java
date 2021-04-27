@@ -85,7 +85,7 @@ public class ServiceHandler implements RequestHandler<RequestWrapper, RequestWra
 		ServiceHandler s = new ServiceHandler();
 
 		RequestWrapper wrapper =new RequestWrapper();
-		wrapper.setBody("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:con=\"http://contract/\"><soapenv:Header/><soapenv:Body><con:PORequest><NumOfRecord>1</NumOfRecord><PurchaseOrders POLineNumber=\"01\"><PurchaseOrderNum>NMNJH753C8</PurchaseOrderNum><totalPOCost>12.5</totalPOCost> <ContractNum>47QSEA20T000E</ContractNum><BuyerCode></BuyerCode><RequisitionRecords requisitionLineNumber=\"1\"><requisitionNumber>POPlIT4200022</requisitionNumber><itemNumber>7510015904409</itemNumber> <reportingOffice>M</reportingOffice><pricingZone>01</pricingZone> </RequisitionRecords></PurchaseOrders></con:PORequest> </soapenv:Body> </soapenv:Envelope>");
+		wrapper.setBody("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:con=\"http://contract/\"><soapenv:Header/><soapenv:Body><con:PORequest><NumOfRecord>1</NumOfRecord><PurchaseOrders POLineNumber=\"01\"><PurchaseOrderNum>NMNJH753C8</PurchaseOrderNum><totalPOCost>12.5</totalPOCost> <ContractNum>47QSEA20T000E</ContractNum><BuyerCode></BuyerCode><RequisitionRecords requisitionLineNumber=\"1\"><requisitionNumber>POPlIT4200022</requisitionNumber><itemNumber>0000000000105</itemNumber> <reportingOffice>M</reportingOffice><pricingZone>01</pricingZone> </RequisitionRecords></PurchaseOrders></con:PORequest> </soapenv:Body> </soapenv:Envelope>");
 
 		RequestWrapper outputStream = s.handleRequest(wrapper, null);
 		System.out.println(outputStream.getBody());

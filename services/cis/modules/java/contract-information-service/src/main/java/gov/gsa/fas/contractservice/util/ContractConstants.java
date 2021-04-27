@@ -122,4 +122,7 @@ public class ContractConstants {
 	public static final String DOMAIN_URL = "execute-api.us-east-1.vpce.amazonaws.com";
 	public static final String ENTITY_API_URL = "/entityManagement/v1/details/";
 	public static final String ENTITY_API_KEY = "ENTITY-API-KEY";
+	
+	public static final String NSN_API_URL = "/nsnService/v1/details/";
+	public static final String NSN_API_KEY = "NSN-API-KEY";
 }

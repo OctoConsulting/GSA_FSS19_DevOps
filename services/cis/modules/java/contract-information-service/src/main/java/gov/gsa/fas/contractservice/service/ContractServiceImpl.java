@@ -36,7 +36,8 @@ import gov.gsa.fas.contractservice.contract.RequisitionRes;
 import gov.gsa.fas.contractservice.dao.ContractServiceDAO;
 import gov.gsa.fas.contractservice.dao.ContractServiceDAOImpl;
 import gov.gsa.fas.contractservice.exception.ApplicationException;
-import gov.gsa.fas.contractservice.exception.EntityNotFoundException;
+import gov.gsa.fas.contractservice.exception.CCSExceptions;
+import gov.gsa.fas.contractservice.exception.RecordNotFoundException;
 import gov.gsa.fas.contractservice.model.ACCMapping;
 import gov.gsa.fas.contractservice.model.ACOContractDetails;
 import gov.gsa.fas.contractservice.model.Address;
@@ -271,7 +272,7 @@ public class ContractServiceImpl implements ContractService {
 			if (contractMaster != null) {
 				try {
 					contractAddress = extractAddress(contractMaster.getD402_cecc());
-				} catch (EntityNotFoundException e) {
+				} catch (RecordNotFoundException | CCSExceptions e) {
 					contractAddress="";
 				}
 			}
@@ -315,7 +316,7 @@ public class ContractServiceImpl implements ContractService {
 			String supplierAddress;
 			try {
 				supplierAddress = extractAddress(contractMaster.getD402_cecs());
-			} catch (EntityNotFoundException e) {
+			} catch (RecordNotFoundException | CCSExceptions e) {
 				supplierAddress = "";
 			}
 
@@ -372,7 +373,20 @@ public class ContractServiceImpl implements ContractService {
 
 			String contractNotes = contractNotes(contractMaster, cdfMasterList);
 			contractDetail.setContractNotesDetails(contractNotes);
-			NIFData nifData = contractServiceDAO.getNIFDetails(contractMaster.getD402_cont_no());
+			
+			String nsnAPIKey = StringUtils.isNotBlank(System.getenv(ContractConstants.NSN_API_KEY))
+					? System.getenv(ContractConstants.NSN_API_KEY)
+					: "qabzpuu991";
+
+			NIFData nifData = null;
+			try {
+				String nifdataJson = invokeAPI(nsnAPIKey, inPOLines.getRequisitionRecords().get(0).getItemNumber(), ContractConstants.NSN_API_URL);
+				nifData = new Gson().fromJson(nifdataJson, NIFData.class);
+			} catch (RecordNotFoundException | CCSExceptions e) {
+				nifData=null;
+
+			}
+
 
 			if (nifData != null) {
 				contractDetail.setDORating(nifData.getD403_d_o_rating());
@@ -761,7 +775,7 @@ public class ContractServiceImpl implements ContractService {
 				String contractAddress;
 				try {
 					contractAddress = extractAddress(master.getD402_cecc());
-				} catch (EntityNotFoundException e) {
+				} catch (RecordNotFoundException | CCSExceptions e) {
 					contractAddress="";
 				}
 
@@ -838,13 +852,14 @@ public class ContractServiceImpl implements ContractService {
 	 * @return
 	 * @throws IOException 
 	 * @throws MalformedURLException 
-	 * @throws EntityNotFoundException 
+	 * @throws RecordNotFoundException 
+	 * @throws CCSExceptions 
 	 */
-	private String extractAddress(String entityId) throws MalformedURLException, IOException, EntityNotFoundException {
+	private String extractAddress(String entityId) throws MalformedURLException, IOException, RecordNotFoundException, CCSExceptions {
 		
 		StringBuffer contractorAddress = new StringBuffer();
 
-		String entityAPIKey = StringUtils.isNotBlank(System.getenv(ContractConstants.SHORT_ENV))
+		String entityAPIKey = StringUtils.isNotBlank(System.getenv(ContractConstants.ENTITY_API_KEY))
 				? System.getenv(ContractConstants.ENTITY_API_KEY)
 				: "xehygqufuk";
 
@@ -1267,48 +1282,62 @@ public class ContractServiceImpl implements ContractService {
 
 	}
 	
-	private String invokeAPI(String apiKey, String pathParam,String serviceUrl) throws MalformedURLException,IOException, EntityNotFoundException{
+	/****
+	 * 
+	 * @param apiKey
+	 * @param pathParam
+	 * @param serviceUrl
+	 * @return
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 * @throws RecordNotFoundException
+	 * @throws CCSExceptions
+	 */
+	private String invokeAPI(String apiKey, String pathParam, String serviceUrl)
+			throws MalformedURLException, IOException, RecordNotFoundException, CCSExceptions {
 
 		try {
-			//"xehygqufuk"
-			String vpc =  StringUtils.isNotBlank(System.getenv(ContractConstants.AWS_VPC))?System.getenv(ContractConstants.AWS_VPC):"vpce-088a5795f16dd4c2c-dnbntft7";
-			String env = StringUtils.isNotBlank(System.getenv(ContractConstants.SHORT_ENV))?System.getenv(ContractConstants.SHORT_ENV):"dev";
-			String url = "https://"+vpc+"."+ContractConstants.DOMAIN_URL+"/"+env+serviceUrl+pathParam;
+			String vpc = StringUtils.isNotBlank(System.getenv(ContractConstants.AWS_VPC))
+					? System.getenv(ContractConstants.AWS_VPC)
+					: "vpce-088a5795f16dd4c2c-dnbntft7";
+			String env = StringUtils.isNotBlank(System.getenv(ContractConstants.SHORT_ENV))
+					? System.getenv(ContractConstants.SHORT_ENV)
+					: "dev";
+			String url = "https://" + vpc + "." + ContractConstants.DOMAIN_URL + "/" + env + serviceUrl + pathParam;
 
 			HttpGet getReq = new HttpGet(url);
 
 			Header header = new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json");
 			Header header2 = new BasicHeader("x-apigw-api-id", apiKey);
-			
-			List<Header> headers = Arrays.asList(header,header2);
+
+			List<Header> headers = Arrays.asList(header, header2);
 			HttpClient client = HttpClients.custom().setDefaultHeaders(headers).build();
 			HttpResponse response = client.execute(getReq);
 
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-				throw new EntityNotFoundException("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
-			}else if (response.getStatusLine().getStatusCode() != 200) {
-				throw new RuntimeException("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
+				throw new RecordNotFoundException(
+						"Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
+			} else if (response.getStatusLine().getStatusCode() != 200) {
+				throw new CCSExceptions("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
 			}
 
 			BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
 
 			StringBuffer outputBuff = new StringBuffer();
 			String output;
-			System.out.println("Output from Server .... \n");
 			while ((output = br.readLine()) != null) {
-				System.out.println(output);
 				outputBuff.append(output);
 
 			}
 
 			client.getConnectionManager().shutdown();
-			
+
 			return outputBuff.toString();
 
 		} catch (IOException e) {
-			throw e;
+			throw new CCSExceptions(e.getMessage());
 
-		} 
+		}
 	}
 
 }
