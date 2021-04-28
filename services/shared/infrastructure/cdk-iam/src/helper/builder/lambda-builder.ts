@@ -13,6 +13,11 @@ export class LambdaBuilder extends BaseBuilder {
         if (this.props.permission === 'lambda-read') {
             return this.read();
         }
+
+        if (this.props.permission === 'lambda-test') {
+            return this.testLambda();
+        }
+
         return this.unimplimented(this.props.permission);
     }
 
@@ -26,5 +31,13 @@ export class LambdaBuilder extends BaseBuilder {
             resources: ['*'],
         });
         return [read, commonPolicy];
+    }
+
+    private testLambda(): PolicyStatement[] {
+        const invoke = new PolicyStatement({
+            actions: ['lambda:InvokeFunction'],
+            resources: [`${this.getServicePrefix()}*`],
+        });
+        return [invoke];
     }
 }

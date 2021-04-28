@@ -37,6 +37,7 @@
                         "apigateway-runapi",
                         "xray-read",
                         "cloudwatch-read",
+                        "lambda-test",
                         "lambda-read",
                         {
                             "kms-encrypt": [
