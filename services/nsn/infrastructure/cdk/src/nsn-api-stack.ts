@@ -8,6 +8,7 @@ import { constants } from './models/constants';
 import { S3Construct } from './constructs/s3-constuct';
 import { AllLambdasConstruct } from './constructs/all-lambdas-construct';
 import { env } from 'process';
+import { BatchJobConstruct } from './constructs/batch-job-construct';
 export class NsnApiStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
@@ -26,7 +27,6 @@ export class NsnApiStack extends cdk.Stack {
         crossStackImporter.getCrossStackImports().rdsDbProps.dbName = envParameters.mysqlDbName;
 
         const lambdas = new AllLambdasConstruct(this, 'lambdas', {
-            // dynamoTable: dynamoDbConstruct.getNsnTable(),
             shortEnv: envParameters.shortEnv,
             vpc: envParameters.vpc,
             xRayTracing: true,
@@ -69,17 +69,15 @@ export class NsnApiStack extends cdk.Stack {
             ],
         });
 
-        // const lambdas = new NsnLambdasConstruct(this, 'lambdas', {
-        //     nsnTable: dynamoDbConstruct.getNsnTable(),
-        //     shortEnv: envParameters.shortEnv,
-        //     vpc: crossStackImporter.getCrossStackImports().vpc,
-        //     xRayTracing: true,
-        //     nsnBucket: s3Construct.myBucket,
-        //     artifactBucket: envParameters.artifactsBucket,
-        //     artifactKey: constants.NSN_ROUTING_LAMBDA_ZIP_PATH,
-        //     logRetentionInDays: 30,
-        //     mysqlDbName: envParameters.mysqlDbName,
-        // });
+        new BatchJobConstruct(this, 'FileProcessor', {
+            cronExpression: '0 1 ? * MON,TUE,WED,THU,FRI *',
+            description: 'nsn routing file processor',
+            name: 'nsn-routing-file-processor',
+            shortEnv: envParameters.shortEnv,
+            lamdaFunction: lambdas
+                .getLambdaFunctions()
+                .filter((x) => x.name === constants.FUNCTION_NAMES.NSN_ROUTING_FILE_PROCESSOR)[0].function,
+        });
 
         new ApiGatewayConstruct(this, 'api', {
             envParameters: envParameters,
