@@ -264,12 +264,14 @@ public class ContractServiceImpl implements ContractService {
 		try {
 			logger.info("Invoking Dynamodb data access getContractByGSAM()  :: ");
 			String contractAddress = "";
+			String owContractNumber ="";
 			RequisitionRes reqnRes = new RequisitionRes();
 			List<RequisitionRes> reqResList = new ArrayList<RequisitionRes>();
 			ContractServiceDAO contractServiceDAO = new ContractServiceDAOImpl();
 			ContractDataMaster contractMaster = contractServiceDAO.getContractByGSAM(inPOLines.getContractNum());
 
 			if (contractMaster != null) {
+				owContractNumber = contractServiceDAO.getCMFColumns(contractMaster.getD402_cont_no(), ContractConstants.SK_D421_OWS);
 				try {
 					contractAddress = extractAddress(contractMaster.getD402_cecc());
 				} catch (RecordNotFoundException | CCSExceptions e) {
@@ -277,11 +279,13 @@ public class ContractServiceImpl implements ContractService {
 				}
 			}
 
-			if (contractMaster == null || StringUtils.isBlank(contractAddress)) {
+			if (contractMaster == null || StringUtils.isBlank(contractAddress) || StringUtils.isBlank(owContractNumber)) {
 				contractDetail
 						.setResult(String.format(ContractConstants.JS000_CONTRACT_DATA, inPOLines.getContractNum()));
 				return contractDetail;
 			}
+			String purchaseOrderContNum = owContractNumber.substring(ContractConstants.SK_D421_OWS.length(), owContractNumber.length());
+			contractDetail.setPurchaseOrderContractNumber(purchaseOrderContNum);
 			contractDetail.setContractorAddress(contractAddress);
 			contractDetail.setPurchaseOrderNumber(inPOLines.getPurchaseOrderNum());
 			contractDetail.setFormalContractNumber(inPOLines.getContractNum());
@@ -680,8 +684,6 @@ public class ContractServiceImpl implements ContractService {
 		contractDetail.setPercentVariationMinus(contractMaster.getD402_pct_var_mi());
 		contractDetail.setPercentVariationPlus(contractMaster.getD402_pct_var_pl());
 		contractDetail.setShipDeliveryCode(contractMaster.getD402_ship_del_cd());
-		contractDetail.setPurchaseOrderContractNumber(contractMaster.getD421_f_cont_no_ows());
-		contractDetail.setParentMASContractNumber(contractMaster.getD421_f_cont_no());
 		contractDetail.setContractNotesList(contractMaster.getD402_note_cd());
 
 		if (StringUtils.isNotBlank(contractMaster.getD402_insp_cd())
@@ -692,6 +694,15 @@ public class ContractServiceImpl implements ContractService {
 			contractDetail.setInspectionPoint("S");
 		} else {
 			contractDetail.setInspectionPoint("D");
+		}
+		
+		if(StringUtils.isNotBlank(contractMaster.getD402_sch_cont_no())){
+			String parentMASContractNumber = contractServiceDAO.getCMFColumns(contractMaster.getD402_cont_no(), ContractConstants.SK_D421_F);
+			if(StringUtils.isNotBlank(parentMASContractNumber)) {
+				String subParentMASCont = parentMASContractNumber.substring(ContractConstants.SK_D421_F.length());
+				contractDetail.setParentMASContractNumber(subParentMASCont);
+			}
+			
 		}
 
 		logger.info("End of the mapContractData() :: ");
