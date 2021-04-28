@@ -31,6 +31,11 @@ export class StaticWebConstruct extends cdk.Construct {
         const hostedZone = route53.HostedZone.fromLookup(this, 'cloudfront-hosted-zone-lookup', {
             domainName: `${props.domainSuffix}`,
         });
+        const privateHostedZone = route53.HostedZone.fromLookup(this, 'cloudfront-private-hosted-zone-lookup', {
+            domainName: `${props.domainSuffix}`,
+            privateZone: true,
+        });
+
         const certificate = new acm.Certificate(this, 'Certificate', {
             domainName: domainName,
             validation: acm.CertificateValidation.fromDns(hostedZone),
@@ -59,7 +64,7 @@ export class StaticWebConstruct extends cdk.Construct {
             ],
         });
 
-        this.addRoute53Alias(myCloudFront, domainName, hostedZone);
+        this.addRoute53Alias(myCloudFront, domainName, privateHostedZone);
     }
 
     addRoute53Alias(cloudFront: cloudfront.Distribution, domainName: string, hostedZone: route53.IHostedZone) {
