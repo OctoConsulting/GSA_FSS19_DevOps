@@ -3,9 +3,8 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda
 import { apiResponses } from './model/responseAPI';
 import AWS, { RDS } from 'aws-sdk';
 import mysql2, { Connection } from 'mysql2';
-import fs from 'fs';
 
-exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
+exports.handler = async (): Promise<APIGatewayProxyResult> => {
     let TABLE_NAME: string =
         '`' +
         process.env.DB_NAME +
@@ -27,34 +26,25 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
         moment().format('HH') +
         moment().format('mm') +
         moment().format('ss');
+    let dir = '/in-memory-path/';
     let path = 'FSS19_D300P5M1_' + TS;
     console.log('Path - ' + path);
+    let reportText: string = '';
+    var MemoryFileSystem = require('memory-fs');
+    var fs = new MemoryFileSystem(); // Optionally pass a javascript object
+    fs.mkdirpSync(dir);
+
     await conn
         .promise()
         .query(selectAllSql)
         .then((result) => {
-            let writeStream = fs.createWriteStream(path);
-
             if (result[0] && Array.isArray(result[0])) {
-                let lineBuffer: Buffer = Buffer.from('');
                 result[0].forEach((item: any) => {
-                    writeStream.write(generateReportLine(item));
+                    reportText += generateReportLine(item);
                 });
             }
+            fs.writeFileSync(dir + path, reportText);
 
-            writeStream.on('finish', (err: any) => {
-                if (err) {
-                    console.log('Error creating file - ' + err);
-                } else {
-                    console.log(
-                        'File created at - ' + path + ' S3 upload needs to be initiated here and then delete this file.'
-                    );
-                }
-            });
-
-            const filePath = require('path');
-            fullFilePath = filePath.resolve(path);
-            console.log('Full file path - ' + fullFilePath);
             //fs.open()
             // Build the buffer for 1000 records and write to the fileSystem
             // for any error condition, delete the file and return the error response.
@@ -68,7 +58,7 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
     const params = {
         Bucket: 'nsn-routing-extract-902479997164-us-east-1-dev',
         Key: path,
-        Body: fs.createReadStream(fullFilePath),
+        Body: fs.readFileSync(dir + path),
     };
 
     await S3.upload(params)
@@ -82,13 +72,6 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context): Promise
             s3Response = err;
         });
 
-    fs.rm(fullFilePath, { force: true, maxRetries: 5, retryDelay: 1000 }, (err: any) => {
-        if (err) {
-            console.log('Error deleting file - ' + err);
-        } else {
-            console.log('File deleted at ' + fullFilePath + ' after upload to S3 ');
-        }
-    });
     return s3Response
         ? apiResponses._200({ message: 'NSN routing report uploaded to S3 bucket successfully!', data: s3Response })
         : apiResponses._500({ message: 'Internal server error on report generation', data: s3Response });
