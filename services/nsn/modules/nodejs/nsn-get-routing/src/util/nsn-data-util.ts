@@ -19,6 +19,25 @@ export async function checkForExistingNsn(routing_id: string) {
     return recordCount == 1 ? true : false;
 }
 
+export async function getExistingNsnDetail(routing_id: string) {
+    let queryStr: string =
+        'SELECT * FROM ' + getDBSettings().TABLE_NAME + " where routing_id = '" + routing_id + "'";
+    console.log('Executing query inside checkForExistingNsn - ' + queryStr);
+
+    let result: any;
+
+    await executeQuery(queryStr, null)
+        .then((response: any) => {
+            result = response && response.result && response.result[0] ? response.result[0] : [];
+        })
+        .catch((error: any) => {
+            result = [];
+        });
+
+    console.log('Got routing_id in checkForExistingNsn = ' + result);
+    return result;
+}
+
 const isLeapYear = function (date: Date) {
     var year = date.getFullYear();
     if ((year & 3) != 0) return false;
