@@ -15,7 +15,6 @@ exports.handler = async (): Promise<APIGatewayProxyResult> => {
 
     let conn: Connection = connection();
     let selectAllSql = 'SELECT * FROM ' + TABLE_NAME;
-    let fullFilePath = '';
     // open the file to write with the name as per spec - FSS19_D300P5M1_TS (TS - YYYYMMDD_HHMMSS)
     var moment = require('moment');
     let TS =
@@ -29,30 +28,25 @@ exports.handler = async (): Promise<APIGatewayProxyResult> => {
     let dir = '/in-memory-path/';
     let path = 'FSS19_D300P5M1_' + TS;
     console.log('Path - ' + path);
-    let reportText: string = '';
+
     var MemoryFileSystem = require('memory-fs');
-    var fs = new MemoryFileSystem(); // Optionally pass a javascript object
+    var fs = new MemoryFileSystem();
     fs.mkdirpSync(dir);
 
     await conn
         .promise()
         .query(selectAllSql)
         .then((result) => {
+            let reportText: string = '';
             if (result[0] && Array.isArray(result[0])) {
                 result[0].forEach((item: any) => {
                     reportText += generateReportLine(item);
                 });
             }
             fs.writeFileSync(dir + path, reportText);
-
-            //fs.open()
-            // Build the buffer for 1000 records and write to the fileSystem
-            // for any error condition, delete the file and return the error response.
-            // On successfull complition of creating the file, initiate transfer of the file to S3.
-            // Delete the file at the end and return success message with the file name.
         });
 
-    AWS.config.update({ region: 'us-east-1' });
+    AWS.config.update({ region: process.env.AWS_REGION });
     let S3 = new AWS.S3({ apiVersion: '2006-03-01' });
     let s3Response;
     const params = {
@@ -93,7 +87,6 @@ function generateReportLine(item: any): string {
 const connection = function (): Connection {
     let connection: Connection;
     console.log('Starting query ...\n');
-    console.log('Running iam auth ...\n');
 
     if (process.env.SHORT_ENV == 'local') {
         connection = mysql2.createConnection({

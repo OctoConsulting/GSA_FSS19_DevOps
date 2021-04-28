@@ -54,10 +54,11 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 			internalContractNumber = internalContractNumberList.get(0);
 
 			String cmfMasterDataJSON = getDetailsByPartitionKey(internalContractNumber,
-					ContractConstants.CONTRACT_SERVICE_SK_D402 + "_" + internalContractNumber);
+					ContractConstants.CONTRACT_SERVICE_SK_D402);
 			Gson gson = new Gson();
 
 			contractMaster = gson.fromJson(cmfMasterDataJSON, ContractDataMaster.class);
+			contractMaster.setD402_cont_no(internalContractNumber);
 		}
 
 		return contractMaster;
@@ -255,6 +256,31 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 			return volumeDiscount;
 		}
 		return null;
+	}
+
+
+	@Override
+	public String getCMFColumns(String partitionKey, String sortKey) throws AmazonDynamoDBException {
+		
+		DynamoDB db = getDynamoDB();
+		Table table = db.getTable(getDynamoDBTable());
+		String resultData = "";
+		QuerySpec specInternal = new QuerySpec()
+				.withKeyConditionExpression(ContractConstants.CONTRACT_SERVICE_PK + " = :internal_cont_no AND begins_with(contract_details_identity, :detail)")
+
+				.withValueMap(new ValueMap().withString(":internal_cont_no", partitionKey).withString(":detail", sortKey));
+
+		ItemCollection<QueryOutcome> itemInternalColl = table.query(specInternal);
+
+		Iterator<Item> iteratorInternal = itemInternalColl.iterator();
+		Item itemInternal = null;
+		while (iteratorInternal != null && iteratorInternal.hasNext()) {
+			itemInternal = iteratorInternal.next();
+			resultData = itemInternal.getString(ContractConstants.CONTRACT_SERVICE_GSI);
+		}
+		return resultData;
+		
+	
 	}
 
 }

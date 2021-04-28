@@ -11,7 +11,7 @@ public class ContractConstants {
 	public static final String CONTRACT_SERVICE_GSI = "contract_details_identity";
 	public static final String CONTRACT_SERVICE_GSI_IDX = "contract_details_identity_index";
 	public static final String CONTRACT_SERVICE_PK = "internal_contract_number";
-	public static final String CONTRACT_SERVICE_SK_D402 = "detail_d402";
+	public static final String CONTRACT_SERVICE_SK_D402 = "ContractDetails";
 	public static final String CONTRACT_SERVICE_SK_D403 = "detail_d403";
 	public static final String CONTRACT_SERVICE_SK_D407 = "detail_d407";
 	public static final String CONTRACT_SERVICE_SK_D410 = "detail_d410";
@@ -117,4 +117,15 @@ public class ContractConstants {
 	
 	public static final String FLOW_TYPE_LISTCONTRACTS = "LIST_CONTRACTS";
 	public static final String FLOW_TYPE_CONTRACTDETAILS = "CONTRACT_DETAILS";
+	
+	public static final String AWS_VPC = "VPC";
+	public static final String DOMAIN_URL = "execute-api.us-east-1.vpce.amazonaws.com";
+	public static final String ENTITY_API_URL = "/entityManagement/v1/details/";
+	public static final String ENTITY_API_KEY = "ENTITY-API-KEY";
+	
+	public static final String NSN_API_URL = "/nsnService/v1/details/";
+	public static final String NSN_API_KEY = "NSN-API-KEY";
+	
+	public static final String SK_D421_F = "detail_421_f_";
+	public static final String SK_D421_OWS = "detail_d421_ows_";
 }

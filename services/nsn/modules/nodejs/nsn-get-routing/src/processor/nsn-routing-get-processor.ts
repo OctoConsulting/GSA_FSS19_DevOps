@@ -3,15 +3,15 @@ import { NsnData } from '../model/nsn-data';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { apiResponses } from '../model/responseAPI';
 import { getDBSettings, executeQuery } from '../config';
-import { checkForExistingNsn } from '../util/nsn-data-util';
+import { checkForExistingNsn, getExistingNsnDetail } from '../util/nsn-data-util';
 
 export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
     if (!event.body) {
         return apiResponses._400({ message: 'Routing id is needed to retrieve NSN data' });
     }
-    const queryStringParam = event.queryStringParameters;
+    // const queryStringParam = event.queryStringParameters;
 
-    let { routing_id, pageNo, pageSize, orderField, desc } = JSON.parse(<string>event.body);
+    let { routing_id, pageNo, pageSize, orderField, desc, mode } = JSON.parse(<string>event.body);
 
     let routingId = routing_id;
 
@@ -21,7 +21,7 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
         });
     }
 
-    if (queryStringParam?.validate) {
+    if (mode && mode.toLowerCase() == 'validate') {
         if (await checkForExistingNsn(routing_id)) {
             return apiResponses._400({
                 message:
@@ -29,6 +29,13 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
             });
         } else {
             return apiResponses._200({ message: 'This routing id is available.' });
+        }
+    } else if (mode && mode.toLowerCase() == 'strict') {
+        let routingIdDetail = await getExistingNsnDetail(routing_id);
+        if (routingIdDetail != []) {
+            return apiResponses._200(routingIdDetail);
+        } else {
+            return apiResponses._400({ message: 'No record found for the routing ID.' });
         }
     }
 

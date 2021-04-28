@@ -233,4 +233,50 @@ public class App2 {
 		return mqcid;
 	}
 	
+	private static void invokeLambda() {
+
+		try {
+
+			String url = "https://vpce-088a5795f16dd4c2c-dnbntft7.execute-api.us-east-1.vpce.amazonaws.com/dev/entityManagement/v1/details/00012403C";
+
+			HttpGet getReq = new HttpGet(url);
+
+			Header header = new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+			Header header2 = new BasicHeader("x-apigw-api-id", "xehygqufuk");
+			
+			List<Header> headers = Arrays.asList(header,header2);
+			HttpClient client = HttpClients.custom().setDefaultHeaders(headers).build();
+			HttpResponse response = client.execute(getReq);
+
+			if (response.getStatusLine().getStatusCode() != 200) {
+				throw new RuntimeException("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
+			}
+
+			BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
+
+			StringBuffer outputBuff = new StringBuffer();
+			String output;
+			System.out.println("Output from Server .... \n");
+			while ((output = br.readLine()) != null) {
+				System.out.println(output);
+				outputBuff.append(output);
+
+			}
+			Address adress = new Gson().fromJson(outputBuff.toString(), Address.class);
+			//System.out.println(adress.getD410_adrs1());
+
+			client.getConnectionManager().shutdown();
+
+		} catch (MalformedURLException e) {
+
+			e.printStackTrace();
+
+		} catch (IOException e) {
+
+			e.printStackTrace();
+
+		}
+	}
+
+	
 }
