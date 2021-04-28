@@ -2,6 +2,7 @@ import * as cdk from '@aws-cdk/core';
 import * as ec2 from '@aws-cdk/aws-ec2';
 import { CrossStackImports } from '../models/CrossStackImports';
 import { EnvParameters } from '../models/env-parms';
+import { RdsDbProps } from '../models/rds-db-props';
 
 export class CrossStackImporter extends cdk.Construct {
     private crossStackImports: CrossStackImports;
@@ -25,9 +26,18 @@ export class CrossStackImporter extends cdk.Construct {
             vpcId: props.vpc,
         });
 
+        const rdsDbProps: RdsDbProps = {
+            rdsProxyArn: cdk.Fn.importValue('rds-proxy-arn'),
+            rdsProxyDefaultEndpoint: cdk.Fn.importValue('rds-proxy-default-endpoint'),
+            rdsProxySgs: cdk.Fn.importValue('rds-proxy-sgs'),
+            rdsProxyName: cdk.Fn.importValue('rds-proxy-name'),
+            rdsProxyLambdaUser: cdk.Fn.importValue('rds-proxy-lambda-user'),
+        };
+
         return {
             apiGatewayVpcEndpoint,
             vpc,
+            rdsDbProps,
         };
     }
 

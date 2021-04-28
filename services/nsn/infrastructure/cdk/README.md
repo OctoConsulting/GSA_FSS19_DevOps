@@ -7,6 +7,7 @@ export SHORT_ENV='qa' AWS_ACCOUNT='902479997164' AWS_REGION='us-east-1'
 export SHORT_ENV='dev' AWS_ACCOUNT='902479997164' AWS_REGION='us-east-1'
 
 aws s3 sync ../../modules/nodejs/nsn-get-routing/dist/nsn-get-routing/ s3://artifacts-902479997164-us-east-1-dev/services/nsn/nsn-get-routing --profile fss
+aws s3 cp ../../modules/nodejs/nsn-routing-file-processor/dist/nsn-routing-file-processor/index.zip s3://artifacts-902479997164-us-east-1-dev/services/nsn/nsn-routing-file-processor/index.zip --profile fss
 
 ```
 

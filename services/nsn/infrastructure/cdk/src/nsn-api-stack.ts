@@ -4,9 +4,10 @@ import { CrossStackImporter } from './helper/CrossStackImporter';
 import { EnvParameters } from './models/env-parms';
 import { DynamoConstruct } from './constructs/dynamo-construct';
 import { ApiGatewayConstruct } from './constructs/api-gateway-construct';
-import { NsnLambdasConstruct } from './constructs/nsn-lambdas-construct';
 import { constants } from './models/constants';
 import { S3Construct } from './constructs/s3-constuct';
+import { AllLambdasConstruct } from './constructs/all-lambdas-construct';
+import { env } from 'process';
 export class NsnApiStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
@@ -15,34 +16,86 @@ export class NsnApiStack extends cdk.Stack {
         const envParameters: EnvParameters = new EnvHelper().getEnvironmentParams(stackContext);
         console.log('envParameters', envParameters);
 
-        const dynamoDbConstruct = new DynamoConstruct(this, 'dynamo', {
-            enableEncryptionAtRest: envParameters.enableEncryptionAtRest,
-            shortEnv: envParameters.shortEnv,
-        });
         const crossStackImporter = new CrossStackImporter(this, 'corss-stack-imports', envParameters);
-        new S3Construct(this, 'nsn-s3', {
+
+        const s3Construct = new S3Construct(this, 'nsn-s3', {
             shortEnv: envParameters.shortEnv,
             name: 'nsn-routing-extract',
         });
 
-        const lambdas = new NsnLambdasConstruct(this, 'lambdas', {
-            nsnTable: dynamoDbConstruct.getNsnTable(),
+        crossStackImporter.getCrossStackImports().rdsDbProps.dbName = envParameters.mysqlDbName;
+
+        const lambdas = new AllLambdasConstruct(this, 'lambdas', {
+            // dynamoTable: dynamoDbConstruct.getNsnTable(),
             shortEnv: envParameters.shortEnv,
-            vpc: crossStackImporter.getCrossStackImports().vpc,
+            vpc: envParameters.vpc,
             xRayTracing: true,
             artifactBucket: envParameters.artifactsBucket,
-            artifactKey: constants.NSN_ROUTING_LAMBDA_ZIP_PATH,
             logRetentionInDays: 30,
-            mysqlDbName: envParameters.mysqlDbName,
+            sharedArtifactPath: constants.NSN_ROUTING_LAMBDA_ZIP_PATH,
+            s3Bucket: s3Construct.myBucket,
+            rdsDbProps: crossStackImporter.getCrossStackImports().rdsDbProps,
+            lambdaFuns: [
+                {
+                    name: constants.FUNCTION_NAMES.POST_NSN_ROUTING_LAMBDA,
+                    handler: 'index.postNsn',
+                    writeAccessToDynamo: true,
+                    rdsAccess: true,
+                },
+                {
+                    name: constants.FUNCTION_NAMES.GET_NSN_ROUTING_LAMBDA,
+                    handler: 'index.getNsn',
+                    rdsAccess: true,
+                },
+                {
+                    name: constants.FUNCTION_NAMES.PUT_NSN_ROUTING_LAMBDA,
+                    handler: 'index.putNsn',
+                    writeAccessToDynamo: true,
+                    rdsAccess: true,
+                },
+                {
+                    name: constants.FUNCTION_NAMES.DELETE_NSN_ROUTING_LAMBDA,
+                    handler: 'index.deleteNsn',
+                    writeAccessToDynamo: true,
+                    rdsAccess: true,
+                },
+                {
+                    artifactPath: constants.NSN_ROUTING_FILE_PROCESSOR_LAMBDA_ZIP_PATH,
+                    name: constants.FUNCTION_NAMES.NSN_ROUTING_FILE_PROCESSOR,
+                    handler: 'index.handler',
+                    writeAccessToS3: true,
+                    rdsAccess: true,
+                },
+            ],
         });
+
+        // const lambdas = new NsnLambdasConstruct(this, 'lambdas', {
+        //     nsnTable: dynamoDbConstruct.getNsnTable(),
+        //     shortEnv: envParameters.shortEnv,
+        //     vpc: crossStackImporter.getCrossStackImports().vpc,
+        //     xRayTracing: true,
+        //     nsnBucket: s3Construct.myBucket,
+        //     artifactBucket: envParameters.artifactsBucket,
+        //     artifactKey: constants.NSN_ROUTING_LAMBDA_ZIP_PATH,
+        //     logRetentionInDays: 30,
+        //     mysqlDbName: envParameters.mysqlDbName,
+        // });
 
         new ApiGatewayConstruct(this, 'api', {
             envParameters: envParameters,
             lambdaFunctions: {
-                deleteRoutingLambda: lambdas.getLambdaFunctions().deleteRoutingLambda,
-                getRoutingLambda: lambdas.getLambdaFunctions().getRoutingLambda,
-                postRoutingLambda: lambdas.getLambdaFunctions().postRoutingLambda,
-                putRoutingLambda: lambdas.getLambdaFunctions().putRoutingLambda,
+                deleteRoutingLambda: lambdas
+                    .getLambdaFunctions()
+                    .filter((x) => x.name === constants.FUNCTION_NAMES.DELETE_NSN_ROUTING_LAMBDA)[0].function,
+                getRoutingLambda: lambdas
+                    .getLambdaFunctions()
+                    .filter((x) => x.name === constants.FUNCTION_NAMES.GET_NSN_ROUTING_LAMBDA)[0].function,
+                postRoutingLambda: lambdas
+                    .getLambdaFunctions()
+                    .filter((x) => x.name === constants.FUNCTION_NAMES.POST_NSN_ROUTING_LAMBDA)[0].function,
+                putRoutingLambda: lambdas
+                    .getLambdaFunctions()
+                    .filter((x) => x.name === constants.FUNCTION_NAMES.PUT_NSN_ROUTING_LAMBDA)[0].function,
             },
             iVpcEndpoint: crossStackImporter.getCrossStackImports().apiGatewayVpcEndpoint,
         });

@@ -5,4 +5,5 @@ export interface LambdaFunctions {
     putRoutingLambda?: lambda.IFunction;
     getRoutingLambda?: lambda.IFunction;
     deleteRoutingLambda?: lambda.IFunction;
+    nsnRoutingFileProcessorLambda?: lambda.IFunction;
 }
