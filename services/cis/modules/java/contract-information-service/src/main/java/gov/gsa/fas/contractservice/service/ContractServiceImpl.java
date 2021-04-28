@@ -1,6 +1,10 @@
 package gov.gsa.fas.contractservice.service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,6 +12,14 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +36,8 @@ import gov.gsa.fas.contractservice.contract.RequisitionRes;
 import gov.gsa.fas.contractservice.dao.ContractServiceDAO;
 import gov.gsa.fas.contractservice.dao.ContractServiceDAOImpl;
 import gov.gsa.fas.contractservice.exception.ApplicationException;
+import gov.gsa.fas.contractservice.exception.CCSExceptions;
+import gov.gsa.fas.contractservice.exception.RecordNotFoundException;
 import gov.gsa.fas.contractservice.model.ACCMapping;
 import gov.gsa.fas.contractservice.model.ACOContractDetails;
 import gov.gsa.fas.contractservice.model.Address;
@@ -256,7 +270,11 @@ public class ContractServiceImpl implements ContractService {
 			ContractDataMaster contractMaster = contractServiceDAO.getContractByGSAM(inPOLines.getContractNum());
 
 			if (contractMaster != null) {
-				contractAddress = extractAddress(contractMaster.getD402_cont_no(), contractServiceDAO);
+				try {
+					contractAddress = extractAddress(contractMaster.getD402_cecc());
+				} catch (RecordNotFoundException | CCSExceptions e) {
+					contractAddress="";
+				}
 			}
 
 			if (contractMaster == null || StringUtils.isBlank(contractAddress)) {
@@ -294,7 +312,13 @@ public class ContractServiceImpl implements ContractService {
 			 * for now we are assigning main address to suplier address, once we are done
 			 * with the API we will change this logic
 			 */
-			String supplierAddress = contractAddress;
+			
+			String supplierAddress;
+			try {
+				supplierAddress = extractAddress(contractMaster.getD402_cecs());
+			} catch (RecordNotFoundException | CCSExceptions e) {
+				supplierAddress = "";
+			}
 
 			contractDetail.setSupplierAddress(supplierAddress);
 
@@ -349,7 +373,20 @@ public class ContractServiceImpl implements ContractService {
 
 			String contractNotes = contractNotes(contractMaster, cdfMasterList);
 			contractDetail.setContractNotesDetails(contractNotes);
-			NIFData nifData = contractServiceDAO.getNIFDetails(contractMaster.getD402_cont_no());
+			
+			String nsnAPIKey = StringUtils.isNotBlank(System.getenv(ContractConstants.NSN_API_KEY))
+					? System.getenv(ContractConstants.NSN_API_KEY)
+					: "qabzpuu991";
+
+			NIFData nifData = null;
+			try {
+				String nifdataJson = invokeAPI(nsnAPIKey, inPOLines.getRequisitionRecords().get(0).getItemNumber(), ContractConstants.NSN_API_URL);
+				nifData = new Gson().fromJson(nifdataJson, NIFData.class);
+			} catch (RecordNotFoundException | CCSExceptions e) {
+				nifData=null;
+
+			}
+
 
 			if (nifData != null) {
 				contractDetail.setDORating(nifData.getD403_d_o_rating());
@@ -464,6 +501,9 @@ public class ContractServiceImpl implements ContractService {
 		} catch (ParseException ex) {
 			logger.error("Error in the validateGetContractData::{}", ex);
 
+		}
+		catch(IOException ex) {
+			logger.error("Error in the validateGetContractData::{}", ex);
 		}
 
 		return contractDetail;
@@ -732,7 +772,12 @@ public class ContractServiceImpl implements ContractService {
 					contractsType.setContractorDUNS(null);
 				}
 				
-				String contractAddress = extractAddress(internal, contractServiceDAO);
+				String contractAddress;
+				try {
+					contractAddress = extractAddress(master.getD402_cecc());
+				} catch (RecordNotFoundException | CCSExceptions e) {
+					contractAddress="";
+				}
 
 				contractsType.setContractorAddress(contractAddress);
 				
@@ -753,6 +798,10 @@ public class ContractServiceImpl implements ContractService {
 				}
 
 			} catch (ParseException ex) {
+				logger.error(ex.getLocalizedMessage(), ex);
+			} catch (MalformedURLException ex) {
+				logger.error(ex.getLocalizedMessage(), ex);
+			} catch (IOException ex) {
 				logger.error(ex.getLocalizedMessage(), ex);
 			}
 		}
@@ -801,11 +850,21 @@ public class ContractServiceImpl implements ContractService {
 	 * @param internal
 	 * @param contractServiceDAO
 	 * @return
+	 * @throws IOException 
+	 * @throws MalformedURLException 
+	 * @throws RecordNotFoundException 
+	 * @throws CCSExceptions 
 	 */
-	private String extractAddress(String internal, ContractServiceDAO contractServiceDAO) {
+	private String extractAddress(String entityId) throws MalformedURLException, IOException, RecordNotFoundException, CCSExceptions {
+		
 		StringBuffer contractorAddress = new StringBuffer();
-		String addressDetails = contractServiceDAO.getDetailsByPartitionKey(internal,
-				ContractConstants.CONTRACT_SERVICE_SK_D410 + "_" + internal);
+
+		String entityAPIKey = StringUtils.isNotBlank(System.getenv(ContractConstants.ENTITY_API_KEY))
+				? System.getenv(ContractConstants.ENTITY_API_KEY)
+				: "xehygqufuk";
+
+		String addressDetails = invokeAPI(entityAPIKey, entityId, ContractConstants.ENTITY_API_URL);
+
 		if (StringUtils.isNotBlank(addressDetails)) {
 			Gson gson = new Gson();
 			Address address = gson.fromJson(addressDetails, Address.class);
@@ -1221,6 +1280,64 @@ public class ContractServiceImpl implements ContractService {
 		
 		}
 
+	}
+	
+	/****
+	 * 
+	 * @param apiKey
+	 * @param pathParam
+	 * @param serviceUrl
+	 * @return
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 * @throws RecordNotFoundException
+	 * @throws CCSExceptions
+	 */
+	private String invokeAPI(String apiKey, String pathParam, String serviceUrl)
+			throws MalformedURLException, IOException, RecordNotFoundException, CCSExceptions {
+
+		try {
+			String vpc = StringUtils.isNotBlank(System.getenv(ContractConstants.AWS_VPC))
+					? System.getenv(ContractConstants.AWS_VPC)
+					: "vpce-088a5795f16dd4c2c-dnbntft7";
+			String env = StringUtils.isNotBlank(System.getenv(ContractConstants.SHORT_ENV))
+					? System.getenv(ContractConstants.SHORT_ENV)
+					: "dev";
+			String url = "https://" + vpc + "." + ContractConstants.DOMAIN_URL + "/" + env + serviceUrl + pathParam;
+
+			HttpGet getReq = new HttpGet(url);
+
+			Header header = new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+			Header header2 = new BasicHeader("x-apigw-api-id", apiKey);
+
+			List<Header> headers = Arrays.asList(header, header2);
+			HttpClient client = HttpClients.custom().setDefaultHeaders(headers).build();
+			HttpResponse response = client.execute(getReq);
+
+			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+				throw new RecordNotFoundException(
+						"Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
+			} else if (response.getStatusLine().getStatusCode() != 200) {
+				throw new CCSExceptions("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
+			}
+
+			BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
+
+			StringBuffer outputBuff = new StringBuffer();
+			String output;
+			while ((output = br.readLine()) != null) {
+				outputBuff.append(output);
+
+			}
+
+			client.getConnectionManager().shutdown();
+
+			return outputBuff.toString();
+
+		} catch (IOException e) {
+			throw new CCSExceptions(e.getMessage());
+
+		}
 	}
 
 }
