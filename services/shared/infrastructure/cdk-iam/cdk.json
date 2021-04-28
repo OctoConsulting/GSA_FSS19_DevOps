@@ -122,6 +122,7 @@
                         "xray-read",
                         "cloudwatch-read",
                         "lambda-read",
+                        "lambda-test",
                         {
                             "kms-encrypt": [
                                 "865d3adc-973f-45f1-87d6-0deebd072a05",
