@@ -10,6 +10,10 @@ export class KmsBuilder extends BaseBuilder {
     }
 
     public buildPolicyStatements(): PolicyStatement[] {
+        if (!this.props.resources || this.props.resources.length == 0) {
+            return [];
+        }
+
         if (this.props.permission === 'kms-encrypt') {
             return this.encrypt(this.props.resources!);
         }

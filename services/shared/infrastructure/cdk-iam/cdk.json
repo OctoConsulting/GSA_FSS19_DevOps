@@ -146,8 +146,103 @@
                 }
             ]
         },
-        "fss-iam-qa": {
-            "vpc": "vpc-0543348a8ffcd0ec9"
+        "fss-iam-test": {
+            "vpc": "vpc-00e28ea4f81217ac0",
+            "samlProvider": "arn:aws:iam::062324032774:saml-provider/SecureAuth",
+            "identityProvider": {
+                "name": "FssOkta",
+                "metadataPath": "resources/okta/saml/test/metadata.xml",
+                "userName": "FssOkta"
+            },
+            "iamSets": [
+                {
+                    "groupName": "FSS-Developers",
+                    "roleName": "FSS-Developers",
+                    "users": [],
+                    "permissions": [
+                        "iam-mfa",
+                        "iam-accessKeys",
+                        "dynamodb-read",
+                        "dynamodb-crudItem",
+                        "logs-read",
+                        {
+                            "s3-write": ["nsn-routing-extract-062324032774-us-east-1-dev"]
+                        },
+                        {
+                            "s3-read": ["nsn-routing-extract-062324032774-us-east-1-dev"]
+                        },
+                        "apigateway-read",
+                        "apigateway-runapi",
+                        "xray-read",
+                        "cloudwatch-read",
+                        "lambda-test",
+                        "lambda-read",
+                        {
+                            "kms-encrypt": []
+                        },
+                        {
+                            "kms-decrypt": []
+                        }
+                    ]
+                },
+                {
+                    "groupName": "FSS-DataOps-Eng",
+                    "roleName": "FSS-DataOps-Eng",
+                    "users": [],
+                    "permissions": ["iam-mfa"]
+                },
+                {
+                    "groupName": "FSS-BusinessAnalysts",
+                    "roleName": "FSS-BusinessAnalysts",
+                    "users": [],
+                    "permissions": [
+                        "iam-mfa",
+                        "dynamodb-read",
+                        {
+                            "s3-read": ["nsn-routing-extract-062324032774-us-east-1-dev"]
+                        },
+                        "dynamodb-crudItem",
+                        "logs-read",
+                        "apigateway-read",
+                        "apigateway-runapi",
+                        "xray-read",
+                        "cloudwatch-read",
+                        "lambda-read",
+                        {
+                            "kms-encrypt": []
+                        },
+                        {
+                            "kms-decrypt": []
+                        }
+                    ]
+                },
+                {
+                    "groupName": "FSS-Testers",
+                    "roleName": "FSS-Testers",
+                    "users": [],
+                    "permissions": [
+                        "iam-mfa",
+                        "dynamodb-read",
+                        {
+                            "s3-read": ["nsn-routing-extract-062324032774-us-east-1-dev"]
+                        },
+                        "dynamodb-crudItem",
+                        "logs-read",
+                        "apigateway-read",
+                        "apigateway-runapi",
+                        "xray-read",
+                        "cloudwatch-read",
+                        "lambda-read",
+                        "lambda-test",
+                        {
+                            "kms-encrypt": []
+                        },
+                        {
+                            "kms-decrypt": []
+                        }
+                    ]
+                }
+            ]
         }
     }
 }
