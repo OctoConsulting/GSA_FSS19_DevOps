@@ -18,6 +18,16 @@
                 "backupRetentionDays": 7
             }
         },
+        "fss-database-test": {
+            "auroraMysql": {
+                "allowFrom": ["172.28.161.160/27"],
+                "instanceCount": 1,
+                "readOnlyGroups": ["FSS-Developers"],
+                "adminGroups": ["FSS-DataOps-Eng"],
+                "RdsProxyLogRetention": "ONE_WEEK",
+                "backupRetentionDays": 7
+            }
+        },
         "fss-common-dev": {},
         "fss-shared-dev": {
             "githubRepoOwner": "octoConsulting",
@@ -113,6 +123,99 @@
                 }
             ],
             "domainName": "fss19-dev.fcs.gsa.gov",
+            "cognitoAdminGroup": "admins",
+            "jenkinsLogRetention": "ONE_WEEK"
+        },
+        "fss-shared-test": {
+            "githubRepoOwner": "octoConsulting",
+            "githubRepo": "GSA_FSS19_DevOps",
+            "githubTokenSecretArn": "arn:aws:secretsmanager:us-east-1:062324032774:secret:github_token-PYYQh9",
+            "vpcId": "vpc-00e28ea4f81217ac0",
+            "maxAzs": 3,
+            "addonRoutesCidrs": [
+                "10.0.0.0/8",
+                "10.176.0.0/15",
+                "10.181.0.0/16",
+                "10.183.0.0/16",
+                "10.184.0.0/15",
+                "159.142.0.0/16",
+                "172.16.0.0/12",
+                "192.168.0.0/16",
+                "206.137.126.0/24"
+            ],
+            "extendedSubnetConfiguration": [
+                {
+                    "subnetConfiguration": {
+                        "name": "PrivateCICD",
+                        "subnetType": "PRIVATE",
+                        "cidrMask": 24
+                    }
+                },
+                {
+                    "subnetConfiguration": {
+                        "name": "PrivateDev",
+                        "subnetType": "PRIVATE",
+                        "cidrMask": 24
+                    }
+                },
+                {
+                    "subnetConfiguration": {
+                        "name": "Isolated",
+                        "subnetType": "ISOLATED",
+                        "cidrMask": 28
+                    }
+                },
+                {
+                    "subnetConfiguration": {
+                        "name": "Public",
+                        "subnetType": "PUBLIC",
+                        "cidrMask": 28
+                    }
+                },
+                {
+                    "subnetConfiguration": {
+                        "name": "IsolatedDMS",
+                        "subnetType": "ISOLATED",
+                        "cidrMask": 28
+                    }
+                },
+                {
+                    "subnetConfiguration": {
+                        "name": "IsolatedDataPlane",
+                        "subnetType": "ISOLATED",
+                        "cidrMask": 28
+                    }
+                },
+                {
+                    "subnetConfiguration": {
+                        "name": "IsolatedSFTPLambda",
+                        "subnetType": "ISOLATED",
+                        "cidrMask": 28
+                    }
+                },
+                {
+                    "subnetConfiguration": {
+                        "name": "IsolatedDnsResolvers",
+                        "subnetType": "ISOLATED",
+                        "cidrMask": 28
+                    }
+                },
+                {
+                    "subnetConfiguration": {
+                        "name": "IsolatedNsnAurora",
+                        "subnetType": "ISOLATED",
+                        "cidrMask": 28
+                    }
+                },
+                {
+                    "subnetConfiguration": {
+                        "name": "Reserved",
+                        "subnetType": "ISOLATED",
+                        "reserved": true
+                    }
+                }
+            ],
+            "domainName": "fss19-test.fcs.gsa.gov",
             "cognitoAdminGroup": "admins",
             "jenkinsLogRetention": "ONE_WEEK"
         },

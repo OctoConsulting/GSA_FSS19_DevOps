@@ -8,6 +8,14 @@
         "@aws-cdk/aws-secretsmanager:parseOwnedSecretName": true,
         "@aws-cdk/aws-kms:defaultKeyPolicies": true,
         "@aws-cdk/aws-s3:grantWriteWithoutAcl": true,
+        "nsn-service-test": {
+            "artifactsBucket": "artifacts-062324032774-us-east-1-test",
+            "vpc": "vpc-00e28ea4f81217ac0",
+            "logRetentionInDays": 7,
+            "apiKeySecruity": false,
+            "enableEncryptionAtRest": true,
+            "xRayTracing": true
+        },
         "nsn-service-dev": {
             "artifactsBucket": "artifacts-902479997164-us-east-1-dev",
             "vpc": "vpc-02130393994755be9",

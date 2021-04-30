@@ -23,6 +23,15 @@
             "apiKeySecruity": false,
             "enableEncryptionAtRest": true,
             "xRayTracing": true
+        },
+        "nsn-api-test": {
+            "artifactsBucket": "artifacts-062324032774-us-east-1-test",
+            "vpc": "vpc-00e28ea4f81217ac0",
+            "logRetentionInDays": 7,
+            "apiKeySecruity": false,
+            "enableEncryptionAtRest": true,
+            "mysqlDbName": "fss_db",
+            "xRayTracing": true
         }
     }
 }

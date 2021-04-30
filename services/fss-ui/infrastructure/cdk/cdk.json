@@ -12,6 +12,11 @@
             "vpc": "vpc-02130393994755be9",
             "domainSuffix": "fss19-dev.fcs.gsa.gov",
             "enableEncryptionAtRest": true
+        },
+        "fss-ui-test": {
+            "vpc": "vpc-00e28ea4f81217ac0",
+            "domainSuffix": "fss19-test.fcs.gsa.gov",
+            "enableEncryptionAtRest": true
         }
     }
 }
