@@ -17,6 +17,15 @@
             "minCapacityForLambda": 1,
             "xRayTracing": true
         },
+        "contract-api-test": {
+            "artifactsBucket": "artifacts-062324032774-us-east-1-test",
+            "vpc": "vpc-00e28ea4f81217ac0",
+            "logRetentionInDays": 7,
+            "apiKeySecruity": false,
+            "enableEncryptionAtRest": true,
+            "minCapacityForLambda": 1,
+            "xRayTracing": true
+        },
         "contract-api-qa": {
             "vpc": "vpc-02130393994755be9",
             "artifactsBucket": "artifacts-902479997164-us-east-1-qa",
