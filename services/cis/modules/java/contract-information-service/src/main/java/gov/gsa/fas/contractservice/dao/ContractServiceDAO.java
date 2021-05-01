@@ -37,7 +37,7 @@ public interface ContractServiceDAO {
 	
 	List<VolumeDiscount> getVolumeDiscounts(String internalContractNumber) throws AmazonDynamoDBException,AmazonClientException;
 	
-	List<VolumeRange> getVolumeRange(String internalContractNumber) throws AmazonDynamoDBException,AmazonClientException;
+	VolumeRange getVolumeRange() throws AmazonDynamoDBException,AmazonClientException;
 	
 	String getCMFColumns(String partitionKey, String sortKey) throws AmazonDynamoDBException;
 	

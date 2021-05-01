@@ -232,28 +232,37 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	@Override
 	public List<VolumeDiscount> getVolumeDiscounts(String internalContractNumber)
 			throws AmazonDynamoDBException, AmazonClientException {
-		String volumeDiscDataJSON = getDetailsByPartitionKey(internalContractNumber,
-				ContractConstants.CONTRACT_SERVICE_SK_D4532 + "_" + internalContractNumber);
 
-		if (volumeDiscDataJSON != null && volumeDiscDataJSON.length() > 0) {
-			List<VolumeDiscount> volumeDiscount = Arrays.asList(new Gson().fromJson(volumeDiscDataJSON, VolumeDiscount[].class));
+		List<VolumeDiscount> discounts = new ArrayList<>();
+		for (int index = 1; index <= 5; index++) {
+			String volumeDiscDataJSON = getDetailsByPartitionKey(internalContractNumber,
+					ContractConstants.CONTRACT_SERVICE_SK_D4532 + "_0" + index);
 
-			return volumeDiscount;
+			if (volumeDiscDataJSON != null && volumeDiscDataJSON.length() > 0) {
+				VolumeDiscount volumeDiscount = new Gson().fromJson(volumeDiscDataJSON, VolumeDiscount.class);
+
+				discounts.add(volumeDiscount);
+			}
 		}
-		return null;
+		if (discounts != null && !discounts.isEmpty()) {
+			return discounts;
+		} else {
+			return null;
+		}
+
 	}
 
 
 	@Override
-	public List<VolumeRange> getVolumeRange(String internalContractNumber)
+	public VolumeRange getVolumeRange()
 			throws AmazonDynamoDBException, AmazonClientException {
-		String volumeRangeJSON = getDetailsByPartitionKey(internalContractNumber,
-				ContractConstants.CONTRACT_SERVICE_SK_D41CD + "_" + internalContractNumber);
+		String volumeRangeJSON = getDetailsByPartitionKey(ContractConstants.CONTRACT_SERVICE_PK_RANGE,
+				ContractConstants.CONTRACT_SERVICE_SK_RANGE );
 
 		if (volumeRangeJSON != null && volumeRangeJSON.length() > 0) {
-			List<VolumeRange> volumeDiscount = Arrays.asList(new Gson().fromJson(volumeRangeJSON, VolumeRange[].class));
+			VolumeRange range = new Gson().fromJson(volumeRangeJSON, VolumeRange.class);
 
-			return volumeDiscount;
+			return range;
 		}
 		return null;
 	}
