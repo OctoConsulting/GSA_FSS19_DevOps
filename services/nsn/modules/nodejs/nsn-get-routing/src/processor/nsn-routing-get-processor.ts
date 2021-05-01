@@ -77,7 +77,7 @@ export const getNsn = async (event: APIGatewayProxyEvent, context: Context): Pro
             });
 
         if (!recordCount || recordCount == 0) {
-            return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
+            return apiResponses._204({ message: 'No NSN Data found for routingId - ' + routingId });
         }
 
         let groupQueryStr =

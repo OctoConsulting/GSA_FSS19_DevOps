@@ -18,7 +18,7 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
     }
 
     if (!(await checkForExistingNsn(routingId))) {
-        return apiResponses._404({ message: 'No NSN Data found for routingId - ' + routingId });
+        return apiResponses._204({ message: 'No NSN Data found for routingId - ' + routingId });
     }
 
     try {
@@ -31,7 +31,7 @@ export const deleteNsn = async (event: APIGatewayProxyEvent): Promise<APIGateway
             return apiResponses._500(response.error);
         }
 
-        return apiResponses._204({ message: 'NSN record for routing id ' + routingId + ' is deleted successfully!' });
+        return apiResponses._200({ message: 'NSN record for routing id ' + routingId + ' is deleted successfully!' });
     } catch (err) {
         console.log('Error >>>>>> ' + err);
         return apiResponses._500({ message: 'Error deleting record for NSN id - ' + routingId });
