@@ -274,8 +274,12 @@ public class ContractServiceImpl implements ContractService {
 				owContractNumber = contractServiceDAO.getCMFColumns(contractMaster.getD402_cont_no(), ContractConstants.SK_D421_OWS);
 				try {
 					contractAddress = extractAddress(contractMaster.getD402_cecc());
-				} catch (RecordNotFoundException | CCSExceptions e) {
+				} catch (RecordNotFoundException  e) {
+					logger.error("Record not found in the entity database::",e );
 					contractAddress="";
+				}catch (CCSExceptions e) {
+					contractAddress="";
+					logger.error("Error while invoking the API::",e );
 				}
 			}
 
@@ -320,8 +324,12 @@ public class ContractServiceImpl implements ContractService {
 			String supplierAddress;
 			try {
 				supplierAddress = extractAddress(contractMaster.getD402_cecs());
-			} catch (RecordNotFoundException | CCSExceptions e) {
+			} catch (RecordNotFoundException e) {
+				logger.error("Record not found in the entity database::", e);
 				supplierAddress = "";
+			} catch (CCSExceptions e) {
+				supplierAddress = "";
+				logger.error("Error while invoking the API::", e);
 			}
 
 			contractDetail.setSupplierAddress(supplierAddress);
@@ -386,9 +394,12 @@ public class ContractServiceImpl implements ContractService {
 			try {
 				String nifdataJson = invokeAPI(nsnAPIKey, inPOLines.getRequisitionRecords().get(0).getItemNumber(), ContractConstants.NSN_API_URL);
 				nifData = new Gson().fromJson(nifdataJson, NIFData.class);
-			} catch (RecordNotFoundException | CCSExceptions e) {
+			} catch (RecordNotFoundException e) {
+				logger.error("Record not found in the NSN database::", e);
+				nifData = null;
+			} catch (CCSExceptions e) {
 				nifData=null;
-
+				logger.error("Error while invoking the API::", e);
 			}
 
 
@@ -1225,33 +1236,64 @@ public class ContractServiceImpl implements ContractService {
 		}
 	}
 
-	private double getRangeFrom(String no, List<VolumeRange> volumeRanges) {
-		if (volumeRanges == null) {
+	/***
+	 * Ranges From
+	 * @param no
+	 * @param volumeRange
+	 * @return
+	 */
+	private double getRangeFrom(String no, VolumeRange volumeRange) {
+		if (volumeRange == null) {
 			return 0;
 		}
 
-		Optional<VolumeRange> volumeRange = volumeRanges.stream()
-				.filter(volRange -> no.equals(volRange.getD41d_value())).findFirst();
-		if (!volumeRange.isPresent()) {
+		String rangeValue = "";
+		if(no.equals(volumeRange.getD41d_value())) {
+			rangeValue = volumeRange.getD41d_alt_value();
+		}else if(no.equals(volumeRange.getD41d_value2())){
+			rangeValue = volumeRange.getD41d_alt_value2();
+		}else if(no.equals(volumeRange.getD41d_value3())) {
+			rangeValue = volumeRange.getD41d_alt_value3();
+		}else if(no.equals(volumeRange.getD41d_value4())) {
+			rangeValue = volumeRange.getD41d_alt_value4();
+		}else if(no.equals(volumeRange.getD41d_value5())) {
+			rangeValue = volumeRange.getD41d_alt_value5();
+		}else {
 			return 0;
 		}
 
-		return new Double(volumeRange.get().getD41d_alt_value()).doubleValue();
+		return new Double(rangeValue).doubleValue();
 	}
 
-	private double getRangeto(String no, List<VolumeRange> volumeRanges) {
+	/***
+	 * Ranges To
+	 * @param no
+	 * @param volumeRange
+	 * @return
+	 */
+	private double getRangeto(String no, VolumeRange volumeRange) {
 
-		if (volumeRanges == null) {
+		if (volumeRange == null) {
 			return 0;
 		}
 
-		Optional<VolumeRange> volumeRange = volumeRanges.stream()
-				.filter(volRange -> no.equals(volRange.getD41d_value())).findFirst();
-		if (!volumeRange.isPresent()) {
+		String rangeValue = "";
+		if(no.equals(volumeRange.getD41d_value())) {
+			rangeValue = volumeRange.getD41d_desc();
+		}else if(no.equals(volumeRange.getD41d_value2())){
+			rangeValue = volumeRange.getD41d_desc();
+		}else if(no.equals(volumeRange.getD41d_value3())) {
+			rangeValue = volumeRange.getD41d_desc();
+		}else if(no.equals(volumeRange.getD41d_value4())) {
+			rangeValue = volumeRange.getD41d_desc();
+		}else if(no.equals(volumeRange.getD41d_value5())) {
+			rangeValue = volumeRange.getD41d_desc();
+		}else {
 			return 0;
 		}
 
-		return new Double(volumeRange.get().getD41d_desc()).doubleValue();
+		return new Double(rangeValue).doubleValue();
+
 	}
 
 	private void getVolumeDiscount(CSDetailPO contractDetail, BigDecimal totalPOCost) {
@@ -1266,7 +1308,7 @@ public class ContractServiceImpl implements ContractService {
 			contractServiceDAO = new ContractServiceDAOImpl();
 		}
 		volumeDiscounts = contractServiceDAO.getVolumeDiscounts(contractDetail.getInternalContractNumber());
-		List<VolumeRange> volumeRanges = contractServiceDAO.getVolumeRange(contractDetail.getInternalContractNumber());
+		VolumeRange volumeRanges = contractServiceDAO.getVolumeRange();
 		int i = 0;
 		if (volumeDiscounts != null) {
 			for (VolumeDiscount volumeDiscount : volumeDiscounts) {
