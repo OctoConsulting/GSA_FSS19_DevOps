@@ -57,15 +57,16 @@ export const getNotesDetailsData = async (event: APIGatewayProxyEvent): Promise<
         if (!notesData.Items || notesData.Items.length == 0) {
             return apiResponses._404({ message: 'No Notes Details for d430_rpt_off : ' + d430_rpt_off +  ' | d430_note_cd : ' + d430_note_cd +  ' | d430_rec_type : ' + d430_rec_type  });
         }
-
+        let notesResponse : any[] = [];
         notesData.Items.forEach(element => {
             var n = element.sk.lastIndexOf('_');
             var result = element.sk.substring(n + 1);
-            element.note_cd = result;
+            element.details.d430_note_cd = result;
+            notesResponse.push(element.details)
         });
 
-        const notesDetailsData: NotesDetailsData = notesData.Items;
-        return apiResponses._200(notesDetailsData);
+        console.log("Final Notes details : " + JSON.stringify(notesResponse));
+        return apiResponses._200(notesResponse);
 
 
     } catch (err) {
