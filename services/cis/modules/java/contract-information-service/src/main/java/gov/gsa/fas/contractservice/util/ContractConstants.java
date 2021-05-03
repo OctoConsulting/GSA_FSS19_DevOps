@@ -15,7 +15,7 @@ public class ContractConstants {
 	public static final String CONTRACT_SERVICE_SK_D403 = "detail_d403";
 	public static final String CONTRACT_SERVICE_SK_D407 = "detail_d407";
 	public static final String CONTRACT_SERVICE_SK_D410 = "detail_d410";
-	public static final String CONTRACT_SERVICE_SK_D411 = "detail_d411";
+	public static final String CONTRACT_SERVICE_SK_D411 = "EFPT_";
 	public static final String CONTRACT_SERVICE_SK_MQCID = "detail_MQCID";
 	public static final String CONTRACT_SERVICE_SK_D430 = "detail_d430";
 	public static final String CONTRACT_SERVICE_SK_D4531 = "detail_d4531";
@@ -126,6 +126,10 @@ public class ContractConstants {
 	
 	public static final String NSN_API_URL = "/nsnService/v1/details/";
 	public static final String NSN_API_KEY = "NSN-API-KEY";
+	
+	public static final String CONTRACT_CONSTANT_NOTES_API_URL = "/contractconstantdata/v1/notes/details";
+	public static final String CONTRACT_CONSTANT_API_KEY = "CONTRACT_CONSTANT_API_KEY";
+	public static final String CONTRACT_CONSTANT_VENDOR_ADDRESS_API_URL = "/contractconstantdata/v1/acoOfficeAddress/details";
 	
 	public static final String SK_D421_F = "detail_421_f_";
 	public static final String SK_D421_OWS = "detail_d421_ows_";

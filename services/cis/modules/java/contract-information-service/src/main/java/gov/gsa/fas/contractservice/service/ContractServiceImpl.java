@@ -3,6 +3,7 @@ package gov.gsa.fas.contractservice.service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.text.ParseException;
@@ -18,6 +19,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.slf4j.Logger;
@@ -26,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import gov.gsa.fas.contractservice.contract.CSDetailPO;
 import gov.gsa.fas.contractservice.contract.ContractsType;
@@ -191,9 +195,9 @@ public class ContractServiceImpl implements ContractService {
 		try {
 			List<String> internals = contractServiceDAO
 					.getInternalContractNumber(ContractInternalIDType.GSAM.get(contractId));
-			if (internals == null || internals.size() <= 0) {
-				internals = contractServiceDAO.getInternalContractNumber(ContractInternalIDType.FCON.get(contractId));
-			}
+//			if (internals == null || internals.size() <= 0) {
+//				internals = contractServiceDAO.getInternalContractNumber(ContractInternalIDType.FCON.get(contractId));
+//			}
 			if (internals == null || internals.size() <= 0) {
 				internals = new ArrayList<String>();
 				internals.add(contractId);
@@ -256,7 +260,7 @@ public class ContractServiceImpl implements ContractService {
 	 * @return
 	 * @throws ApplicationException
 	 */
-	private CSDetailPO validateGetContractData(CSDetailPO contractDetail, PORecordsType inPOLines)
+	private CSDetailPO validateGetContractData(CSDetailPO contractDetail, PORecordsType inPOLines) 
 			throws ApplicationException, AmazonDynamoDBException {
 
 		logger.info("Begin of the validateRequest() :: ");
@@ -305,11 +309,11 @@ public class ContractServiceImpl implements ContractService {
 
 			logger.info("Invoking the data access getBuyerDetails() :: ");
 
-			List<CDFMaster> cdfMasterList = null;
+			//List<CDFMaster> cdfMasterList = null;
 
-			if (StringUtils.isNotBlank(contractDetail.getContractNotesList())) {
-				cdfMasterList = contractServiceDAO.getBuyerDetails(contractDetail.getInternalContractNumber());
-				contractDetail = getNotesDetails(contractDetail, inPOLines, contractMaster, cdfMasterList);
+			if (StringUtils.isNotBlank(contractDetail.getContractNotesList())) { // P2S2 : need to revisit if we need this noteslist condition
+				//cdfMasterList = contractServiceDAO.getBuyerDetails(contractDetail.getInternalContractNumber());
+				contractDetail = getNotesDetails(contractDetail, inPOLines, contractMaster); // Buyer code related logic . 
 
 				if (StringUtils.isNotBlank(contractDetail.getResult())) {
 					return contractDetail;
@@ -383,8 +387,15 @@ public class ContractServiceImpl implements ContractService {
 				}
 			}
 
-			String contractNotes = contractNotes(contractMaster, cdfMasterList);
-			contractDetail.setContractNotesDetails(contractNotes);
+			String contractNotes="";
+			try {
+				contractNotes = getContractReportingOfficeNotes(contractMaster);
+				contractDetail.setContractNotesDetails(contractNotes);
+			} catch (CCSExceptions e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
 			
 			String nsnAPIKey = StringUtils.isNotBlank(System.getenv(ContractConstants.NSN_API_KEY))
 					? System.getenv(ContractConstants.NSN_API_KEY)
@@ -471,15 +482,16 @@ public class ContractServiceImpl implements ContractService {
 				itemNotesCount++;
 			}
 
+			// P2S2 -- Need to revisit this logic for NOTES
 			CDFMaster cdfNotes = null;
-			if (cdfMasterList != null) {
-				for (CDFMaster cdfMaster : cdfMasterList) {
-					if (cffRptOff.equals(cdfMaster.getD430_rpt_off())
-							&& cffNoteCode.equals(cdfMaster.getD430_note_cd())) {
-						cdfNotes = cdfMaster;
-					}
-				}
-			}
+//			if (cdfMasterList != null) {
+//				for (CDFMaster cdfMaster : cdfMasterList) {
+//					if (cffRptOff.equals(cdfMaster.getD430_rpt_off())
+//							&& cffNoteCode.equals(cdfMaster.getD430_note_cd())) {
+//						cdfNotes = cdfMaster;
+//					}
+//				}
+//			}
 
 			if (cdfNotes != null) {
 				notesCount++;
@@ -496,11 +508,10 @@ public class ContractServiceImpl implements ContractService {
 					contractMaster.getD402_cont_ind());
 			logger.info("Instrument determinde is {}", instrumentType);
 			contractDetail.setInstrumentType(instrumentType);
-			String contractReportingOffceAddress = contratReportingOfficeAddress(contractDetail.getReportingOffice(),
-					cdfMasterList);
+			String contractReportingOffceAddress = contratReportingOfficeAddress(contractDetail.getReportingOffice());
 			contractDetail.setReportOfficeAddress(contractReportingOffceAddress);
 
-			String acoAddress = getACOOfficeAddress(contractDetail.getACO(), cdfMasterList);
+			String acoAddress = getACOOfficeAddress(contractDetail.getACO());
 			contractDetail.setAcoAddress(acoAddress);
 			setEDIFax(contractDetail);
 			setReportingOfficeAAC(contractDetail);
@@ -524,112 +535,111 @@ public class ContractServiceImpl implements ContractService {
 		return contractDetail;
 	}
 
-	private CSDetailPO getNotesDetails(CSDetailPO contractDetail, PORecordsType inPOLines, ContractDataMaster contractMaster,
-			List<CDFMaster> cdfMasterList) {
+	private CSDetailPO getNotesDetails(CSDetailPO contractDetail, PORecordsType inPOLines, ContractDataMaster contractMaster) {
 		String filterReporting = (!"G".equals(inPOLines.getRequisitionRecords().get(0).getReportingOffice()))
 				? inPOLines.getRequisitionRecords().get(0).getReportingOffice()
 				: contractMaster.getD402_rpt_off();
-
-		logger.info("Filtered reporting office {}::", filterReporting);
-		CDFMaster cdfMasterFiltered = null;
-		if (cdfMasterList != null) {
-			for (CDFMaster cdfMaster : cdfMasterList) {
-				if (filterReporting.equals(cdfMaster.getD430_rpt_off())
-						&& contractMaster.getD402_byr_cd().equals(cdfMaster.getD430_bm_cd())) {
-					cdfMasterFiltered = cdfMaster;
-				}
-			}
-		}
-
-		BigDecimal byrDollarLimit = null;
-		String byrALT = "";
-		if (cdfMasterFiltered != null) {
-			contractDetail.setBuyerEmailAddress(cdfMasterFiltered.getD430_email_adrs());
-			contractDetail.setBuyerName(cdfMasterFiltered.getD430_bm_name());
-			contractDetail.setBuyerPhoneNumber(cdfMasterFiltered.getD430_bm_phone_no());
-			contractDetail.setSignatureName(cdfMasterFiltered.getD430_bm_name());
-			byrDollarLimit = new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt());
-			byrALT = cdfMasterFiltered.getD430_bm_cd_alt();
-		} else {
-			contractDetail.setResult(String.format(ContractConstants.JS004_CONTRACT_DATA, contractDetail.getBuyerCode(),
-					filterReporting));
-			return contractDetail;
-		}
-
-		if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) == 1 && (cdfMasterFiltered.getD430_bm_cd_alt() == null
-				|| cdfMasterFiltered.getD430_bm_cd_alt().trim().length() < 2)) {
-
-			logger.info("Buyer Dollar Limit exceeded");
-
-			String dlrLmtMsg = String.format(ContractConstants.JS005_CONTRACT_DATA,
-					StringUtils.isNotBlank(contractDetail.getBuyerName()) ? contractDetail.getBuyerName() : "",
-					new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt()).intValue(),
-					inPOLines.getTotalPOCost().toBigInteger().intValue());
-
-			contractDetail.setResult(dlrLmtMsg);
-
-			return contractDetail;
-		}
-
-		if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) == 1) {
-			cdfMasterFiltered = null;
-			for (CDFMaster cdfMaster : cdfMasterList) {
-				if (filterReporting.equals(cdfMaster.getD430_rpt_off())
-						&& contractMaster.getD402_byr_cd().equals(byrALT)) {
-					cdfMasterFiltered = cdfMaster;
-				}
-			}
-
-			if (cdfMasterFiltered != null) {
-				contractDetail.setSignatureName(cdfMasterFiltered.getD430_bm_name());
-				byrDollarLimit = new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt());
-				byrALT = cdfMasterFiltered.getD430_bm_cd_alt();
-			} else {
-				contractDetail.setResult(String.format(ContractConstants.JS006_CONTRACT_DATA, byrALT, filterReporting));
-				return contractDetail;
-			}
-
-			if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) == 1
-					&& (cdfMasterFiltered.getD430_bm_cd_alt() == null
-							|| cdfMasterFiltered.getD430_bm_cd_alt().trim().length() < 2)) {
-
-				logger.info("Buyer Dollar Limit exceeded");
-
-				String dlrLmtMsg = String.format(ContractConstants.JS005_CONTRACT_DATA, byrALT,
-						new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt()).intValue(),
-						inPOLines.getTotalPOCost().toBigInteger().intValue());
-
-				contractDetail.setResult(dlrLmtMsg);
-
-				return contractDetail;
-			}
-			cdfMasterFiltered = null;
-			if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) == 1) {
-				for (CDFMaster cdfMaster : cdfMasterList) {
-					if (filterReporting.equals(cdfMaster.getD430_rpt_off())
-							&& contractMaster.getD402_byr_cd().equals(byrALT)) {
-						cdfMasterFiltered = cdfMaster;
-					}
-				}
-			}
-			if (cdfMasterFiltered != null) {
-				contractDetail.setSignatureName(cdfMasterFiltered.getD430_bm_name());
-				byrDollarLimit = new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt());
-				byrALT = cdfMasterFiltered.getD430_bm_cd_alt();
-			} else {
-				contractDetail.setResult(String.format(ContractConstants.JS006_CONTRACT_DATA, byrALT, filterReporting));
-				return contractDetail;
-			}
-
-			/* validating the dollar value limit with PO Total */
-			if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) == 1) {
-				String dlrLmtMsg = String.format(ContractConstants.JS005_CONTRACT_DATA, byrALT,
-						new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt()).intValue(),
-						inPOLines.getTotalPOCost().toBigInteger().intValue());
-
-				contractDetail.setResult(dlrLmtMsg);
-			}
-		}
+//
+//		logger.info("Filtered reporting office {}::", filterReporting);
+//		CDFMaster cdfMasterFiltered = null;
+//		if (cdfMasterList != null) {
+//			for (CDFMaster cdfMaster : cdfMasterList) {
+//				if (filterReporting.equals(cdfMaster.getD430_rpt_off())
+//						&& contractMaster.getD402_byr_cd().equals(cdfMaster.getD430_bm_cd())) {
+//					cdfMasterFiltered = cdfMaster;
+//				}
+//			}
+//		}
+//
+//		BigDecimal byrDollarLimit = null;
+//		String byrALT = "";
+//		if (cdfMasterFiltered != null) {
+//			contractDetail.setBuyerEmailAddress(cdfMasterFiltered.getD430_email_adrs());
+//			contractDetail.setBuyerName(cdfMasterFiltered.getD430_bm_name());
+//			contractDetail.setBuyerPhoneNumber(cdfMasterFiltered.getD430_bm_phone_no());
+//			contractDetail.setSignatureName(cdfMasterFiltered.getD430_bm_name());
+//			byrDollarLimit = new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt());
+//			byrALT = cdfMasterFiltered.getD430_bm_cd_alt();
+//		} else {
+//			contractDetail.setResult(String.format(ContractConstants.JS004_CONTRACT_DATA, contractDetail.getBuyerCode(),
+//					filterReporting));
+//			return contractDetail;
+//		}
+//
+//		if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) == 1 && (cdfMasterFiltered.getD430_bm_cd_alt() == null
+//				|| cdfMasterFiltered.getD430_bm_cd_alt().trim().length() < 2)) {
+//
+//			logger.info("Buyer Dollar Limit exceeded");
+//
+//			String dlrLmtMsg = String.format(ContractConstants.JS005_CONTRACT_DATA,
+//					StringUtils.isNotBlank(contractDetail.getBuyerName()) ? contractDetail.getBuyerName() : "",
+//					new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt()).intValue(),
+//					inPOLines.getTotalPOCost().toBigInteger().intValue());
+//
+//			contractDetail.setResult(dlrLmtMsg);
+//
+//			return contractDetail;
+//		}
+//
+//		if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) == 1) {
+//			cdfMasterFiltered = null;
+//			for (CDFMaster cdfMaster : cdfMasterList) {
+//				if (filterReporting.equals(cdfMaster.getD430_rpt_off())
+//						&& contractMaster.getD402_byr_cd().equals(byrALT)) {
+//					cdfMasterFiltered = cdfMaster;
+//				}
+//			}
+//
+//			if (cdfMasterFiltered != null) {
+//				contractDetail.setSignatureName(cdfMasterFiltered.getD430_bm_name());
+//				byrDollarLimit = new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt());
+//				byrALT = cdfMasterFiltered.getD430_bm_cd_alt();
+//			} else {
+//				contractDetail.setResult(String.format(ContractConstants.JS006_CONTRACT_DATA, byrALT, filterReporting));
+//				return contractDetail;
+//			}
+//
+//			if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) == 1
+//					&& (cdfMasterFiltered.getD430_bm_cd_alt() == null
+//							|| cdfMasterFiltered.getD430_bm_cd_alt().trim().length() < 2)) {
+//
+//				logger.info("Buyer Dollar Limit exceeded");
+//
+//				String dlrLmtMsg = String.format(ContractConstants.JS005_CONTRACT_DATA, byrALT,
+//						new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt()).intValue(),
+//						inPOLines.getTotalPOCost().toBigInteger().intValue());
+//
+//				contractDetail.setResult(dlrLmtMsg);
+//
+//				return contractDetail;
+//			}
+//			cdfMasterFiltered = null;
+//			if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) == 1) {
+//				for (CDFMaster cdfMaster : cdfMasterList) {
+//					if (filterReporting.equals(cdfMaster.getD430_rpt_off())
+//							&& contractMaster.getD402_byr_cd().equals(byrALT)) {
+//						cdfMasterFiltered = cdfMaster;
+//					}
+//				}
+//			}
+//			if (cdfMasterFiltered != null) {
+//				contractDetail.setSignatureName(cdfMasterFiltered.getD430_bm_name());
+//				byrDollarLimit = new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt());
+//				byrALT = cdfMasterFiltered.getD430_bm_cd_alt();
+//			} else {
+//				contractDetail.setResult(String.format(ContractConstants.JS006_CONTRACT_DATA, byrALT, filterReporting));
+//				return contractDetail;
+//			}
+//
+//			/* validating the dollar value limit with PO Total */
+//			if (inPOLines.getTotalPOCost().compareTo(byrDollarLimit) == 1) {
+//				String dlrLmtMsg = String.format(ContractConstants.JS005_CONTRACT_DATA, byrALT,
+//						new BigDecimal(cdfMasterFiltered.getD430_bm_dval_lmt()).intValue(),
+//						inPOLines.getTotalPOCost().toBigInteger().intValue());
+//
+//				contractDetail.setResult(dlrLmtMsg);
+//			}
+//		}
 		return contractDetail;
 	}
 
@@ -803,13 +813,13 @@ public class ContractServiceImpl implements ContractService {
 
 				contractsType.setContractorAddress(contractAddress);
 				
-				List<CDFMaster> cdfMasterList = contractServiceDAO
-						.getBuyerDetails(internal);
+//				List<CDFMaster> cdfMasterList = contractServiceDAO
+//						.getBuyerDetails(internal);
 			//	Notes Detail pending
-				String contractNotes = contractNotes(master,cdfMasterList);
+				String contractNotes = getContractReportingOfficeNotes(master);
 				contractsType.setContractNotesDetails(contractNotes);
 				
-				EDIFax edifaxDetails = extractEdifax(internal, contractServiceDAO);
+				EDIFax edifaxDetails = contractServiceDAO.getEDIFax(internal);
 				contractsType.setEfptIndicator(edifaxDetails.getD411_efpt_ind());
 				contractsType.setEdiMessageSetVersion(StringUtils.isNotBlank(edifaxDetails.getD411_x12_version())?edifaxDetails.getD411_x12_version():null);
 				
@@ -825,9 +835,36 @@ public class ContractServiceImpl implements ContractService {
 				logger.error(ex.getLocalizedMessage(), ex);
 			} catch (IOException ex) {
 				logger.error(ex.getLocalizedMessage(), ex);
+			} catch (CCSExceptions ex) {
+				logger.error(ex.getLocalizedMessage(), ex);
 			}
 		}
 		return Optional.empty();
+	}
+
+	private String getContractReportingOfficeNotes(ContractDataMaster master)
+			throws MalformedURLException, IOException, CCSExceptions {
+		String notes ="";
+		Gson gson =  new Gson();
+		try {
+			String contractConstantAPIKey = StringUtils.isNotBlank(System.getenv(ContractConstants.CONTRACT_CONSTANT_API_KEY))
+					? System.getenv(ContractConstants.CONTRACT_CONSTANT_API_KEY)
+					: "on890eyswh";
+			CDFMaster cdfMaster = new CDFMaster();
+			cdfMaster.setD430_rpt_off(master.getD402_rpt_off());
+			cdfMaster.setD430_rec_type("N"); // always set to N for notes 
+			notes = this.invokePostAPI(contractConstantAPIKey, ContractConstants.CONTRACT_CONSTANT_NOTES_API_URL,gson.toJson(cdfMaster) );
+		} catch (RecordNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		Type userListType = new TypeToken<List<CDFMaster>>(){}.getType();
+		 
+		List<CDFMaster> cdfNotesDetails = gson.fromJson(notes, userListType);  
+		//List<CDFMaster> cdfNotesDetails = gson.fromJson(noteArrList, List.class);
+		String contractNotes = contractNotes(master,cdfNotesDetails);
+		return contractNotes;
 	}
 
 	private void setAcoContractDetails(String internal, ContractsType contractsType  ,ContractDataMaster master) {
@@ -856,16 +893,7 @@ public class ContractServiceImpl implements ContractService {
 		}
 	}
 
-	private EDIFax extractEdifax(String internal, ContractServiceDAO contractServiceDAO) {
-		String ediFaXDetails = contractServiceDAO.getDetailsByPartitionKey(internal,
-				ContractConstants.CONTRACT_SERVICE_SK_D411 + "_" + internal);
-		EDIFax edifaxDetail = new EDIFax();
-		if (StringUtils.isNotBlank(ediFaXDetails)) {
-			Gson gson = new Gson();
-			edifaxDetail = gson.fromJson(ediFaXDetails, EDIFax.class);
-		}
-		return edifaxDetail;
-	}
+
 	/***
 	 * this method used to set the address for get contract data /list
 	 * 
@@ -1003,8 +1031,7 @@ public class ContractServiceImpl implements ContractService {
 
 				if (cdfMasterList != null) {
 					for (CDFMaster cdfMaster : cdfMasterList) {
-						if (contractMaster.getD402_rpt_off().equals(cdfMaster.getD430_rpt_off())
-								&& note1.equals(cdfMaster.getD430_note_cd())) {
+						if (note1.equals(cdfMaster.getD430_note_cd())) {
 							cdfNotes = cdfMaster;
 						}
 					}
@@ -1022,8 +1049,7 @@ public class ContractServiceImpl implements ContractService {
 				cdfNotes = null;
 				if (cdfMasterList != null) {
 					for (CDFMaster cdfMaster : cdfMasterList) {
-						if (contractMaster.getD402_rpt_off().equals(cdfMaster.getD430_rpt_off())
-								&& note2.equals(cdfMaster.getD430_note_cd())) {
+						if (note2.equals(cdfMaster.getD430_note_cd())) {
 							cdfNotes = cdfMaster;
 						}
 					}
@@ -1041,8 +1067,7 @@ public class ContractServiceImpl implements ContractService {
 				cdfNotes = null;
 				if (cdfMasterList != null) {
 					for (CDFMaster cdfMaster : cdfMasterList) {
-						if (contractMaster.getD402_rpt_off().equals(cdfMaster.getD430_rpt_off())
-								&& note3.equals(cdfMaster.getD430_note_cd())) {
+						if (note3.equals(cdfMaster.getD430_note_cd())) {
 							cdfNotes = cdfMaster;
 						}
 					}
@@ -1060,8 +1085,7 @@ public class ContractServiceImpl implements ContractService {
 				cdfNotes = null;
 				if (cdfMasterList != null) {
 					for (CDFMaster cdfMaster : cdfMasterList) {
-						if (contractMaster.getD402_rpt_off().equals(cdfMaster.getD430_rpt_off())
-								&& note4.equals(cdfMaster.getD430_note_cd())) {
+						if (note4.equals(cdfMaster.getD430_note_cd())) {
 							cdfNotes = cdfMaster;
 						}
 					}
@@ -1079,8 +1103,7 @@ public class ContractServiceImpl implements ContractService {
 				cdfNotes = null;
 				if (cdfMasterList != null) {
 					for (CDFMaster cdfMaster : cdfMasterList) {
-						if (contractMaster.getD402_rpt_off().equals(cdfMaster.getD430_rpt_off())
-								&& note5.equals(cdfMaster.getD430_note_cd())) {
+						if (note5.equals(cdfMaster.getD430_note_cd())) {
 							cdfNotes = cdfMaster;
 						}
 					}
@@ -1109,35 +1132,78 @@ public class ContractServiceImpl implements ContractService {
 	 * @param cdfMasterList
 	 * @return
 	 */
-	private String contratReportingOfficeAddress(String contractReportingOffice, List<CDFMaster> cdfMasterList) {
+//	private String contratReportingOfficeAddress(String contractReportingOffice, List<CDFMaster> cdfMasterList) {
+//
+//		CDFMaster reportingOfficeAddress = null;
+//		String address = "";
+//		if (cdfMasterList != null) {
+//			for (CDFMaster cdfMaster : cdfMasterList) {
+//				if (contractReportingOffice.equals(cdfMaster.getD430_rpt_off())
+//						&& "P".equals(cdfMaster.getD430_office())) {
+//					reportingOfficeAddress = cdfMaster;
+//				}
+//			}
+//		}
+//
+//		if (reportingOfficeAddress != null) {
+//			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs1())
+//					&& reportingOfficeAddress.getD430_adrs1().length() < 35) {
+//				address = reportingOfficeAddress.getD430_adrs1() + " ";
+//			}
+//			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs2())
+//					&& reportingOfficeAddress.getD430_adrs2().length() < 35) {
+//				address = address + reportingOfficeAddress.getD430_adrs2() + " ";
+//			}
+//			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs3())
+//					&& reportingOfficeAddress.getD430_adrs3().length() < 35) {
+//				address = address + reportingOfficeAddress.getD430_adrs3() + " ";
+//			}
+//			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs4())
+//					&& reportingOfficeAddress.getD430_adrs4().length() < 35) {
+//				address = address + reportingOfficeAddress.getD430_adrs4() + " ";
+//			}
+//		}
+//		return address;
+//	}
+	
+	private String contratReportingOfficeAddress(String contractReportingOffice) {
 
-		CDFMaster reportingOfficeAddress = null;
 		String address = "";
-		if (cdfMasterList != null) {
-			for (CDFMaster cdfMaster : cdfMasterList) {
-				if (contractReportingOffice.equals(cdfMaster.getD430_rpt_off())
-						&& "P".equals(cdfMaster.getD430_office())) {
-					reportingOfficeAddress = cdfMaster;
-				}
-			}
+		Gson gson =  new Gson();
+		String contractConstantAPIKey = StringUtils.isNotBlank(System.getenv(ContractConstants.CONTRACT_CONSTANT_API_KEY))
+				? System.getenv(ContractConstants.CONTRACT_CONSTANT_API_KEY)
+				: "on890eyswh";
+		CDFMaster cdfMaster = new CDFMaster();
+		cdfMaster.setD430_rpt_off(contractReportingOffice);
+		cdfMaster.setD430_office("P");
+		cdfMaster.setD430_rec_type("F");
+		
+		String reportingOfficeAddressJSON = "";
+		try {
+			reportingOfficeAddressJSON = invokePostAPI(contractConstantAPIKey, ContractConstants.CONTRACT_CONSTANT_VENDOR_ADDRESS_API_URL, gson.toJson(cdfMaster));
+		} catch (IOException | RecordNotFoundException | CCSExceptions e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
-		if (reportingOfficeAddress != null) {
+		
+		if (reportingOfficeAddressJSON != null) {
+			CDFMaster reportingOfficeAddress = gson.fromJson(reportingOfficeAddressJSON, CDFMaster.class);
 			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs1())
 					&& reportingOfficeAddress.getD430_adrs1().length() < 35) {
-				address = reportingOfficeAddress.getD430_adrs1() + " ";
+				address = address + StringUtils.rightPad(StringUtils.defaultString(reportingOfficeAddress.getD430_adrs1(), ""), 35);
 			}
 			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs2())
 					&& reportingOfficeAddress.getD430_adrs2().length() < 35) {
-				address = address + reportingOfficeAddress.getD430_adrs2() + " ";
+				address = address + StringUtils.rightPad(StringUtils.defaultString(reportingOfficeAddress.getD430_adrs2(), ""), 35);
 			}
 			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs3())
 					&& reportingOfficeAddress.getD430_adrs3().length() < 35) {
-				address = address + reportingOfficeAddress.getD430_adrs3() + " ";
+				address = address + StringUtils.rightPad(StringUtils.defaultString(reportingOfficeAddress.getD430_adrs3(), ""), 35);
 			}
 			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs4())
 					&& reportingOfficeAddress.getD430_adrs4().length() < 35) {
-				address = address + reportingOfficeAddress.getD430_adrs4() + " ";
+				address = address + StringUtils.rightPad(StringUtils.defaultString(reportingOfficeAddress.getD430_adrs4(), ""), 35);
 			}
 		}
 		return address;
@@ -1150,34 +1216,43 @@ public class ContractServiceImpl implements ContractService {
 	 * @param cdfMasterList
 	 * @return
 	 */
-	private String getACOOfficeAddress(String aco, List<CDFMaster> cdfMasterList) {
+	private String getACOOfficeAddress(String aco) {
 
-		CDFMaster reportingOfficeAddress = null;
 		String address = "";
-		if (cdfMasterList != null) {
-			for (CDFMaster cdfMaster : cdfMasterList) {
-				if (aco.equals(cdfMaster.getD430_aco())) {
-					reportingOfficeAddress = cdfMaster;
-				}
-			}
+		Gson gson =  new Gson();
+		String contractConstantAPIKey = StringUtils.isNotBlank(System.getenv(ContractConstants.CONTRACT_CONSTANT_API_KEY))
+				? System.getenv(ContractConstants.CONTRACT_CONSTANT_API_KEY)
+				: "on890eyswh";
+		CDFMaster cdfMaster = new CDFMaster();
+	
+		cdfMaster.setD430_aco(aco);
+		cdfMaster.setD430_rec_type("A");
+		
+		String reportingOfficeAddressJSON = "";
+		try {
+			reportingOfficeAddressJSON = invokePostAPI(contractConstantAPIKey, ContractConstants.CONTRACT_CONSTANT_VENDOR_ADDRESS_API_URL, gson.toJson(cdfMaster));
+		} catch (IOException | RecordNotFoundException | CCSExceptions e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
-		if (reportingOfficeAddress != null) {
+		if (reportingOfficeAddressJSON != null) {
+			CDFMaster reportingOfficeAddress = gson.fromJson(reportingOfficeAddressJSON, CDFMaster.class);
 			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs1())
 					&& reportingOfficeAddress.getD430_adrs1().length() < 35) {
-				address = reportingOfficeAddress.getD430_adrs1() + " ";
+				address = address + StringUtils.rightPad(StringUtils.defaultString(reportingOfficeAddress.getD430_adrs1(), ""), 35);
 			}
 			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs2())
 					&& reportingOfficeAddress.getD430_adrs2().length() < 35) {
-				address = address + reportingOfficeAddress.getD430_adrs2() + " ";
+				address = address + StringUtils.rightPad(StringUtils.defaultString(reportingOfficeAddress.getD430_adrs2(), ""), 35);
 			}
 			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs3())
 					&& reportingOfficeAddress.getD430_adrs3().length() < 35) {
-				address = address + reportingOfficeAddress.getD430_adrs3() + " ";
+				address = address + StringUtils.rightPad(StringUtils.defaultString(reportingOfficeAddress.getD430_adrs3(), ""), 35);
 			}
 			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs4())
 					&& reportingOfficeAddress.getD430_adrs4().length() < 35) {
-				address = address + reportingOfficeAddress.getD430_adrs4() + " ";
+				address = address + StringUtils.rightPad(StringUtils.defaultString(reportingOfficeAddress.getD430_adrs4(), ""), 35);
 			}
 		}
 		return address;
@@ -1392,5 +1467,110 @@ public class ContractServiceImpl implements ContractService {
 
 		}
 	}
+	
+	/****
+	 * 
+	 * @param apiKey
+	 * @param pathParam
+	 * @param serviceUrl
+	 * @return
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 * @throws RecordNotFoundException
+	 * @throws CCSExceptions
+	 */
+	private String invokePostAPI(String apiKey, String serviceUrl, String requestBody)
+			throws MalformedURLException, IOException, RecordNotFoundException, CCSExceptions {
+
+		try {
+			String vpc = StringUtils.isNotBlank(System.getenv(ContractConstants.AWS_VPC))
+					? System.getenv(ContractConstants.AWS_VPC)
+					: "vpce-088a5795f16dd4c2c-dnbntft7";
+			String env = StringUtils.isNotBlank(System.getenv(ContractConstants.SHORT_ENV))
+					? System.getenv(ContractConstants.SHORT_ENV)
+					: "dev";
+			String url = "https://" + vpc + "." + ContractConstants.DOMAIN_URL + "/" + env + serviceUrl ;
+
+			HttpPost postReq = new HttpPost(url);
+			StringEntity entity = new StringEntity(requestBody);
+			postReq.setEntity(entity);
+
+			Header header = new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+			Header header2 = new BasicHeader("x-apigw-api-id", apiKey);
+
+			List<Header> headers = Arrays.asList(header, header2);
+			HttpClient client = HttpClients.custom().setDefaultHeaders(headers).build();
+			
+			HttpResponse response = client.execute(postReq);
+
+			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+				throw new RecordNotFoundException(
+						"Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
+			} else if (response.getStatusLine().getStatusCode() != 200) {
+				throw new CCSExceptions("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
+			}
+
+			BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
+
+			StringBuffer outputBuff = new StringBuffer();
+			String output;
+			while ((output = br.readLine()) != null) {
+				outputBuff.append(output);
+
+			}
+
+			client.getConnectionManager().shutdown();
+
+			return outputBuff.toString();
+
+		} catch (IOException e) {
+			throw new CCSExceptions(e.getMessage());
+
+		}
+	}
+
+	public static void main(String[] args) {
+		ContractServiceImpl i = new ContractServiceImpl();
+		String notes ="";
+		try {
+			
+		
+			ContractDataMaster c= new ContractDataMaster();
+			c.setD402_rpt_off("P");
+			c.setD402_note_cd("01020304");
+//			String address = i.contratReportingOfficeAddress("P");
+//			System.out.println(address);
+			
+			notes = i.getContractReportingOfficeNotes(c);
+			System.out.println(notes);
+//			String contractConstantAPIKey = StringUtils.isNotBlank(System.getenv(ContractConstants.CONTRACT_CONSTANT_API_KEY))
+//					? System.getenv(ContractConstants.CONTRACT_CONSTANT_API_KEY)
+//							: "on890eyswh";
+//			CDFMaster cdfMaster = new CDFMaster();
+//			cdfMaster.setD430_rpt_off("I");
+//			cdfMaster.setD430_rec_type("N");
+//			notes = i.invokePostAPI(contractConstantAPIKey, ContractConstants.CONTRACT_CONSTANT_NOTES_API_URL,gson.toJson(cdfMaster) );
+//			
+//			List<JsonObject> cdfNotesDetails = gson.fromJson(notes, List.class);
+//			for (JsonObject jsonObject : cdfNotesDetails) {
+//				System.out.println(jsonObject);
+//			}
+////			ObjectMapper mapper = new ObjectMapper();
+////			notes = 
+////			List<CDFMaster> cdfNotesDetails = mapper.readValue(notes, new TypeReference<List<CDFMaster>>() {
+////			});
+////
+////			for (CDFMaster cdfMaster2 : cdfNotesDetails) {
+////				
+////				System.out.println(cdfMaster2);
+////			}
+//			System.out.println(cdfNotesDetails);
+		} catch ( Exception e) {
+			
+		}
+	}
+		
+		
+	
 
 }
