@@ -1,0 +1,10 @@
+{
+    "/api/*": {
+      "target": "https://vpce-088a5795f16dd4c2c-dnbntft7.execute-api.us-east-1.vpce.amazonaws.com/dev",
+      "secure": true,
+      "changeOrigin": true,
+      "pathRewrite": {
+        "^/api": ""
+      }
+    }
+  }

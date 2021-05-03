@@ -1,63 +1,22 @@
 export class NSNModel {
-	nsn: string;
+    group: RoutingModel[] = new Array<RoutingModel>();
 
-	groupRoutings: GroupRoutingModel[] = new Array<GroupRoutingModel>();
+    class: RoutingModel[] = new Array<RoutingModel>();
 
-    classRoutings: ClassRoutingModel[] = new Array<ClassRoutingModel>();
-
-    nsnRoutings: NSNRoutingModel[] = new Array<NSNRoutingModel>();
+    nsn: RoutingModel[] = new Array<RoutingModel>();
 }
 
-export class GroupRoutingModel {
-    group: string;
+export class RoutingModel {
+    routing_id: string;
 
-    commodityCenter: string;
+    owa: string;
 
-    civilianManager: string;
+    is_civ_mgr: string = 'N';
 
-    militaryManager: string;
+    is_mil_mgr: string = 'N';
 
-    routingIdentifierCode: string;
+    ric: string;
 
-    lastModified: string;
-}
+    updated_date: string;
 
-export class ClassRoutingModel {
-    group: string;
-
-    commodityCenter: string;
-
-    civilianManager: string;
-
-    militaryManager: string;
-
-    routingIdentifierCode: string;
-
-    lastModified: string;
-}
-
-export class NSNRoutingModel {
-    nationalStockNumber: string;
-
-    commodityCenter: string;
-
-    civilianManager: string;
-
-    militaryManager: string;
-
-    routingIdentifierCode: string;
-
-    lastModified: string;
-}
-
-export class NSNFormModel {
-    nsn: string;
-
-    contractOffice: any;
-
-    dodCivilianManager: string = 'false';
-
-    dodMilitaryManager: string = 'false';
-
-    routingIdentifierCode: string;
 }

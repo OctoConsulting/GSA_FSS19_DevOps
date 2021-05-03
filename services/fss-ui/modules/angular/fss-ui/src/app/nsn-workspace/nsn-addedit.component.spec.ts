@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NsnAddComponent } from './nsn-add.component';
+import { NSNAddEditComponent } from './nsn-addedit.component';
 
-describe('NsnAddComponent', () => {
-  let component: NsnAddComponent;
-  let fixture: ComponentFixture<NsnAddComponent>;
+describe('NSNAddEditComponent', () => {
+  let component: NSNAddEditComponent;
+  let fixture: ComponentFixture<NSNAddEditComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ NsnAddComponent ]
+      declarations: [ NSNAddEditComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NsnAddComponent);
+    fixture = TestBed.createComponent(NSNAddEditComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -3,7 +3,9 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  NSN_ROUTING_API_TOKEN: "af3a40mod1",
+  BASE_URL: "api"
 };
 
 /*

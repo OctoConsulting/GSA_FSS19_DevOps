@@ -1,24 +1,24 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SharedModule } from '../shared/shared.module';
-import { NsnSearchComponent } from './nsn-search.component';
+import { NSNSearchComponent } from './nsn-search.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TextMaskModule } from 'angular2-text-mask';
 import { NSNWorkspaceRoutingModule } from './nsn-workspace-routing.module';
-import { NsnAddComponent } from './nsn-add.component';
+import { NSNAddEditComponent } from './nsn-addedit.component';
 
 @NgModule({
   declarations: [
-    NsnSearchComponent,
-    NsnAddComponent
+    NSNSearchComponent,
+    NSNAddEditComponent
   ],
   imports: [
     CommonModule,
-    SharedModule,
     FormsModule,
+    SharedModule,
     ReactiveFormsModule,
     TextMaskModule,
     NSNWorkspaceRoutingModule
   ]
 })
-export class NsnWorkspaceModule { }
+export class NSNWorkspaceModule { }
