@@ -13,21 +13,26 @@ export class APIService {
 
   getNSNRoutingData(url: string, params) {
     const requestOptions = {
-      headers: new HttpHeaders({ 'x-apigw-api-id': NSNRoutingToken }),
+      headers: new HttpHeaders({ 'x-apigw-api-id': NSNRoutingToken,
+     'Host' : 'af3a40mod1.execute-api.us-east-1.amazonaws.com'},
+      ),
+
     };
     return this.http.post<NSNModel[]>(url, params, requestOptions);
   }
 
   createNSNRoutingData(url: string, model: RoutingModel) {
     const requestOptions = {
-      headers: new HttpHeaders({ 'x-apigw-api-id': NSNRoutingToken }),
+      headers: new HttpHeaders({ 'x-apigw-api-id': NSNRoutingToken ,
+      'Host' : 'af3a40mod1.execute-api.us-east-1.amazonaws.com'}),
     };
     return this.http.post(url, model, requestOptions);
   }
 
   updateNSNRoutingData(url: string, model: RoutingModel) {
     const requestOptions = {
-      headers: new HttpHeaders({ 'x-apigw-api-id': NSNRoutingToken }),
+      headers: new HttpHeaders({ 'x-apigw-api-id': NSNRoutingToken ,
+      'Host' : 'af3a40mod1.execute-api.us-east-1.amazonaws.com'}),
     };
     return this.http.put(url, model, requestOptions);
   }
