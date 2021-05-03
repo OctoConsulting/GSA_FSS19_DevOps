@@ -511,7 +511,7 @@ public class ContractServiceImpl implements ContractService {
 			String contractReportingOffceAddress = contratReportingOfficeAddress(contractDetail.getReportingOffice());
 			contractDetail.setReportOfficeAddress(contractReportingOffceAddress);
 
-			String acoAddress = getACOOfficeAddress(contractDetail.getACO());
+			String acoAddress = getACOOfficeAddress(contractMaster.getD402_aco());
 			contractDetail.setAcoAddress(acoAddress);
 			setEDIFax(contractDetail);
 			setReportingOfficeAAC(contractDetail);
@@ -1229,10 +1229,7 @@ public class ContractServiceImpl implements ContractService {
 		String reportingOfficeAddressJSON = "";
 		try {
 			reportingOfficeAddressJSON = invokePostAPI(contractConstantAPIKey, ContractConstants.CONTRACT_CONSTANT_VENDOR_ADDRESS_API_URL, gson.toJson(cdfMaster));
-		} catch (IOException | RecordNotFoundException | CCSExceptions e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 
 		if (reportingOfficeAddressJSON != null) {
 			CDFMaster reportingOfficeAddress = gson.fromJson(reportingOfficeAddressJSON, CDFMaster.class);
@@ -1252,6 +1249,9 @@ public class ContractServiceImpl implements ContractService {
 					&& reportingOfficeAddress.getD430_adrs4().length() < 35) {
 				address = address + StringUtils.rightPad(StringUtils.defaultString(reportingOfficeAddress.getD430_adrs4(), ""), 35);
 			}
+		}
+		} catch (IOException | RecordNotFoundException | CCSExceptions e) {
+			logger.error("getACOOfficeAddress Error occured :: " , e);
 		}
 		return address;
 	}
