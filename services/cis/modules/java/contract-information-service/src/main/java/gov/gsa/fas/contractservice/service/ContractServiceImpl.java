@@ -1181,30 +1181,28 @@ public class ContractServiceImpl implements ContractService {
 		String reportingOfficeAddressJSON = "";
 		try {
 			reportingOfficeAddressJSON = invokePostAPI(contractConstantAPIKey, ContractConstants.CONTRACT_CONSTANT_VENDOR_ADDRESS_API_URL, gson.toJson(cdfMaster));
-		} catch (IOException | RecordNotFoundException | CCSExceptions e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
 		
-		if (reportingOfficeAddressJSON != null) {
-			CDFMaster reportingOfficeAddress = gson.fromJson(reportingOfficeAddressJSON, CDFMaster.class);
-			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs1())
-					&& reportingOfficeAddress.getD430_adrs1().length() < 35) {
-				address = address + StringUtils.rightPad(StringUtils.defaultString(reportingOfficeAddress.getD430_adrs1(), ""), 35);
+			if (reportingOfficeAddressJSON != null) {
+				CDFMaster reportingOfficeAddress = gson.fromJson(reportingOfficeAddressJSON, CDFMaster.class);
+				if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs1())
+						&& reportingOfficeAddress.getD430_adrs1().length() < 35) {
+					address = address + StringUtils.rightPad(StringUtils.defaultString(reportingOfficeAddress.getD430_adrs1(), ""), 35);
+				}
+				if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs2())
+						&& reportingOfficeAddress.getD430_adrs2().length() < 35) {
+					address = address + StringUtils.rightPad(StringUtils.defaultString(reportingOfficeAddress.getD430_adrs2(), ""), 35);
+				}
+				if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs3())
+						&& reportingOfficeAddress.getD430_adrs3().length() < 35) {
+					address = address + StringUtils.rightPad(StringUtils.defaultString(reportingOfficeAddress.getD430_adrs3(), ""), 35);
+				}
+				if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs4())
+						&& reportingOfficeAddress.getD430_adrs4().length() < 35) {
+					address = address + StringUtils.rightPad(StringUtils.defaultString(reportingOfficeAddress.getD430_adrs4(), ""), 35);
+				}
 			}
-			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs2())
-					&& reportingOfficeAddress.getD430_adrs2().length() < 35) {
-				address = address + StringUtils.rightPad(StringUtils.defaultString(reportingOfficeAddress.getD430_adrs2(), ""), 35);
-			}
-			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs3())
-					&& reportingOfficeAddress.getD430_adrs3().length() < 35) {
-				address = address + StringUtils.rightPad(StringUtils.defaultString(reportingOfficeAddress.getD430_adrs3(), ""), 35);
-			}
-			if (StringUtils.isNotBlank(reportingOfficeAddress.getD430_adrs4())
-					&& reportingOfficeAddress.getD430_adrs4().length() < 35) {
-				address = address + StringUtils.rightPad(StringUtils.defaultString(reportingOfficeAddress.getD430_adrs4(), ""), 35);
-			}
+		} catch (IOException | RecordNotFoundException | CCSExceptions e) {
+			logger.error("contratReportingOfficeAddress Error occured :: " , e);
 		}
 		return address;
 	}
@@ -1483,14 +1481,18 @@ public class ContractServiceImpl implements ContractService {
 			throws MalformedURLException, IOException, RecordNotFoundException, CCSExceptions {
 
 		try {
+			
 			String vpc = StringUtils.isNotBlank(System.getenv(ContractConstants.AWS_VPC))
 					? System.getenv(ContractConstants.AWS_VPC)
 					: "vpce-088a5795f16dd4c2c-dnbntft7";
+			
+			
 			String env = StringUtils.isNotBlank(System.getenv(ContractConstants.SHORT_ENV))
 					? System.getenv(ContractConstants.SHORT_ENV)
 					: "dev";
 			String url = "https://" + vpc + "." + ContractConstants.DOMAIN_URL + "/" + env + serviceUrl ;
 
+			logger.info("VPC URL : {} || env : {} || url : {} || key : {}" , vpc, env, url, apiKey );
 			HttpPost postReq = new HttpPost(url);
 			StringEntity entity = new StringEntity(requestBody);
 			postReq.setEntity(entity);
@@ -1520,10 +1522,14 @@ public class ContractServiceImpl implements ContractService {
 			}
 
 			client.getConnectionManager().shutdown();
-
+			
+			logger.info("invokePOSTAPI response : " + outputBuff.toString());
+			
 			return outputBuff.toString();
 
 		} catch (IOException e) {
+			
+			logger.error( " invokePostAPI exception occured" , e);
 			throw new CCSExceptions(e.getMessage());
 
 		}
