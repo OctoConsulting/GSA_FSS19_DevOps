@@ -46,8 +46,8 @@
           </div>
         </div>
 
-        <div *ngIf="recordFound">
-          <div class="usa-table-container--scrollable">
+        <div>
+          <div *ngIf="nsnModel && nsnModel.group && nsnModel.group.length > 0" class="usa-table-container--scrollable">
             <table class="usa-table">
               <caption>Group Routing Details</caption>
               <thead>
@@ -70,22 +70,41 @@
                   <th scope="col" role="columnheader">
                     Last Modified
                   </th>
+                  <th scope="col" role="columnheader" class="text-center">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let groupRouting of nsnModel.groupRoutings">
-                  <th scope="row">{{groupRouting.group}}</th>
-                  <td>{{groupRouting.commodityCenter}}</td>
-                  <td>{{groupRouting.civilianManager}}</td>
-                  <td>{{groupRouting.militaryManager}}</td>
-                  <td>{{groupRouting.routingIdentifierCode}}</td>
-                  <td>{{groupRouting.lastModified}}</td>
+                <tr *ngFor="let groupRouting of nsnModel.group">
+                  <th scope="row">{{groupRouting.routing_id}}</th>
+                  <td>{{groupRouting.owa}}</td>
+                  <td>{{groupRouting.is_civ_mgr}}</td>
+                  <td>{{groupRouting.is_mil_mgr}}</td>
+                  <td>{{groupRouting.ric}}</td>
+                  <td>{{groupRouting.updated_date | date:'MM/dd/yyyy'}}</td>
+                  <td>
+                    <span class="margin-right-105">
+                      <button type="button" class="bg-transparent cursor-pointer border-0" aria-label="Edit" (click)="onEditHandler(groupRouting.routing_id)">
+                        <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
+                          <use xlink:href="/assets/img/sprite.svg#edit"></use>
+                        </svg>
+                      </button>
+                    </span>
+                    <span class="margin-left-105">
+                      <button type="button" class="bg-transparent cursor-pointer border-0" aria-label="Delete" (click)="onDeleteHandler(groupRouting.routing_id)">
+                        <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
+                          <use xlink:href="/assets/img/sprite.svg#delete"></use>
+                        </svg>
+                      </button>
+                    </span>
+                  </td>
                 </tr>
               </tbody>
             </table>
             <div class="usa-sr-only usa-table__announcement-region" aria-live="polite"></div>
           </div>
-          <div class="usa-table-container--scrollable">
+          <div *ngIf="nsnModel && nsnModel.class && nsnModel.class.length > 0" class="usa-table-container--scrollable">
             <table class="usa-table">
               <caption>Class Routing Details</caption>
               <thead>
@@ -108,22 +127,41 @@
                   <th scope="col" role="columnheader">
                     Last Modified
                   </th>
+                  <th scope="col" role="columnheader" class="text-center">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let classRouting of nsnModel.classRoutings">
-                  <th scope="row">{{classRouting.group}}</th>
-                  <td>{{classRouting.commodityCenter}}</td>
-                  <td>{{classRouting.civilianManager}}</td>
-                  <td>{{classRouting.militaryManager}}</td>
-                  <td>{{classRouting.routingIdentifierCode}}</td>
-                  <td>{{classRouting.lastModified}}</td>
+                <tr *ngFor="let classRouting of nsnModel.class">
+                  <th scope="row">{{classRouting.routing_id}}</th>
+                  <td>{{classRouting.owa}}</td>
+                  <td>{{classRouting.is_civ_mgr}}</td>
+                  <td>{{classRouting.is_mil_mgr}}</td>
+                  <td>{{classRouting.ric}}</td>
+                  <td>{{classRouting.updated_date | date:'MM/dd/yyyy'}}</td>
+                  <td>
+                    <span class="margin-right-105">
+                      <button type="button" class="bg-transparent cursor-pointer border-0" aria-label="Edit" (click)="onEditHandler(classRouting.routing_id)">
+                        <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
+                          <use xlink:href="/assets/img/sprite.svg#edit"></use>
+                        </svg>
+                      </button>
+                    </span>
+                    <span class="margin-left-105">
+                      <button type="button" class="bg-transparent cursor-pointer border-0" aria-label="Delete" (click)="onDeleteHandler(classRouting.routing_id)">
+                        <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
+                          <use xlink:href="/assets/img/sprite.svg#delete"></use>
+                        </svg>
+                      </button>
+                    </span>
+                  </td>
                 </tr>
               </tbody>
             </table>
             <div class="usa-sr-only usa-table__announcement-region" aria-live="polite"></div>
           </div>
-          <div class="usa-table-container--scrollable">
+          <div *ngIf="nsnModel && nsnModel.nsn && nsnModel.nsn.length > 0" class="usa-table-container--scrollable">
             <table class="usa-table">
               <caption>NSN Routing Details</caption>
               <thead>
@@ -146,16 +184,36 @@
                   <th scope="col" role="columnheader">
                     Last Modified
                   </th>
+                  <th scope="col" role="columnheader" class="text-center">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let nsnRouting of nsnModel.nsnRoutings">
-                  <th scope="row">{{nsnRouting.nationalStockNumber}}</th>
-                  <td>{{nsnRouting.commodityCenter}}</td>
-                  <td>{{nsnRouting.civilianManager}}</td>
-                  <td>{{nsnRouting.militaryManager}}</td>
-                  <td>{{nsnRouting.routingIdentifierCode}}</td>
-                  <td>{{nsnRouting.lastModified}}</td>
+                <tr *ngFor="let nsnRouting of nsnModel.nsn">
+                  <th scope="row">{{nsnRouting.routing_id | replace:'(\\d{4})(\\d{2})(\\d{3})(\\d+)':'$1-$2-$3-$4' }}
+                  </th>
+                  <td>{{nsnRouting.owa}}</td>
+                  <td>{{nsnRouting.is_civ_mgr}}</td>
+                  <td>{{nsnRouting.is_mil_mgr}}</td>
+                  <td>{{nsnRouting.ric}}</td>
+                  <td>{{nsnRouting.updated_date | date:'MM/dd/yyyy'}}</td>
+                  <td>
+                    <span class="margin-right-105">
+                      <button type="button" class="bg-transparent cursor-pointer border-0" aria-label="Edit" (click)="onEditHandler(nsnRouting.routing_id)">
+                        <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
+                          <use xlink:href="/assets/img/sprite.svg#edit"></use>
+                        </svg>
+                      </button>
+                    </span>
+                    <span class="margin-left-105">
+                      <button type="button" class="bg-transparent cursor-pointer border-0" aria-label="Delete" (click)="onDeleteHandler(nsnRouting.routing_id)">
+                        <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
+                          <use xlink:href="/assets/img/sprite.svg#delete"></use>
+                        </svg>
+                      </button>
+                    </span>
+                  </td>
                 </tr>
               </tbody>
             </table>

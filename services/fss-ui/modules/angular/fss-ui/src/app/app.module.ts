@@ -11,14 +11,13 @@ import { LayoutHeaderComponent } from './layout-header/layout-header.component';
 import { LayoutFooterComponent } from './layout-footer/layout-footer.component';
 
 import { TextMaskModule } from 'angular2-text-mask';
-import { NsnWorkspaceModule } from './nsn-workspace/nsn-workspace.module';
+import { NSNWorkspaceModule } from './nsn-workspace/nsn-workspace.module';
 
 @NgModule({
   declarations: [
     AppComponent,
     LayoutHeaderComponent,
-    LayoutFooterComponent,
-
+    LayoutFooterComponent
   ],
   imports: [
     BrowserModule,
@@ -29,7 +28,7 @@ import { NsnWorkspaceModule } from './nsn-workspace/nsn-workspace.module';
     AppRoutingModule,
     RouterModule,
     HttpClientModule,
-    NsnWorkspaceModule
+    NSNWorkspaceModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { NsnWorkspaceService } from './nsn-workspace.service';
+import { NSNService } from './nsn.service';
 
-describe('NsnWorkspaceService', () => {
-  let service: NsnWorkspaceService;
+describe('NSNService', () => {
+  let service: NSNService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(NsnWorkspaceService);
+    service = TestBed.inject(NSNService);
   });
 
   it('should be created', () => {

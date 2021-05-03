@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NsnSearchComponent } from './nsn-search.component';
+import { NSNSearchComponent } from './nsn-search.component';
 
-describe('NsnSearchComponent', () => {
-  let component: NsnSearchComponent;
-  let fixture: ComponentFixture<NsnSearchComponent>;
+describe('NSNSearchComponent', () => {
+  let component: NSNSearchComponent;
+  let fixture: ComponentFixture<NSNSearchComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ NsnSearchComponent ]
+      declarations: [ NSNSearchComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NsnSearchComponent);
+    fixture = TestBed.createComponent(NSNSearchComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

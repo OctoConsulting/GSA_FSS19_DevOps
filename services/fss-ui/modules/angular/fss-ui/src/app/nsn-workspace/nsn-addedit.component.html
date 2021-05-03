@@ -4,7 +4,7 @@
             <main class="main-content" id="main-content">
                 <h1>NSN/Class/Group Routing Maintenance</h1>
                 <div *ngIf="confirmStatus == 'U'">
-                    <h3>Add NSN/Class/Group Routing Record</h3>
+                    <h3>{{pageOptions[pageMode].label}} NSN/Class/Group Routing Record</h3>
                     <div class="usa-hint">Required fields are marked with an asterisk
                         (<span class="required">*</span>).
                     </div>
@@ -16,14 +16,18 @@
                             </svg>
                         </sup>
 
-                        <div class="usa-hint">Enter 2 digits for Federal Supply Group (FSG) or 4 digits for Federal Supply Class (FSC) or 13-15 digits for the National Stock Number (NSN). <br/> First 4 characters must be numeric. Click on Search to see if NSN, Class, or Group already exists.</div>
+                        <div class="usa-hint">Enter 2 digits for Federal Supply Group (FSG) or 4 digits for Federal
+                            Supply Class (FSC) or 13-15 digits for the National Stock Number (NSN). <br /> First 4
+                            characters must be numeric. Click on Search to see if NSN, Class, or Group already exists.
+                        </div>
                         <div class="usa-form">
                             <form class="usa-search" role="search">
                                 <label class="usa-sr-only" for="nsn-search-field">Search</label>
                                 <input required class="usa-input nsn-search" id="nsn-search-field" type="search"
-                                    name="nsn-search" autocomplete="off" [(ngModel)]="nsnFormModel.nsn"
-                                    [textMask]="nsnInputMask">
-                                <button class="usa-button nsn-search" type="submit" (click)="searchHandler()">
+                                    name="nsn-search" autocomplete="off" [(ngModel)]="nsnModel.routing_id"
+                                    [textMask]="nsnInputMask" [disabled]="pageMode == 'edit'">
+                                <button *ngIf="pageMode == 'add'" class="usa-button nsn-search" type="submit"
+                                    (click)="searchHandler()">
                                     Search
                                 </button>
                             </form>
@@ -46,7 +50,7 @@
                             <form class="usa-search" role="search">
                                 <label class="usa-sr-only" for="nsn-search-field">Search</label>
                                 <input required class="usa-input nsn-search usa-input--error" id="nsn-search-field"
-                                    type="search" name="nsn-search" autocomplete="off" [(ngModel)]="nsnFormModel.nsn"
+                                    type="search" name="nsn-search" autocomplete="off" [(ngModel)]="nsnModel.routing_id"
                                     [textMask]="nsnInputMask" aria-describedby="input-error-message">
                                 <button class="usa-button nsn-search" type="submit" (click)="searchHandler()">
                                     Search
@@ -59,8 +63,9 @@
                         <label class="usa-label" for="nsn-contract-office">Contract Office <span
                                 class="required">*</span></label>
                         <select required class="usa-select" name="nsn-contract-office" id="nsn-contract-office"
-                            [(ngModel)]="nsnFormModel.contractOffice">
-                            <option *ngFor="let contractOffice of contractOffices" [ngValue]="contractOffice">{{contractOffice.value}}</option>
+                            [(ngModel)]="contractOffice">
+                            <option *ngFor="let office of contractOffices" [ngValue]="office">
+                                {{office.value}}</option>
                         </select>
                         <div class="margin-top-205">
                             <fieldset class="usa-fieldset">
@@ -68,14 +73,12 @@
                                         class="required">*</span></legend>
                                 <div class="usa-radio radio-inline">
                                     <input class="usa-radio__input" id="nsn-dod-civilian-manager-no" type="radio"
-                                        name="nsn-dod-civilian-manager" value="false"
-                                        [(ngModel)]="nsnFormModel.dodCivilianManager">
+                                        name="nsn-dod-civilian-manager" value="N" [(ngModel)]="nsnModel.is_civ_mgr">
                                     <label class="usa-radio__label" for="nsn-dod-civilian-manager-no">No</label>
                                 </div>
                                 <div class="usa-radio radio-inline">
                                     <input class="usa-radio__input" id="nsn-dod-civilian-manager-yes" type="radio"
-                                        name="nsn-dod-civilian-manager" value="true"
-                                        [(ngModel)]="nsnFormModel.dodCivilianManager">
+                                        name="nsn-dod-civilian-manager" value="Y" [(ngModel)]="nsnModel.is_civ_mgr">
                                     <label class="usa-radio__label" for="nsn-dod-civilian-manager-yes">Yes</label>
                                 </div>
                             </fieldset>
@@ -86,14 +89,12 @@
                                         class="required">*</span></legend>
                                 <div class="usa-radio radio-inline">
                                     <input class="usa-radio__input" id="nsn-dod-military-manager-no" type="radio"
-                                        name="nsn-dod-military-manager" value="false"
-                                        [(ngModel)]="nsnFormModel.dodMilitaryManager">
+                                        name="nsn-dod-military-manager" value="N" [(ngModel)]="nsnModel.is_mil_mgr">
                                     <label class="usa-radio__label" for="nsn-dod-military-manager-no">No</label>
                                 </div>
                                 <div class="usa-radio radio-inline">
                                     <input class="usa-radio__input" id="nsn-dod-military-manager-yes" type="radio"
-                                        name="nsn-dod-military-manager" value="true"
-                                        [(ngModel)]="nsnFormModel.dodMilitaryManager">
+                                        name="nsn-dod-military-manager" value="Y" [(ngModel)]="nsnModel.is_mil_mgr">
                                     <label class="usa-radio__label" for="nsn-dod-military-manager-yes">Yes</label>
                                 </div>
                             </fieldset>
@@ -104,76 +105,89 @@
                             </div>
                             <div class="usa-hint">Enter 3 alphanumeric characters</div>
                             <input required class="usa-input" id="nsn-ric-field" type="input" name="nsn-ric-field"
-                                autocomplete="off" [(ngModel)]="nsnFormModel.routingIdentifierCode">
+                                autocomplete="off" [(ngModel)]="nsnModel.ric">
                         </div>
-                        <button class="usa-button" [disabled]="!validationPassed" (click)="addRecordHandler()">Add
-                            New Record</button>
+                        <button class="usa-button" [disabled]="!validationPassed"
+                            (click)="saveChanges()">{{pageOptions[pageMode].button}}</button>
                         <button class="usa-button" [routerLink]="'/nsn/search'">Cancel</button>
                     </div>
                 </div>
                 <div *ngIf="confirmStatus == 'I'">
-                    <h3>Add NSN/Class/Group Routing Record Confirmation</h3>
+                    <h3>{{pageOptions[pageMode].label}} NSN/Class/Group Routing Record Confirmation</h3>
                     <div class="margin-top-105">Confirm below details</div>
-                    <table class="usa-table no-border-table">
+                    <table class="usa-table">
+                        <thead>
+                            <tr>
+                                <th scope="col" role="columnheader">
+                                    {{confirmLabel}}
+                                </th>
+                                <th scope="col" role="columnheader">
+                                    Commodity Center
+                                </th>
+                                <th scope="col" role="columnheader">
+                                    Civilian Manager
+                                </th>
+                                <th scope="col" role="columnheader">
+                                    Military Manager
+                                </th>
+                                <th scope="col" role="columnheader">
+                                    Routing Identifier Code
+                                </th>
+                            </tr>
+                        </thead>
                         <tbody>
                             <tr>
-                                <th scope="row"><span class="text-bold">NSN, Class or Group:</span></th>
-                                <td>{{nsnFormModel.nsn}}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><span class="text-bold">Contract Office:</span></th>
-                                <td>{{nsnFormModel.contractOffice.value}}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><span class="text-bold">DOD Civilian Manager:</span></th>
-                                <td>{{nsnFormModel.dodCivilianManager == 'false' ? 'No' : 'Yes'}}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><span class="text-bold">DOD Military Manager:</span></th>
-                                <td>{{nsnFormModel.dodMilitaryManager == 'false' ? 'No' : 'Yes'}}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><span class="text-bold">Routing Identifier Code(RIC):</span></th>
-                                <td>{{nsnFormModel.routingIdentifierCode}}</td>
+                                <td>{{nsnModel.routing_id | replace:'(\\d{4})(\\d{2})(\\d{3})(\\d+)':'$1-$2-$3-$4'}}
+                                </td>
+                                <td>{{nsnModel.owa}}</td>
+                                <td>{{nsnModel.is_civ_mgr}}</td>
+                                <td>{{nsnModel.is_mil_mgr}}</td>
+                                <td>{{nsnModel.ric}}</td>
                             </tr>
                         </tbody>
                     </table>
-                    <button class="usa-button" (click)="confirmHandler()">Confirm New Record</button>
+                    <button class="usa-button" (click)="confirmHandler()">Confirm Changes</button>
                     <button class="usa-button" (click)="editHandler()">Edit Record</button>
                     <button class="usa-button" [routerLink]="'/nsn/search'">Cancel</button>
                 </div>
                 <div *ngIf="confirmStatus == 'C'">
-                    <div class="usa-alert usa-alert--success" >
+                    <div class="usa-alert usa-alert--success">
                         <div class="usa-alert__body">
-                          <p class="usa-alert__text">The record has been successfully added</p>
+                            <p class="usa-alert__text">The record has been successfully added</p>
                         </div>
                     </div>
                     <h3>NSN/Class/Group Routing Record Details</h3>
-                    <table class="usa-table no-border-table">
+                    <table class="usa-table">
+                        <thead>
+                            <tr>
+                                <th scope="col" role="columnheader">
+                                    Class (FSC)
+                                </th>
+                                <th scope="col" role="columnheader">
+                                    Commodity Center
+                                </th>
+                                <th scope="col" role="columnheader">
+                                    Civilian Manager
+                                </th>
+                                <th scope="col" role="columnheader">
+                                    Military Manager
+                                </th>
+                                <th scope="col" role="columnheader">
+                                    Routing Identifier Code
+                                </th>
+                            </tr>
+                        </thead>
                         <tbody>
                             <tr>
-                                <th scope="row"><span class="text-bold">NSN, Class or Group:</span></th>
-                                <td>{{nsnFormModel.nsn}}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><span class="text-bold">Contract Office:</span></th>
-                                <td>{{nsnFormModel.contractOffice.value}}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><span class="text-bold">DOD Civilian Manager:</span></th>
-                                <td>{{nsnFormModel.dodCivilianManager == 'false' ? 'No' : 'Yes'}}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><span class="text-bold">DOD Military Manager:</span></th>
-                                <td>{{nsnFormModel.dodMilitaryManager == 'false' ? 'No' : 'Yes'}}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><span class="text-bold">Routing Identifier Code(RIC):</span></th>
-                                <td>{{nsnFormModel.routingIdentifierCode}}</td>
+                                <td>{{nsnModel.routing_id | replace:'(\\d{4})(\\d{2})(\\d{3})(\\d+)':'$1-$2-$3-$4' }}</td>
+                                <td>{{nsnModel.owa}}</td>
+                                <td>{{nsnModel.is_civ_mgr}}</td>
+                                <td>{{nsnModel.is_mil_mgr}}</td>
+                                <td>{{nsnModel.ric}}</td>
                             </tr>
                         </tbody>
                     </table>
-                     <button class="usa-button" [routerLink]="'/nsn/search'">Close</button>
+                    <button class="usa-button" [routerLink]="'/nsn/search'">Close</button>
                 </div>
             </main>
         </div>

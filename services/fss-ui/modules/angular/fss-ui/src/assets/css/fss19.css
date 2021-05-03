@@ -73,3 +73,15 @@ h3 {
 .usa-form .usa-input {
     max-width: 25.6rem;
 }
+.grid-container {
+    max-width: 80em;
+}
+.usa-nav-container, .usa-footer__primary-container, .usa-footer__secondary-section>.grid-container {
+    max-width: 75em;
+}
+input:disabled {
+    pointer-events: none;
+    opacity: .5;
+    background-color: #e6e6e6;
+    cursor: default
+}

@@ -1,13 +1,16 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { NSNService } from '../api-service/nsn.service';
+import { NSNModel, RoutingModel } from './nsn-model';
+
 import USWDS from "uswds/src/js/components";
-import { ClassRoutingModel, GroupRoutingModel, NSNModel, NSNRoutingModel } from './nsn-model';
 const { tooltip } = USWDS;
 
 @Component({
   selector: 'app-nsn-search',
   templateUrl: './nsn-search.component.html'
 })
-export class NsnSearchComponent implements OnInit {
+export class NSNSearchComponent implements OnInit {
 
   ref: HTMLElement;
 
@@ -28,7 +31,7 @@ export class NsnSearchComponent implements OnInit {
 
   nsnModel: NSNModel;
 
-  constructor() {
+  constructor(private router: Router, private nsnService: NSNService) {
     this.ref = document.body;
   }
 
@@ -41,61 +44,71 @@ export class NsnSearchComponent implements OnInit {
   }
 
   searchHandler() {
-    this.recordFound = false;
     this.nsnModel = new NSNModel();
-    this.nsn = this.nsnInput = this.nsnInput.replace(/(-*\s*)$/, '');
+    this.nsnInput = this.nsnInput.replace(/(-*\s*)$/, '');
 
     if (this.nsnInput.length < 2) {
+      this.nsn = this.nsnInput;
       this.validationFailed = true;
       return;
     }
-
     this.validationFailed = false;
-    
-
     this.callService();
   }
 
   callService() {
-    if (this.nsn != '3510') {
-      this.nsnModel = new NSNModel();
-      return;
-    }
+    this.nsnService.getNSNRoutingData(this.nsnInput, 'all').subscribe(data => {
+      this.nsnModel = data;
+    
+      if (this.nsnModel) {
+        this.recordFound = true;
+      } else {
+        this.recordFound = false;
+      }
 
-    this.recordFound = true;
-    this.nsnModel = this.mockNSNServiceResponse();
+      this.nsn = this.nsnInput;
+    });
+    //this.nsnModel = this.mockNSNServiceResponse();
+  }
+
+  onEditHandler(routing) {
+    this.router.navigate(['/nsn/edit'], { queryParams: { routing_id: routing } });
+  }
+
+  onDeleteHandler(routing) {
+    console.log(routing)
+    this.router.navigate(['/nsn/delete'], { queryParams: { routing_id: routing } });
   }
 
   mockNSNServiceResponse() {
     let model: NSNModel = new NSNModel();
-    model.nsn = '3510';
-    
-    let groupRoutingModel: GroupRoutingModel = new GroupRoutingModel();
-    groupRoutingModel.group = '35';
-    groupRoutingModel.commodityCenter = 'F';
-    groupRoutingModel.civilianManager = 'N';
-    groupRoutingModel.militaryManager = 'Y';
-    groupRoutingModel.routingIdentifierCode = 'SMS';
-    groupRoutingModel.lastModified = '07/12/2007';
-    model.groupRoutings.push(groupRoutingModel);
 
-    let classRoutingModel: ClassRoutingModel = new ClassRoutingModel();
-    classRoutingModel.group = '3510';
-    classRoutingModel.commodityCenter = 'F';
-    classRoutingModel.civilianManager = 'N';
-    classRoutingModel.militaryManager = 'Y';
-    classRoutingModel.routingIdentifierCode = 'SMS';
-    classRoutingModel.lastModified = '03/05/2009';
-    model.classRoutings.push(classRoutingModel);
-    
-    let nsnRoutingModel: NSNRoutingModel = new NSNRoutingModel();
-    nsnRoutingModel.nationalStockNumber = '3510-00-222-1457';
-    nsnRoutingModel.commodityCenter = 'F';
-    nsnRoutingModel.civilianManager = 'N';
-    nsnRoutingModel.militaryManager = 'N';
-    nsnRoutingModel.routingIdentifierCode = '';
-    nsnRoutingModel.lastModified = '05/13/1991';
-    model.nsnRoutings.push(nsnRoutingModel);
+    let groupRoutingModel: RoutingModel = new RoutingModel();
+    groupRoutingModel.routing_id = '35';
+    groupRoutingModel.owa = 'F';
+    groupRoutingModel.is_civ_mgr = 'N';
+    groupRoutingModel.is_mil_mgr = 'Y';
+    groupRoutingModel.ric = 'SMS';
+    groupRoutingModel.updated_date = '07/12/2007';
+    model.group.push(groupRoutingModel);
+
+    let classRoutingModel: RoutingModel = new RoutingModel();
+    classRoutingModel.routing_id = '3510';
+    classRoutingModel.owa = 'F';
+    classRoutingModel.is_civ_mgr = 'N';
+    classRoutingModel.is_mil_mgr = 'Y';
+    classRoutingModel.ric = 'SMS';
+    classRoutingModel.updated_date = '03/05/2009';
+    model.class.push(classRoutingModel);
+
+    let nsnRoutingModel: RoutingModel = new RoutingModel();
+    nsnRoutingModel.routing_id = '3510-00-222-1457';
+    nsnRoutingModel.owa = 'F';
+    nsnRoutingModel.is_civ_mgr = 'N';
+    nsnRoutingModel.is_mil_mgr = 'N';
+    nsnRoutingModel.ric = '';
+    nsnRoutingModel.updated_date = '05/13/1991';
+    model.nsn.push(nsnRoutingModel);
 
     return model;
   }
