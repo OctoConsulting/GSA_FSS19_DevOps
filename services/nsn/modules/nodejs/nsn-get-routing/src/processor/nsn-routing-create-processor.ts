@@ -34,6 +34,7 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         return apiResponses._400({ message: 'Routing id can not be more than 14 characters.' });
     }
     routing_id = routing_id.toUpperCase();
+    created_by = created_by ? created_by : "FSS-UI"; // P2S2 - need to be changed once Authentication and Auth details are available
     //  let owaRegex = /^[A-X,Z,0-9]$/;
     const owaAllowedVal = ['F', 'M', 'N', 'P'];
     //  if (!owa || !owaRegex.test(owa)) {
