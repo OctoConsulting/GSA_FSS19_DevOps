@@ -116,6 +116,14 @@
                 },
                 {
                     "subnetConfiguration": {
+                        "name": "IsolatedSFTP",
+                        "subnetType": "ISOLATED",
+                        "cidrMask": 28
+                    },
+                    "availabilityZonesCount": 3
+                },
+                {
+                    "subnetConfiguration": {
                         "name": "Reserved",
                         "subnetType": "ISOLATED",
                         "reserved": true
