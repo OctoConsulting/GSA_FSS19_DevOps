@@ -13,8 +13,8 @@ export class APIService {
 
   getNSNRoutingData(url: string, params) {
     const requestOptions = {
-      headers: new HttpHeaders({ 'x-apigw-api-id': NSNRoutingToken
-    }),
+    //   headers: new HttpHeaders({ 'x-apigw-api-id': NSNRoutingToken
+    // }),
 
     };
     return this.http.post<NSNModel[]>(url, params, requestOptions);
@@ -22,14 +22,14 @@ export class APIService {
 
   createNSNRoutingData(url: string, model: RoutingModel) {
     const requestOptions = {
-      headers: new HttpHeaders({ 'x-apigw-api-id': NSNRoutingToken }),
+    //  headers: new HttpHeaders({ 'x-apigw-api-id': NSNRoutingToken }),
     };
     return this.http.post(url, model, requestOptions);
   }
 
   updateNSNRoutingData(url: string, model: RoutingModel) {
     const requestOptions = {
-      headers: new HttpHeaders({ 'x-apigw-api-id': NSNRoutingToken}),
+     // headers: new HttpHeaders({ 'x-apigw-api-id': NSNRoutingToken}),
     };
     return this.http.put(url, model, requestOptions);
   }
