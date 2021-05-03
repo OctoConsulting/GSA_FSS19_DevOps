@@ -103,7 +103,7 @@ export const postNsn = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
         return apiResponses._201(nsnData);
     } catch (err) {
-        console.log('Error ---- ' + err);
+        console.log('Error ---- ' + JSON.stringify(err));
         return apiResponses._500({ message: 'Error creating NSN record' });
     }
 };
