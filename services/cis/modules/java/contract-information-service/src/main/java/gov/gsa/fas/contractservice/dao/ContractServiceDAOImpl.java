@@ -204,7 +204,7 @@ public class ContractServiceDAOImpl implements ContractServiceDAO {
 	public EDIFax getEDIFax(String internalContractNumber) throws AmazonDynamoDBException, AmazonClientException {
 		
 		String ediFaxDataJSON = getDetailsByPartitionKey(internalContractNumber,
-				ContractConstants.CONTRACT_SERVICE_SK_D411 + "_" + internalContractNumber);
+				ContractConstants.CONTRACT_SERVICE_SK_D411);
 
 		if (ediFaxDataJSON != null && ediFaxDataJSON.length() > 0) {
 			EDIFax ediFaxData = new Gson().fromJson(ediFaxDataJSON, EDIFax.class);
