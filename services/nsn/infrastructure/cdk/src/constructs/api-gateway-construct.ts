@@ -71,6 +71,10 @@ export class ApiGatewayConstruct extends cdk.Construct {
             description: `${constants.API_PREFIX}-api-${this.props.envParameters.shortEnv}`,
             restApiName: `${constants.API_PREFIX}-${this.props.envParameters.shortEnv}`,
             cloudWatchRole: false,
+            defaultCorsPreflightOptions: {
+                allowOrigins: apigw.Cors.ALL_ORIGINS,
+                allowMethods: apigw.Cors.ALL_METHODS,
+            },
             deployOptions: {
                 stageName: `${this.props.envParameters.shortEnv}`,
                 loggingLevel: apigw.MethodLoggingLevel.INFO,
