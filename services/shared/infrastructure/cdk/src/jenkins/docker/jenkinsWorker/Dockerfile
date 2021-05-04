@@ -32,8 +32,9 @@ USER root
 COPY jenkins-agent /usr/local/bin/jenkins-agent
 RUN chmod +x /usr/local/bin/jenkins-agent &&\
     ln -s /usr/local/bin/jenkins-agent /usr/local/bin/jenkins-slave &&\
-    apt-get -y update &&\
-    apt-get -y install postgresql-client jq &&\
+    apt -y update &&\
+    apt -y install postgresql-client jq python3 &&\
+    update-alternatives --install /usr/bin/python python /usr/bin/python3 10 &&\
     curl -Lo baur.tar.xz https://github.com/simplesurance/baur/releases/download/v0.20.0/baur-linux_amd64-0.20.0.tar.xz && tar -xvf baur.tar.xz && chmod +x baur && mv baur /usr/local/bin
 USER ${user}
 
