@@ -21,6 +21,7 @@ export class NSNSearchComponent implements OnInit {
 
     validationFailed: boolean = false;
     isShowModal : boolean = false;
+    
 
     nsnInputMask = {
         guide: false,
@@ -39,6 +40,7 @@ export class NSNSearchComponent implements OnInit {
 
     ngOnInit(): void {
         tooltip.on();
+        this.isShowModal = false;
     }
 
     ngOnDestroy() {
@@ -129,6 +131,7 @@ export class NSNSearchComponent implements OnInit {
     openModal(routing_id: string) {
         console.log('Deleting routing id - ' + routing_id);
         this.deleteRoutingId = routing_id;
+        this.isShowModal = true;
     }
 
     checkDelete = (evt) => {
