@@ -76,8 +76,8 @@ export class NSNAddEditComponent implements OnInit {
   }
 
   editSearchHandler(routing_id: string) {
-    routing_id = routing_id?.replace(/(-*\s*)$/, '');
-
+    routing_id = routing_id?.replace(/-/g, '');
+    
     this.nsnService.getNSNRoutingData(routing_id, 'strict').subscribe(data => {
       if (data && data.routing_id) {
         this.pageMode = 'edit';
@@ -91,8 +91,8 @@ export class NSNAddEditComponent implements OnInit {
   }
 
   searchHandler() {
-    const routing_id = this.nsnModel.routing_id?.replace(/(-*\s*)$/, '');
-
+    const routing_id = this.nsnModel.routing_id?.replace(/-/g, '');
+   
     this.nsnService.getNSNRoutingData(routing_id, 'strict').subscribe(data => {
       this.nsnModel = new RoutingModel();
       this.nsnModel.routing_id = routing_id;
@@ -132,7 +132,7 @@ export class NSNAddEditComponent implements OnInit {
 
   get validationPassed() {
     return (!this.recordFound && this.nsnModel.routing_id?.length > 1 && this.contractOffice?.key.length > 0 &&
-      (!this.routingIdentifierRequired || this.nsnModel.ric?.length > 0));
+      (!this.routingIdentifierRequired || this.nsnModel.ric?.length > 2));
   }
 
   get routingIdentifierRequired() {
