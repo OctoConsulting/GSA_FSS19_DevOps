@@ -20,6 +20,7 @@ export class NSNSearchComponent implements OnInit {
     recordFound: boolean = false;
 
     validationFailed: boolean = false;
+    isShowModal : boolean = false;
 
     nsnInputMask = {
         guide: false,
@@ -78,7 +79,18 @@ export class NSNSearchComponent implements OnInit {
 
     onDeleteHandler(routing) {
         console.log(routing);
-        this.router.navigate(['/nsn/delete'], { queryParams: { routing_id: routing } });
+       // this.router.navigate(['/nsn/delete'], { queryParams: { routing_id: routing } });
+        this.nsnService.deleteNSNRoutingData(routing).subscribe((data) => {
+            this.nsnModel = data;
+
+            if (this.nsnModel) {
+                this.recordFound = true;
+            } else {
+                this.recordFound = false;
+            }
+
+            this.nsn = this.nsnInput;
+        });
     }
 
     mockNSNServiceResponse() {
