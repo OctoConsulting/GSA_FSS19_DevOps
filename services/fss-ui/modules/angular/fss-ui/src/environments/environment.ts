@@ -3,9 +3,9 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,
-  NSN_ROUTING_API_TOKEN: "af3a40mod1",
-  BASE_URL: "api"
+    production: false,
+    NSN_ROUTING_API_TOKEN: 'af3a40mod1',
+    BASE_URL: 'https://af3a40mod1-vpce-088a5795f16dd4c2c.execute-api.us-east-1.amazonaws.com/dev',
 };
 
 /*

@@ -40,4 +40,14 @@ export class NSNService {
       map((res: any) => res)
     );
   }
+
+  deleteNSNRoutingData(routing: string) {
+    return this.apiService.deleteNSNRoutingData(BaseUrl + '/details/'+routing).pipe(
+      catchError((err) => {
+        return observableOf({});
+      }),
+      map((res: any) => res)
+    );
+  }
+
 }

@@ -33,4 +33,11 @@ export class APIService {
     };
     return this.http.put(url, model, requestOptions);
   }
+
+  deleteNSNRoutingData(url: string) {
+    const requestOptions = {
+     // headers: new HttpHeaders({ 'x-apigw-api-id': NSNRoutingToken}),
+    };
+    return this.http.delete(url, requestOptions);
+  }
 }
